@@ -1,65 +1,78 @@
-.loans-container {
-  padding: 20px;
+
+.wrapper {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+}
+
+.content-wrapper {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.error-message {
-  color: red;
-  text-align: center;
-  margin: 20px 0;
+.content-header {
+  margin-bottom: 20px;
 }
 
-.filter-container {
-  margin: 10px 0 20px;
+.heading {
+  font-size: 40px;
+  color: white;
+  text-align: left;
+  margin-top: auto;
 }
 
-.filter-container label {
-  margin-right: 10px;
+/* Search form styles */
+.search-form {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-.loans-table {
+.search-input {
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  width: 50%;
+  margin-left: 45%;
+}
+
+.search-button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  cursor: pointer;
+
+}
+
+.search-button:hover {
+  background-color: #0056b3;
+}
+
+.card {
+  background-color: gray; 
+  border-radius: 8px;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  border: 2px solid black;
 }
 
-.loans-table th,
-.loans-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
+.table-header {
+  background-color: black;
+  color: white;
+  padding: 12px;
   text-align: left;
 }
 
-.loans-table th {
-  background-color: #f4f4f4;
-  font-weight: bold;
-}
-
-.loans-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.loans-table tr:hover {
-  background-color: #f1f1f1;
-}
-
-.action-links a {
-  margin-right: 10px;
-  text-decoration: none;
-  color: #007bff;
-}
-
-.action-links a:hover {
-  text-decoration: underline;
-}
-
-@media screen and (max-width: 768px) {
-  .loans-table {
-    font-size: 12px;
-  }
-
-  .loans-container {
-    padding: 10px;
-  }
+.table-cell {
+  padding: 12px;
+  text-align: left;
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Topbar from '../Topbar/Topbar';
-import './Account.css'; // Import the CSS for styling
+// import './AccountM.css';
 
 const Ledger = () => {
   const [transactions, setTransactions] = useState([]);
@@ -9,8 +9,8 @@ const Ledger = () => {
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const accountNumber = localStorage.getItem('accountN') || '';
-  const userRole = localStorage.getItem('userRole') || '';
+  const accountNumber = localStorage.getItem('account_number'); 
+  const userRole = localStorage.getItem('userRole'); 
 
   useEffect(() => {
     setIsAdmin(userRole === 'admin');
@@ -18,7 +18,7 @@ const Ledger = () => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('accessToken');
+        const token = localStorage.getItem('accessToken'); 
         if (!accountNumber || !token) {
           setError('Account number or token missing.');
           setLoading(false);
@@ -28,11 +28,11 @@ const Ledger = () => {
         const response = await axios.get(
           `http://localhost:8000/api/account/${accountNumber}/transactions/`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` }, 
           }
         );
 
-        setTransactions(response.data.transactions);
+        setTransactions(response.data.transactions); 
       } catch (err) {
         setError('Failed to fetch transactions. Please try again later.');
         console.error(err);
@@ -45,51 +45,43 @@ const Ledger = () => {
   }, [accountNumber, userRole]);
 
   if (loading) {
-    return (
-      <div className="loading">
-        <p>Loading...</p>
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return (
-      <div className="error">
-        <p style={{ color: 'red' }}>{error}</p>
-      </div>
-    );
+    return <div style={{ color: 'red' }}>{error}</div>;
   }
 
   return (
     <div>
       <Topbar />
-      <div className="ledger-container">
-        <h1>{isAdmin ? 'All Transactions' : 'Your Transactions'}</h1>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="ledger-table">
-            <thead>
-              <tr>
-                <th>Transaction Type</th>
-                <th>Amount</th>
-                <th>Description</th>
-                <th>Balance After Transaction</th>
-                <th>Timestamp</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((transaction, index) => (
-                <tr key={index}>
-                  <td>{transaction.transaction_type}</td>
-                  <td>{transaction.amount}</td>
-                  <td>{transaction.description}</td>
-                  <td>{transaction.balance_after_transaction}</td>
-                  <td>{new Date(transaction.timestamp).toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <h1>{isAdmin ? 'All Transactions' : 'My Transactions'}</h1>
+
+      {/* Back Button */}
+      <button onClick={() => window.history.back()}>Go Back</button>
+
+      <table border="1" cellPadding="5" cellSpacing="0">
+        <thead>
+          <tr>
+            <th>Transaction Type</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Balance </th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {transactions.map((transaction, index) => (
+            <tr key={index}>
+              <td>{transaction.transaction_type}</td>
+              <td>{transaction.amount}</td>
+              <td>{transaction.description}</td>
+              <td>{transaction.balance_after_transaction}</td>
+              <td>{new Date(transaction.timestamp).toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

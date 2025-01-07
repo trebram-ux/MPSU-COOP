@@ -235,6 +235,20 @@ const getAccountHolderName = (member) => {
                         <BiMoneyWithdraw /> Withdraw
                       </strong>
                     </button>
+                    <button
+                      onClick={() => handleDeleteAccount(account.account_number)}
+                      style={{
+                        border: '2px solid #000',
+                        padding: '5px',
+                        cursor: 'pointer',
+                        color: 'black',
+                        width: '50px',
+                      }}
+                    >
+                      <strong>
+                        <FaTrash /> Delete
+                      </strong>
+                    </button>
                   </td>
                 </tr>
               ))}

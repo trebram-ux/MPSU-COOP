@@ -20,9 +20,9 @@ function AdminNavbar({ onLinkClick }) {
   const handleLogout = () => {
     const confirmLogout = window.confirm('Are you sure you want to log out?'); // Show confirmation dialog
     if (confirmLogout) {
-      // Perform any necessary logout logic (e.g., clearing session, tokens)
+      
       console.log('Log out confirmed');
-      navigate('/'); // Redirect to the login page
+      navigate('/'); 
     }
   };
 
@@ -30,7 +30,7 @@ function AdminNavbar({ onLinkClick }) {
     <nav className={styles.adminNavbar}>
       <div className={styles.logoContainer}>
         <img
-          src="/R.jpg"
+          src="/cong.jpg"
           alt="Logo"
           className={styles.logoImage}
           style={{

@@ -435,28 +435,13 @@ class Payment(models.Model):
 
 
 class Ledger(models.Model):
-    TRANSACTION_TYPES = [
-        ('Deposit', 'Deposit'),
-        ('Withdrawal', 'Withdrawal'),
-        ('Loan Disbursal', 'Loan Disbursal'),
-        ('Loan Payment', 'Loan Payment'),
-        ('Penalty', 'Penalty'),
-        ('Service Fee', 'Service Fee'),
-    ]
-
     ledger_id = models.AutoField(primary_key=True)  
-    account_number = models.ForeignKey('Account', on_delete=models.CASCADE, related_name='ledger_entries')
-    control_number = models.ForeignKey('Loan', on_delete=models.SET_NULL, null=True, blank=True, related_name='ledger_entries')
-    transaction_type = models.CharField(max_length=20, choices=[('Deposit', 'Deposit'), ('Withdrawal', 'Withdrawal'), ('Loan Release', 'Loan Release'), ('Loan Payment', 'Loan Payment')])
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
-    description = models.TextField(blank=True, help_text="Optional description for the transaction.")
-    transaction_date = models.DateTimeField(default=now)
-    balance_after_transaction = models.DecimalField(max_digits=12, decimal_places=2)
-
-    class Meta:
-        ordering = ['-transaction_date'] 
-        verbose_name = 'Ledger Entry'
-        verbose_name_plural = 'Ledger Entries'
+    account_number = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='ledger_entries')
+    transaction_type = models.CharField(max_length=20, choices=[('Deposit', 'Deposit'), ('Withdrawal', 'Withdrawal')])
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    description = models.TextField()
+    balance_after_transaction = models.DecimalField(max_digits=15, decimal_places=2)
+    timestamp = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Ledger {self.ledger_id} - {self.transaction_type} - {self.amount}"
+        return f"{self.transaction_type} of {self.amount} on {self.timestamp}"

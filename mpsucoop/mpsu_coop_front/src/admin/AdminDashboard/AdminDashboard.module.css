@@ -35,11 +35,11 @@ html, body {
     padding-top: 5px;
     padding-bottom: 0px;
     box-shadow: 25px 25px 25px 25px rgba(0, 0, 0, 0.2);
+    overflow-y: auto; /* Allow scrolling without scrollbar */
     height: 99%; /* Full height relative to container */
     width: 99%; /* Full width relative to container */
     scrollbar-width: none; /* Hide scrollbar in Firefox */
     position: sticky;
-    overflow: hidden; 
   }
   
   .adminDashboardMain::-webkit-scrollbar {

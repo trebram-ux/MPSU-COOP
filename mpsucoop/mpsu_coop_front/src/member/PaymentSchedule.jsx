@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Topbar from './Topbar/Topbar';
 
 const PaymentSchedule = () => {
@@ -7,6 +7,7 @@ const PaymentSchedule = () => {
   const [paymentSchedules, setPaymentSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();  
 
   useEffect(() => {
     const fetchPaymentSchedules = async () => {
@@ -46,8 +47,12 @@ const PaymentSchedule = () => {
 
   return (
     <div>
-    <Topbar />
-      <h2>MY PAYMENT SCHEDULES </h2>
+      <Topbar />
+      <h2>MY PAYMENT SCHEDULES</h2>
+      
+      
+      <button onClick={() => navigate(-1)}>Back</button>
+
       {paymentSchedules.length > 0 ? (
         <table>
           <thead>
@@ -68,7 +73,8 @@ const PaymentSchedule = () => {
                 <td>{schedule.interest_amount}</td>
                 <td>{schedule.service_fee_component}</td>
                 <td>{schedule.payment_amount || "N/A"}</td>
-                <td>{schedule.is_paid ? "Paid" : "Pending"}</td>
+                <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
+                {schedule.is_paid ? "Paid" : "Pending"}</td>
               </tr>
             ))}
           </tbody>

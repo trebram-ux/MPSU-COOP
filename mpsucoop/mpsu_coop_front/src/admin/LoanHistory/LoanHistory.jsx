@@ -377,12 +377,12 @@ return (
                                         <td>{loan.status}</td>
                                         <td>{loan.purpose}</td>
                                         <td>
-                                            {/* <button
+                                            <button
                                                 onClick={() => handlePayLoan(loan)}
                                                 className="action-button pay-button"
                                             >
                                                 <FaDollarSign />
-                                            </button> */}
+                                            </button>
                                             <button
                                                 onClick={() => handleDeleteLoan(loan)}
                                                 className="action-button delete-button"

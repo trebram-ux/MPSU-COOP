@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Topbar from '../Topbar/Topbar';
 import axios from 'axios';
@@ -10,7 +10,7 @@ const Home = () => {
   const [payments, setPayments] = useState([]);
   const [error, setError] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [buttonClicked, setButtonClicked] = useState(false);
+  const [buttonClicked, setButtonClicked] = useState(false); // Track if the button was clicked
   const navigate = useNavigate();
 
   // Fetch member details and loan data
@@ -92,10 +92,10 @@ const Home = () => {
     ? parseFloat(nearestPaymentSchedule.interest_due).toFixed(2) // Use toFixed for formatting
     : 'Interest Due: Data not available';
 
-  // Handle dropdown toggle
+  // Handle dropdown toggle and hide "More" button after clicking
   const handleDropdownToggle = () => {
     setDropdownOpen(!dropdownOpen);
-    setButtonClicked(true);
+    setButtonClicked(true); // Mark the button as clicked
   };
 
   // Handle navigation for dropdown options
@@ -104,138 +104,140 @@ const Home = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#D5ED9F', minHeight: '100vh', minWidth: '210vh', fontFamily: 'Arial, sans-serif', color: 'black', width: '100%' }}>
+    <div>
       <Topbar />
+      <div style={{ backgroundColor: '#D5ED9F', Height: '100vh', Width: '210vh', fontFamily: 'Arial, sans-serif', color: 'black', width: '100%' }}>
+        <div style={{ padding: '20px' }}>
+          <section id="welcome">
+            <h2 style={{ fontWeight: 'bolder', color: 'black', marginLeft: '10px', borderBottom: '3px solid black', fontSize: '30px' }}>
+              WELCOME!!
+            </h2>
+          </section>
 
-      <div style={{ padding: '20px' }}>
-        <section id="welcome">
-          <h2 style={{ fontWeight: 'bolder', color: 'black', marginLeft: '10px', borderBottom: '3px solid black', fontSize: '28px' }}>
-            WELCOME!!
-          </h2>
-        </section>
-
-        <div style={{ display: 'flex', gap: '100px', marginTop: '60px', justifyContent: 'center' }}>
-          {/* Left Card */}
-          <div
-            style={{
-              backgroundColor: '#c8f7ce',
-              borderRadius: '8px',
-              width: '600px',
-              padding: '20px',
-              height: '220px',
-            }}
-          >
-            <h3
-              style={{
-                fontWeight: 'bold',
-                color: 'black',
-                borderBottom: '3px solid rgb(0, 0, 0)',
-                paddingBottom: '10px',
-                textAlign: 'center',
-              }}
-            >
-              {memberData.first_name?.toUpperCase()} {memberData.middle_name?.toUpperCase()} {memberData.last_name?.toUpperCase()}
-            </h3>
-            <p style={{ textAlign: 'center' }}>
-              <strong>ACCOUNT NUMBER:</strong> {memberData.accountN || 'N/A'}
-            </p>
-            <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '18px' }}>
-              SHARE CAPITAL: <span style={{ fontWeight: '900' }}>{memberData.share_capital || 'N/A'}</span>
-            </p>
-
+          <div style={{ display: 'flex', gap: '100px', marginTop: '60px', justifyContent: 'center' }}>
+            {/* Left Card */}
             <div
               style={{
-                display: 'flex',
-                justifyContent: 'space-around',
-                marginTop: '20px',
+                backgroundColor:  'rgb(213, 242, 145)',
+                borderRadius: '8px',
+                width: '600px',
+                padding: '20px',
+                height: '220px',
               }}
             >
-              <div
+              <h3
                 style={{
-                  backgroundColor: 'green',
-                  borderRadius: '20px',
-                  width: '45%',
-                  textAlign: 'center',
-                  padding: '10px',
                   fontWeight: 'bold',
+                  color: 'black',
+                  borderBottom: '3px solid rgb(0, 0, 0)',
+                  paddingBottom: '10px',
+                  textAlign: 'center',
                 }}
               >
-                <p style={{ margin: 0, fontSize: '12px' }}>REGULAR LOAN</p>
-                <strong>{loanData.regular_loan_amount || '1,500,000.00'}</strong>
-              </div>
-              <div
-                style={{
-                  backgroundColor: 'red',
-                  borderRadius: '20px',
-                  width: '45%',
-                  textAlign: 'center',
-                  padding: '10px',
-                  fontWeight: 'bold',
-                }}
-              >
-                <p style={{ margin: 0, fontSize: '12px' }}>EMERGENCY LOAN</p>
-                <strong>{loanData.emergency_loan_amount || '50,000.00'}</strong>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Card */}
-          <section style={{ flex: 1 }}>
-            <div style={{ backgroundColor: '#c8f7ce', borderRadius: '8px', width: '600px', padding: '20px' }}>
-              <h3 style={{ textAlign: 'left', color: 'black' }}>
-                {nearestPaymentSchedule ? `Loan Due on: ${new Date(nearestPaymentSchedule.due_date).toLocaleDateString()}` : 'Loan Due Date: N/A'}
+                {memberData.first_name?.toUpperCase()} {memberData.middle_name?.toUpperCase()} {memberData.last_name?.toUpperCase()}
               </h3>
-              <div style={{ textAlign: 'left', margin: '20px 0' }}>
-                <p style={{ fontSize: '30px', fontWeight: 'bold', color: 'blue' }}>
-                  {nearestPaymentSchedule?.payment_amount || 0}
-                </p>
+              <p style={{ textAlign: 'center' }}>
+                <strong>ACCOUNT NUMBER:</strong> {memberData.accountN || 'N/A'}
+              </p>
+              <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '18px' }}>
+                SHARE CAPITAL: <span style={{ fontWeight: '900' }}>{memberData.share_capital || 'N/A'}</span>
+              </p>
 
-                <p>Amount Paid:</p>
-                <p>{totalAmountPaid} out of {totalPaymentAmount}</p>
-                <div style={{ backgroundColor: 'red', borderRadius: '20px', height: '8px', width: '2%' }}>
-                  <div
-                    style={{
-                      height: '10%',
-                      width: `${(totalAmountPaid / totalPaymentAmount) * 100}%`,
-                      borderRadius: '20px',
-                      backgroundColor: 'green',
-                    }}
-                  ></div>
-                  <div
-                    style={{
-                      width: `${((totalPaymentAmount - totalAmountPaid) / totalPaymentAmount) * 100}%`,
-                      borderRadius: '20px',
-                      backgroundColor: 'red',
-                      position: 'absolute',
-                      top: 0,
-                      left: `${(totalAmountPaid / totalPaymentAmount) * 100}%`,
-                    }}
-                  ></div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-around',
+                  marginTop: '20px',
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: 'green',
+                    borderRadius: '20px',
+                    width: '45%',
+                    textAlign: 'center',
+                    padding: '10px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  <p style={{ margin: 0, fontSize: '12px' }}>REGULAR LOAN</p>
+                  <strong>{loanData.regular_loan_amount || '1,500,000.00'}</strong>
                 </div>
-
-                <p style={{ marginTop: '10px' }}><strong>Interest Rate:</strong> {loanData[0]?.interest_rate || '0'}%</p>
-                <p><strong>{totalInterestDue}</strong></p>
-                <div style={{ textAlign: 'left', marginTop: '15px' }}>
-                  <button
-                    style={{ display: 'inline-block', backgroundColor: '#007bff', color: 'black', padding: '10px 20px', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}
-                    onClick={handleDropdownToggle}
-                  >
-                    More
-                  </button>
-                  {dropdownOpen && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
-                      <button onClick={() => handleNavigation('/accounts')} style={{ marginBottom: '10px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', borderRadius: '5px', fontWeight: 'bold' }}>
-                        View Ledger
-                      </button>
-                      <button onClick={() => handleNavigation('/loans')} style={{ padding: '8px 15px', backgroundColor: '#007bff', color: 'white', borderRadius: '5px', fontWeight: 'bold' }}>
-                        View Schedules
-                      </button>
-                    </div>
-                  )}
+                <div
+                  style={{
+                    backgroundColor: 'red',
+                    borderRadius: '20px',
+                    width: '45%',
+                    textAlign: 'center',
+                    padding: '10px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  <p style={{ margin: 0, fontSize: '12px' }}>EMERGENCY LOAN</p>
+                  <strong>{loanData.emergency_loan_amount || '50,000.00'}</strong>
                 </div>
               </div>
             </div>
-          </section>
+
+            {/* Right Card */}
+            <section style={{ flex: 1 }}>
+              <div style={{ backgroundColor: '#c8f7ce', borderRadius: '8px', width: '600px', padding: '20px' }}>
+                <h3 style={{ textAlign: 'left', color: 'black' }}>
+                  {nearestPaymentSchedule ? `Loan Due on: ${new Date(nearestPaymentSchedule.due_date).toLocaleDateString()}` : 'Loan Due Date: N/A'}
+                </h3>
+                <div style={{ textAlign: 'left', margin: '20px 0' }}>
+                  <p style={{ fontSize: '30px', fontWeight: 'bold', color: 'blue' }}>
+                    {nearestPaymentSchedule?.payment_amount || 0}
+                  </p>
+
+                  <p>Amount Paid:</p>
+                  <p>{totalAmountPaid} out of {totalPaymentAmount}</p>
+                  <div style={{ backgroundColor: 'red', borderRadius: '20px', height: '8px', width: '2%' }}>
+                    <div
+                      style={{
+                        height: '10%',
+                        width: `${(totalAmountPaid / totalPaymentAmount) * 100}%`,
+                        borderRadius: '20px',
+                        backgroundColor: 'green',
+                      }}
+                    ></div>
+                    <div
+                      style={{
+                        width: `${((totalPaymentAmount - totalAmountPaid) / totalPaymentAmount) * 100}%`,
+                        borderRadius: '20px',
+                        backgroundColor: 'red',
+                        position: 'absolute',
+                        top: 0,
+                        left: `${(totalAmountPaid / totalPaymentAmount) * 100}%`,
+                      }}
+                    ></div>
+                  </div>
+
+                  <p style={{ marginTop: '10px' }}><strong>Interest Rate:</strong> {loanData[0]?.interest_rate || '0'}%</p>
+                  <div style={{ textAlign: 'left', marginTop: '15px' }}>
+                    {!buttonClicked && (
+                      <button
+                        style={{ display: 'inline-block', backgroundColor: '#007bff', color: 'black', padding: '10px 20px', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}
+                        onClick={handleDropdownToggle}
+                      >
+                        More
+                      </button>
+                    )}
+                    {dropdownOpen && (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
+                        <button onClick={() => handleNavigation('/accounts')} style={{ marginBottom: '10px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', borderRadius: '5px', fontWeight: 'bold' }}>
+                          View Ledger
+                        </button>
+                        <button onClick={() => handleNavigation('/loans')} style={{ padding: '8px 15px', backgroundColor: '#007bff', color: 'white', borderRadius: '5px', fontWeight: 'bold' }}>
+                          View Loan
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
     </div>

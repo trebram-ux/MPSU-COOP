@@ -90,10 +90,9 @@
 .logOut {
   display: flex;
   align-items: center;
-  margin-top: 180px;
+  margin-top: auto;
   padding: 10px 20px;
   cursor: pointer;
-  margin-right: 60px;
 }
 
 .logOut:hover {

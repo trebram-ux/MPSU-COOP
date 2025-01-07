@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FaCog, FaTrash} from 'react-icons/fa';
+import { FaCog, FaUsers} from 'react-icons/fa';
 import './SystemSettings.css';
+
 
 const SystemSettings = () => {
     const [settings, setSettings] = useState({
@@ -17,7 +18,7 @@ const SystemSettings = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [error, setError] = useState(null);
-    const [isSettingsActive, setIsSettingsActive] = useState(false); 
+    const [isSettingsActive, setIsSettingsActive] = useState(false); // Tracks whether settings are active
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -60,11 +61,11 @@ const SystemSettings = () => {
             case 'Settings':
                 setIsSettingsActive(true);
                 break;
-            // case 'Archive':
-            //     navigate('/archived-records'); 
-            //     break;
-            // default:
-            //     break;
+            case 'User Management':
+                navigate('/user-mgmt'); 
+                break;
+            default:
+                break;
         }
     };
 
@@ -76,9 +77,9 @@ const SystemSettings = () => {
                 <a className="nav-item" onClick={() => handleMenuItemClick('Settings')}>
                     <FaCog /> System Settings
                 </a>
-                {/* <a className="nav-item" onClick={() => handleMenuItemClick('/Archive')}>
-                    <FaTrash /> Archive
-                </a> */}
+                <a className="nav-item" onClick={() => handleMenuItemClick('User Management')}>
+                    <FaUsers /> User Management
+                </a>
             </nav>
 
             {/* Show content only when "Settings" is clicked */}

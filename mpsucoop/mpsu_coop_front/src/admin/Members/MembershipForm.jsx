@@ -67,7 +67,6 @@ function MembershipForm() {
             <h3 style={{ textAlign: "center", fontSize: "18px", margin: "10px 0" }}>
               MEMBER'S PERSONAL DATA
             </h3>
-
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <tbody>
               
@@ -152,7 +151,7 @@ function MembershipForm() {
                     />
                   </td>
                 </tr>
-                
+                {/* Age and Gender */}
                 <tr>
                   <td style={{ padding: "2px" }}><label>Age:</label></td>
                   <td style={{ padding: "2px" }}>
