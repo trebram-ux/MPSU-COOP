@@ -1,0 +1,163 @@
+/* Loan Manager Container */
+.loan-manager {
+    padding: 20px;
+}
+
+/* Loan Manager Header */
+.loan-manager-header {
+    text-align: center;
+    border-bottom: 2px solid #000000;
+    color: black;
+}
+
+/* Search Container */
+.search-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.search-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 21%;
+}
+
+.search-input {
+    padding: 7px 40px 10px 10px;
+    font-size: 16px;
+    border: 2px solid #000000;
+    border-radius: 4px;
+    width: 260px;
+    margin-left: 955px;
+    margin-top: -5px;
+}
+
+.search-button {
+    position: absolute;
+    top: -10px;
+    font-size: 12px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: black;
+    border: 2px solid #000000;
+    border-radius: 4px;
+    padding: 10px;
+    margin-left: 1215px;
+}
+
+/* Button Container */
+.button-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.add-loan-button {
+    background-color: #28a745;
+    color: black;
+    padding: 10px 20px;
+    border: 2px solid #000000;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 1100px;
+}
+
+/* Loan Form */
+.loan-form {
+    border: 2px solid black;
+    padding: 8px;
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-left: 100px;
+    width: 500px;
+}
+
+.form-header {
+    margin-bottom: 10px;
+    color: black;
+}
+
+.form-input {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 2px solid black;
+    border-radius: 5px;
+}
+
+.form-input-readonly {
+    background-color: #f8f9fa;
+}
+
+.form-submit {
+    background-color: #007bff;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.form-cancel {
+    background-color: #dc3545;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Loan Table */
+.loan-table-container {
+    max-height: 428px;
+    overflow-y: auto;
+    border: 2px solid black;
+    margin-top: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    scrollbar-width: none; 
+    width: 100%;
+}
+
+.loan-table-container::-webkit-scrollbar {
+    display: none; /* Hides scrollbar in Chrome, Safari, and Edge */
+}
+
+.loan-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.loan-table th,
+.loan-table td {
+    border: 2px solid #000000;
+    padding: 8px;
+}
+
+.loan-table thead tr {
+    border-bottom: 2px solid black;
+    position: sticky;
+    top: -7px;
+    background-color: #fff;
+    z-index: 1;
+}
+
+/* Action Buttons */
+.action-button {
+    margin: 0 5px;
+    border: 2px solid #000000;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.pay-button {
+    background-color: goldenrod;
+    color: black;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: black;
+}
