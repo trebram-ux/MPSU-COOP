@@ -156,6 +156,97 @@ const PaymentSchedule = () => {
     }
   };
 
+  // Print Receipt
+  const generateReceipt = (schedule) => {
+    // Ensure accountDetails and schedule are available
+    if (!accountDetails || !schedule) {
+      console.error("Missing data for generating receipt");
+      return;
+    }
+  
+    console.log("Generating receipt...");
+  
+    // Open a new window for the receipt
+    const receiptWindow = window.open("", "Receipt", "width=600,height=400");
+  
+    if (!receiptWindow) {
+      console.error("Failed to open window.");
+      return;
+    }
+  
+    console.log("Window opened, preparing to write content...");
+  
+    // Wait for the window to load and then write the content
+    setTimeout(() => {
+      console.log("Writing content to the window...");
+  
+      // Use string interpolation to insert loanType dynamically
+      const receiptContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Receipt Test</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1 { text-align: center; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid black; padding: 10px; text-align: left; }
+                .footer { margin-top: 20px; text-align: center; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <h1>Payment Receipt</h1>
+            <table>
+                <tr>
+                  <th>Loan Type</th>
+                  <td>${loanType}</td>
+                </tr>
+                <tr>
+                    <th>Account Number</th>
+                    <td>${selectedAccount}</td>
+                </tr>
+                <tr>
+                  <th>Account Holder</th>
+                  <td>${accountDetails ? `${accountDetails.first_name} ${accountDetails.middle_name} ${accountDetails.last_name}` : 'N/A'}</td>
+                </tr>
+                <tr>
+                  <th>Payment Amount</th>
+                  <td>₱ ${(isNaN(schedule.payment_amount) ? 0 : parseFloat(schedule.payment_amount)).toFixed(2)}</td>
+                </tr>
+                <tr>
+                    <th>Due Date</th>
+                    <td>${new Date(schedule.due_date).toLocaleDateString()}</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>${schedule.is_paid ? "Paid" : "Ongoing"}</td>
+                </tr>
+            </table>
+            <div class="footer">
+                <p>Thank you for your payment!</p>
+            </div>
+        </body>
+        </html>
+      `;
+  
+      // Write content to the new window
+      receiptWindow.document.write(receiptContent);
+      receiptWindow.document.close();
+  
+      console.log("Content written. Attempting to print...");
+  
+      // Wait a moment before printing
+      setTimeout(() => {
+        console.log("Attempting to print...");
+        receiptWindow.print();
+      }, 500); // Delay before printing
+  
+    }, 100); // Delay before writing to the window
+  };
+  
+  
   // Initial fetch of account summaries when the component mounts
   useEffect(() => {
     fetchAccountSummaries();
@@ -377,15 +468,48 @@ const PaymentSchedule = () => {
                       {schedule.is_paid ? 'Paid!' : 'Ongoing'}
                     </td>
                     <td>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '10px',
+                      }}
+                    >
                       {!schedule.is_paid && (
                         <button
-                          style={{ backgroundColor: 'goldenrod', color: 'black' }}
+                          style={{
+                            backgroundColor: 'goldenrod',
+                            color: 'black',
+                            border: '2px solid black',
+                            padding: '5px 10px',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            flex: '1',
+                          }}
                           onClick={() => markAsPaid(schedule.id)}
                         >
                           {paying ? 'Processing...' : 'Pay'}
                         </button>
                       )}
-                    </td>
+                      <button
+                        onClick={() => generateReceipt(schedule)}
+                        style={{
+                          backgroundColor: 'goldenrod',
+                          color: 'black',
+                          cursor: 'pointer',
+                          border: '2px solid black',
+                          padding: '5px 10px',
+                          borderRadius: '5px',
+                          fontSize: '14px',
+                          flex: '1',
+                        }}
+                      >
+                        Print Receipt
+                      </button>
+                    </div>
+                  </td>
                   </tr>
                 ))}
               </tbody>

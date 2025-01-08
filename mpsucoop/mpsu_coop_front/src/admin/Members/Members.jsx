@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 import styles from './Members.css';
-import MembershipForm from './MembershipForm';
+// import MembershipForm from './MembershipForm';
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { FaEdit, FaTrash, FaEye} from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
@@ -119,36 +119,36 @@ function Members() {
     setSelectedMember(member);
   };
 
-  const handlePrintMemberForm = (member) => {
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank', 'width=800,height=600', 'position=center');
+  // const handlePrintMemberForm = (member) => {
+  //   // Create a new window for printing
+  //   const printWindow = window.open('', '_blank', 'width=800,height=600', 'position=center');
 
-    // Render the MembershipForm component in the new window
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Print Membership Form</title>
-        </head>
-        <body>
-          <div id="print-content"></div>
-          <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js"></script>
-          <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"></script>
-        </body>
-      </html>
-    `);
+  //   // Render the MembershipForm component in the new window
+  //   printWindow.document.write(`
+  //     <!DOCTYPE html>
+  //     <html>
+  //       <head>
+  //         <title>Print Membership Form</title>
+  //       </head>
+  //       <body>
+  //         <div id="print-content"></div>
+  //         <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js"></script>
+  //         <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"></script>
+  //       </body>
+  //     </html>
+  //   `);
 
-    // Set up the MembershipForm with prefilled data from the `member`
-    ReactDOM.render(
-      <MembershipForm prefilledData={member} />,
-      printWindow.document.getElementById('print-content')
-    );
+  //   // Set up the MembershipForm with prefilled data from the `member`
+  //   ReactDOM.render(
+  //     <MembershipForm prefilledData={member} />,
+  //     printWindow.document.getElementById('print-content')
+  //   );
 
-    // Trigger print after rendering
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-  };
+  //   // Trigger print after rendering
+  //   printWindow.document.close();
+  //   printWindow.focus();
+  //   printWindow.print();
+  // };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -160,223 +160,281 @@ function Members() {
           <h3>{editingMember ? 'Edit Member' : 'Add Member'}</h3>
           {formError && <p className={styles.errorText}>{formError}</p>}
 
-          <input
-            type="text"
-            placeholder="First Name"
-            name="first_name"
-            value={editingMember?.first_name || newMember.first_name || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          />
+          <div style={{
+            fontFamily: 'Arial, sans-serif',
+            color: '#000',
+            padding: '20px',
+            width: '100%',
+            border: '1px solid #000',
+            borderRadius: '5px',
+            marginRight: '50px',
+            boxSizing: 'border-box',
+            height: '100%'
+          }}>
+            <div style={{ display: 'grid', gap: '20px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>First Name:</label>
+                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  id="first_name"
+                  placeholder="First Name"
+                  name="first_name"
+                  value={editingMember?.first_name || newMember.first_name || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+                
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Middle Name:</label>
+                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Middle Name"
+                  name="middle_name"
+                  value={editingMember?.middle_name || newMember.middle_name || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Last Name:</label>
+                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="last Name"
+                  name="last_name"
+                  value={editingMember?.last_name || newMember.last_name || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
 
-          <input
-            type="text"
-            placeholder="Middle Name"
-            name="middle_name"
-            value={editingMember?.middle_name || newMember.middle_name || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          />
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Email Address:</label>
+                  <input type="email" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Email"
+                  name="email"
+                  value={editingMember?.email || newMember.email || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+              </div>
 
-          <input
-            type="text"
-            placeholder="Last Name"
-            name="last_name"
-            value={editingMember?.last_name || newMember.last_name || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Date of Birth:</label>
+                  <input type="date" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Birth Date"
+                  name="birth_date"
+                  value={editingMember?.birth_date || newMember.birth_date || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+                <div style={{ flex: '2' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Birth Place:</label>
+                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Birth Place"
+                  name="birth_place"
+                  value={editingMember?.birth_place || newMember.birth_place || ''}
+                  onChange={(e) =>
+                  handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Age:</label>
+                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder='Age'
+                  name="age"
+                  value={editingMember?.age || newMember.age || ''}
+                  onChange={(e) =>
+                  handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Zip Code:</label>
+                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Zip Code"
+                  name="zip_code"
+                  value={editingMember?.zip_code || newMember.zip_code || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+              </div>
 
-          <input
-            type="email"
-            placeholder="Email"
-            name="email"
-            value={editingMember?.email || newMember.email || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Gender:</label>
+                  <select style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  name="gender"
+                  value={editingMember?.gender || newMember.gender || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  >
+                  <option value="" disabled>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Others">Others</option>
+                  </select>
+                  </div>
 
-          <input
-            type="date"
-            placeholder="Birth Date"
-            name="birth_date"
-            value={editingMember?.birth_date || newMember.birth_date || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            min="1950-01-01"
-            max="2005-12-31"
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          />
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Civil Status:</label>
+                  <select style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  name="pstatus"
+                  value={editingMember?.pstatus || newMember.pstatus || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                >
+                    <option value="" disabled>Select Relationship Status</option> {/* Optional placeholder */}
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Widowed">Widowed</option>
+                    <option value="In a relationship">In a relationship</option>
+                    <option value="Engaged">Engaged</option>
+                    <option value="Baak">Baak</option>
+                  </select>
+                </div>
+              </div>
 
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Religion:</label>
+                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Religion"
+                  name="religion"
+                  value={editingMember?.religion || newMember.religion || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+                <div style={{ flex: '2' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Address:</label>
+                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Address"
+                  name="address"
+                  value={editingMember?.address || newMember.address || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+                <div style={{ flex: '1' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold' }}>Phone Number:</label>
+                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Phone Number"
+                  name="phone_number"
+                  value={editingMember?.phone_number || newMember.phone_number || ''}
+                  onChange={(e) =>
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                  }
+                  />
+                </div>
+              </div>
 
-          <input
-            type="text"
-            placeholder="Phone Number"
-            name="phone_number"
-            value={editingMember?.phone_number || newMember.phone_number || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          />
+              <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold' }}>Height (cm)</label>
+                <input 
+                  type="number" 
+                  style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Height"
+                  name="height"
+                  value={editingMember?.height || newMember.height || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
 
-          <input
-            type="text"
-            placeholder="Religion"
-            name="religion"
-            value={editingMember?.religion || newMember.religion || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          />
+              <div style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold' }}>Weight (kg)</label>
+                <input 
+                  type="number" 
+                  style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Weight"
+                  name="weight"
+                  value={editingMember?.weight || newMember.weight || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
 
-          <input
-            type="text"
-            placeholder="Address"
-            name="address"
-            value={editingMember?.address || newMember.address || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          />
+              <div style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold' }}>Annual Income</label>
+                <input 
+                  type="number" 
+                  style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="Annual Income"
+                  name="ann_com"
+                  value={editingMember?.mem_co || newMember.mem_co || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
 
-          <select
-            name="gender"
-            value={editingMember?.gender || newMember.gender || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          >
-            <option value="" disabled>Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Others">Others</option>
-          </select>
+              <div style={{ flex: '1 1 200px' }}>
+              <label style={{ display: 'block', fontWeight: 'bold' }}>Valid ID</label>
+              <select 
+                style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                name="valid_id"
+                value={editingMember?.valid_id || newMember.valid_id || ''}
+                onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+              >
+                <option value="" disabled>Select Valid ID</option>
+                <option value="Philippine Passport">Philippine Passport</option>
+                <option value="Driver's License">Driver's License</option>
+                <option value="SSS ID">SSS ID</option>
+                <option value="GSIS ID">GSIS ID</option>
+                <option value="TIN ID">TIN ID</option>
+                <option value="Postal ID">Postal ID</option>
+                <option value="Voter's ID">Voter's ID</option>
+                <option value="PhilHealth ID">PhilHealth ID</option>
+                <option value="Senior Citizen ID">Senior Citizen ID</option>
+                <option value="PWD ID">PWD ID</option>
+                <option value="UMID">UMID</option>
+                <option value="Police Clearance">Police Clearance</option>
+                <option value="Barangay ID">Barangay ID</option>
+                <option value="Student ID">Student ID</option>
+              </select>
+            </div>
 
+              <div style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold' }}>ID Number</label>
+                <input 
+                  type="text" 
+                  style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  placeholder="ID Number"
+                  name="id_no"
+                  value={editingMember?.id_no || newMember.id_no || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
+            </div>
+            </div>
+            </div>
 
-          <select
-            name="pstatus"
-            value={editingMember?.pstatus || newMember.pstatus || ''}
-            onChange={(e) =>
-              handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-            }
-            required
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '10px',
-              marginBottom: '10px',
-              border: '2px solid black',
-              borderRadius: '5px',
-            }}
-          >
-            <option value="" disabled>Select Relationship Status</option> {/* Optional placeholder */}
-            <option value="Single">Single</option>
-            <option value="Married">Married</option>
-            <option value="Divorced">Divorced</option>
-            <option value="Widowed">Widowed</option>
-            <option value="In a relationship">In a relationship</option>
-            <option value="Engaged">Engaged</option>
-            <option value="Baak">Baak</option>
-          </select>
-
-  
-          {/* Buttons */}
-          <button onClick={editingMember ? handleEditMember : handleAddMember}>
+           {/* Buttons */}
+           <button onClick={editingMember ? handleEditMember : handleAddMember}>
             {editingMember ? 'Save Changes' : 'Submit'}
           </button>
           <button onClick={() => setShowAddForm(false)}>Cancel</button>
         </div>
+
       ) : (
   
         <>
         <div className={styles.tableHeader}>
             <h2 style={{ padding: '20px', textAlign: 'center', borderBottom: '2px solid #000000', color: 'black'}}>MEMBERS</h2>
-            <a
+            {/* <a
             href="#"
             onClick={(e) => {
               e.preventDefault(); // Prevent default link behavior
@@ -399,7 +457,7 @@ function Members() {
             }}
           >
             <SiFormspree /><strong>Membership Form</strong>
-          </a>
+          </a> */}
 
           <div className={styles.searchBar} style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
             <input
@@ -415,14 +473,14 @@ function Members() {
                 width: '200px',
                 marginLeft: '999px',
                 marginBottom: '50px',
-                marginTop: '-40px'
+                marginTop: '-18px'
             }}
         />
         <button
             onClick={() => console.log('Search triggered')}
             style={{
                 position: 'absolute',
-                marginTop: '-85px',
+                marginTop: '-65px',
                 fontSize: '12px',
                 cursor: 'pointer',
                 backgroundColor: '#007bff',
@@ -700,10 +758,75 @@ function Members() {
                   </tr>
                   <tr>
                     <td style={{ padding: '10px', border: '2px solid black' }}>
-                      <strong>Status.</strong>
+                      <strong> Civil Status.</strong>
                     </td>
                     <td style={{ padding: '10px', border: '2px solid black' }}>
                       {selectedMember.pstatus}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      <strong>Birth Place.</strong>
+                    </td>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      {selectedMember.birth_place}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      <strong>Age.</strong>
+                    </td>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      {selectedMember.age}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      <strong>Zip Code.</strong>
+                    </td>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      {selectedMember.zip_code}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      <strong>Height(cm)</strong>
+                    </td>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      {selectedMember.height}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      <strong>Weight(kg)</strong>
+                    </td>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      {selectedMember.weight}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      <strong>Annual Income</strong>
+                    </td>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      {selectedMember.ann_com}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      <strong>Valid ID</strong>
+                    </td>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      {selectedMember.valid_id}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      <strong>ID Number</strong>
+                    </td>
+                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                      {selectedMember.id_no}
                     </td>
                   </tr>
 

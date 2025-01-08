@@ -367,15 +367,17 @@ class PaymentScheduleViewSet(viewsets.ModelViewSet):
         summaries = PaymentSchedule.objects.filter(
             is_paid=False,
             due_date=Subquery(earliest_due_date)
-        
         )
+
         if loan_type:  # Filter by loan_type if provided (Regular or Emergency)
             summaries = summaries.filter(loan__loan_type=loan_type)
-        summaries=summaries.annotate(
+
+        summaries = summaries.annotate(
             account_number=F('loan__account__account_number'),
             next_due_date=F('due_date'),
-            total_balance=Sum('balance')
-        ).values('account_number', 'next_due_date', 'total_balance').distinct()
+            total_balance=Sum('balance'),
+            loan_type_annotated=F('loan__loan_type')  # No need to specify source here
+        ).values('account_number', 'next_due_date', 'total_balance', 'loan_type_annotated').distinct()
 
         return Response(summaries)
 
@@ -399,6 +401,7 @@ class PaymentScheduleViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(loan__loan_type=loan_type)
 
         return queryset
+
 
     @action(detail=True, methods=['post'])
     def mark_as_paid(self, request, pk=None):

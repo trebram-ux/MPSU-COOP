@@ -13,6 +13,7 @@ const Payments = () => {
   const [error, setError] = useState('');
   const [accountDetails, setAccountDetails] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loanTypeFilter, setLoanTypeFilter] = useState('All'); // Options: 'All', 'Regular', 'Emergency'
 
   const fetchAccountSummaries = async () => {
     setLoading(true);
@@ -57,12 +58,13 @@ const Payments = () => {
         `http://127.0.0.1:8000/payment-schedules/?account_number=${accountNumber}`,
         { withCredentials: true }
       );
-
+  
+      console.log(response.data);  // Log the response to check the structure
+  
       const paidSchedules = response.data.filter(schedule => schedule.is_paid);
-
       setSchedules(paidSchedules);
       setSelectedAccount(accountNumber);
-
+  
       const memberResponse = await axios.get(
         `http://127.0.0.1:8000/members/?account_number=${accountNumber}`,
         { withCredentials: true }
@@ -75,6 +77,7 @@ const Payments = () => {
       setLoading(false);
     }
   };
+  
 
   const calculatePaidBalance = () => {
     return schedules
@@ -87,12 +90,37 @@ const Payments = () => {
       .toFixed(2);
   };
 
+  const filterSchedulesByLoanType = () => {
+    // Debugging: Log all schedules with their loan_type
+    console.log('All Schedules:', schedules.map(s => ({ id: s.id, loan_type: s.loan_type })));
+
+    if (loanTypeFilter === 'All') {
+      return schedules; // Return all schedules when filter is "All"
+    }
+
+    // Safely filter schedules by loan type (case-sensitive match)
+    return schedules.filter(schedule => schedule.loan_type === loanTypeFilter);
+  };
+
   const filteredSummaries = accountSummaries.filter((summary) => {
     return (
       summary.account_number.toString().includes(searchQuery) ||
       summary.account_holder.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
+
+  const handleLoanTypeChange = (type) => {
+    console.log('Loan type filter set to:', type); // Debugging: Log the selected filter type
+    setLoanTypeFilter(type);
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '', 'width=800, height=600');
+    const content = document.getElementById('print-section').innerHTML;
+    printWindow.document.write(content);
+    printWindow.document.close();
+    printWindow.print();
+  };
 
   useEffect(() => {
     fetchAccountSummaries();
@@ -195,7 +223,7 @@ const Payments = () => {
                       onClick={() => fetchPaymentSchedules(summary.account_number)}
                       style={{ cursor: 'pointer' }}
                     >
-                      <td style={{ color: 'white' }}>{summary.account_number || 'N/A'}</td>
+                      <td>{summary.account_number || 'N/A'}</td>
                       <td>{summary.account_holder}</td>
                       <td>{summary.next_due_date ? new Date(summary.next_due_date).toLocaleDateString() : 'No Due Date'}</td>
                       <td>₱ {summary.total_balance?.toFixed(2)}</td>
@@ -210,118 +238,141 @@ const Payments = () => {
         </>
       ) : (
         <>
-          {accountDetails && (
-            <div style={{ width: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <h3 style={{ color: 'black' }}>Payment History For:</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-                <tbody>
-                  <tr>
-                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Name:</td>
-                    <td style={{ padding: '5px', border: '2px solid black' }}>
-                      {accountDetails.first_name} {accountDetails.last_name}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Account Number:</td>
-                    <td style={{ padding: '5px', border: '2px solid black' }}>
-                      {selectedAccount}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Paid Balance:</td>
-                    <td style={{ padding: '5px', border: '2px solid black' }}>
-                      ₱ {calculatePaidBalance()}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
+          <div id="print-section">
+            {accountDetails && (
+              <div style={{ width: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <h3 style={{ color: 'black' }}>Payment History For:</h3>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Name:</td>
+                      <td style={{ padding: '5px', border: '2px solid black' }}>
+                        {accountDetails.first_name} {accountDetails.last_name}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Account Number:</td>
+                      <td style={{ padding: '5px', border: '2px solid black' }}>
+                        {selectedAccount}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Paid Balance:</td>
+                      <td style={{ padding: '5px', border: '2px solid black' }}>
+                        ₱ {calculatePaidBalance()}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-          <button
-            style={{
-              color: 'black',
-              padding: '5px 5px',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '5px',
-              marginLeft: '5px',
-            }}
-            onClick={() => setSelectedAccount(null)}
-          >
-            <IoArrowBackCircle /> Back to List
-          </button>
-
-          {schedules.length > 0 ? (
-            <div
-            style={{
-              maxHeight: '385px',
-              overflowY: 'auto',
-              border: '2px solid black',
-              marginTop: '20px',
-              padding: '5px',
-              borderRadius: '5px',
-              scrollbarWidth: 'none', // For Firefox
-              msOverflowStyle: 'none', // For IE and Edge
-              width: '100%',
-              marginRight: '400px',
-            }}
-          >
-            <style>
-              {`
-                /* For WebKit-based browsers (Chrome, Safari, etc.) */
-                div::-webkit-scrollbar {
-                  display: none;
-                }
-              `}
-            </style>
-            <table
-              className="payment-schedule-table"
+            <button
               style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                textAlign: 'center',
-                fontSize: '14px',
+                color: 'black',
+                padding: '5px 5px',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: '5px',
+                marginLeft: '5px',
+              }}
+              onClick={() => setSelectedAccount(null)}
+            >
+              <IoArrowBackCircle /> Back to List
+            </button>
+
+            <button
+              onClick={handlePrint}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#28a745',
+                color: 'black',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                marginTop: '20px',
               }}
             >
-              <thead>
-                <tr
+              Print Payment History
+            </button>
+
+            <div>
+              <button onClick={() => handleLoanTypeChange('All')}>All Loans</button>
+              <button onClick={() => handleLoanTypeChange('Regular')}>Regular Loans</button>
+              <button onClick={() => handleLoanTypeChange('Emergency')}>Emergency Loans</button>
+            </div>
+
+            {filterSchedulesByLoanType().length > 0 ? (
+              <div
+                style={{
+                  maxHeight: '385px',
+                  overflowY: 'auto',
+                  border: '2px solid black',
+                  marginTop: '20px',
+                  padding: '5px',
+                  borderRadius: '5px',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  width: '100%',
+                  marginRight: '400px',
+                }}
+              >
+                <style>
+                  {`
+                    div::-webkit-scrollbar {
+                      display: none;
+                    }
+
+                    @media print {
+                      button {
+                        display: none;
+                      }
+                    }
+                  `}
+                </style>
+                <table
+                  className="payment-schedule-table"
                   style={{
-                    backgroundColor: 'red',
-                    color: 'black',
-                    position: 'sticky',
-                    top: '0', // Ensure the header sticks at the top
-                    zIndex: '1',
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    textAlign: 'center',
+                    fontSize: '14px',
                   }}
                 >
-                  <th>Principal Amount</th>
-                  <th>Interest</th>
-                  <th>Service Fee</th>
-                  <th>Paid Amount</th>
-                  <th>Date Paid</th>
-                  <th>Balance</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {schedules.map((schedule, index) => (
-                  <tr key={`${schedule.id}-${schedule.loan}-${schedule.due_date}-${index}`}>
-                    <td>₱ {(parseFloat(schedule.principal_amount) || 0).toFixed(2)}</td>
-                    <td>₱ {(parseFloat(schedule.interest_amount) || 0).toFixed(2)}</td>
-                    <td>₱ {(parseFloat(schedule.service_fee_component) || 0).toFixed(2)}</td>
-                    <td>₱ {(parseFloat(schedule.payment_amount) || 0).toFixed(2)}</td>
-                    <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
-                    <td>₱ {(parseFloat(schedule.balance) || 0).toFixed(2)}</td>
-                    <td style={{ color: 'goldenrod' }}>Paid</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  <thead>
+                    <tr
+                      style={{
+                        backgroundColor: 'red',
+                        color: 'black',
+                        position: 'sticky',
+                        top: '0',
+                        zIndex: '1',
+                      }}
+                    >
+                      <th>Loan Type</th>
+                      <th>Principal Amount</th>
+                      <th>Paid Amount</th>
+                      <th>Date Paid</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filterSchedulesByLoanType().map((schedule, index) => (
+                      <tr key={`${schedule.id}-${schedule.loan}-${index}`}>
+                        <td>{schedule.loan_type || 'N/A'}</td>
+                        <td>₱ {parseFloat(schedule.principal_amount).toFixed(2)}</td>
+                        <td>₱ {parseFloat(schedule.payment_amount).toFixed(2)}</td>
+                        <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
+                        <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p>No payments found for the selected loan type.</p>
+            )}
           </div>
-          
-          ) : (
-            <p>No paid payments found for this account.</p>
-          )}
         </>
       )}
     </div>

@@ -91,6 +91,25 @@ const LoanManager = () => {
     // Handle loan form submit (create or edit loan)
     const handleLoanSubmit = async (e) => {
         e.preventDefault();
+    
+        // Check if the loan type is "Emergency" and the loan period exceeds 6 months
+        if (loanData.loan_type === 'Emergency' && loanData.loan_period > 6) {
+            alert("Emergency loans cannot exceed 6 months.");
+            return; // Stop the form submission
+        }
+    
+        // Check if the loan type is "Regular" and the loan amount exceeds 1.5 million
+        if (loanData.loan_type === 'Regular' && loanData.loan_amount > 1500000) {
+            alert("Regular loans cannot exceed 1.5 million.");
+            return; // Stop the form submission
+        }
+    
+        // Check if the loan type is "Emergency" and the loan amount exceeds 50 thousand
+        if (loanData.loan_type === 'Emergency' && loanData.loan_amount > 50000) {
+            alert("Emergency loans cannot exceed 50,000.");
+            return; // Stop the form submission
+        }
+    
         try {
             if (editingLoan) {
                 await axios.put(`${BASE_URL}/loans/${editingLoan.control_number}/`, loanData);
@@ -105,6 +124,8 @@ const LoanManager = () => {
             setError('Error saving loan');
         }
     };
+    
+    
     
     const handleDeleteLoan = async (loan) => {
         if (loan.status !== "Fully Paid") {

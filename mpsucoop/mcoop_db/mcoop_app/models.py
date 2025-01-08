@@ -388,9 +388,11 @@ class PaymentSchedule(models.Model):
     due_date = models.DateField()
     balance = models.DecimalField(max_digits=15, decimal_places=2)
     is_paid = models.BooleanField(default=False)
+    loan_type = models.CharField(max_length=20, choices=[('Regular', 'Regular'), ('Emergency', 'Emergency')], default='Regular')  # Add loan_type field
     
     def __str__(self):
         return f"Payment for Loan {self.loan.control_number} on {self.due_date}"
+
 
     def mark_as_paid(self):
         if self.balance <= Decimal('0.00'):       

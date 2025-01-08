@@ -116,11 +116,12 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ['account_number', 'account_holder', 'shareCapital', 'status', 'created_at', 'updated_at']
 class PaymentScheduleSerializer(serializers.ModelSerializer):
+    loan_type = serializers.CharField(source='loan_type_annotated', read_only=True)  # Ibigay ang loan_type mula sa annotated field
 
     class Meta:
         model = PaymentSchedule
         fields = ['id', 'loan', 'principal_amount', 'interest_amount', 'payment_amount', 
-                  'due_date', 'balance', 'is_paid', 'service_fee_component']
+                  'due_date', 'balance', 'is_paid', 'service_fee_component', 'loan_type']
 
 class LoanSerializer(serializers.ModelSerializer):
     control_number = serializers.ReadOnlyField()

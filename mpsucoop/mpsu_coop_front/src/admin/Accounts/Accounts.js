@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './Accounts.css';
 import DepositWithdrawForm from '../DepositWithdrawForm/DepositWithdrawForm';
-import { FaTrash } from 'react-icons/fa6';
 import { PiHandDepositFill } from 'react-icons/pi';
 import { BiMoneyWithdraw } from 'react-icons/bi';
 import { FaSearch } from 'react-icons/fa';
@@ -233,20 +232,6 @@ const getAccountHolderName = (member) => {
                     >
                       <strong>
                         <BiMoneyWithdraw /> Withdraw
-                      </strong>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAccount(account.account_number)}
-                      style={{
-                        border: '2px solid #000',
-                        padding: '5px',
-                        cursor: 'pointer',
-                        color: 'black',
-                        width: '50px',
-                      }}
-                    >
-                      <strong>
-                        <FaTrash /> Delete
                       </strong>
                     </button>
                   </td>

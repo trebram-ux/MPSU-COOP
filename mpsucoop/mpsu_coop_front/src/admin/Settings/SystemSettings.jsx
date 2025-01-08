@@ -61,9 +61,6 @@ const SystemSettings = () => {
             case 'Settings':
                 setIsSettingsActive(true);
                 break;
-            case 'User Management':
-                navigate('/user-mgmt'); 
-                break;
             default:
                 break;
         }
@@ -76,9 +73,6 @@ const SystemSettings = () => {
             <nav className="navbar">
                 <a className="nav-item" onClick={() => handleMenuItemClick('Settings')}>
                     <FaCog /> System Settings
-                </a>
-                <a className="nav-item" onClick={() => handleMenuItemClick('User Management')}>
-                    <FaUsers /> User Management
                 </a>
             </nav>
 

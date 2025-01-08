@@ -4,16 +4,33 @@ import axios from 'axios';
 function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setError }) {
   const [amount, setAmount] = useState('');
 
+  const formatAmount = (value) => {
+    // Remove non-numeric characters (except commas) and format with commas
+    return value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const handleChange = (e) => {
+    const formattedAmount = formatAmount(e.target.value);
+    setAmount(formattedAmount);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const numericAmount = parseFloat(amount.replace(/,/g, ''));
+
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      setError('Invalid amount');
+      return;
+    }
+
     try {
-      const endpoint = actionType === 'deposit' 
+      const endpoint = actionType === 'deposit'
         ? `http://localhost:8000/accounts/${account.account_number}/deposit/`
         : `http://localhost:8000/accounts/${account.account_number}/withdraw/`;
 
-      await axios.post(endpoint, { amount });
-      fetchAccounts(); 
+      await axios.post(endpoint, { amount: numericAmount });
+      fetchAccounts();
       onClose();
     } catch (err) {
       setError(err.response ? err.response.data.message : err.message);
@@ -76,9 +93,9 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
         <label>
           Amount:
           <input 
-            type="number" 
+            type="text" 
             value={amount} 
-            onChange={(e) => setAmount(e.target.value)} 
+            onChange={handleChange} 
             required 
             style={inputStyle}
           />
