@@ -366,62 +366,60 @@ return (
         )}
 
         {!formVisible && !paymentFormVisible && (
-            <>
-                {loans.length > 0 ? (
-                    <div className="loan-table-container">
-                        <table className="loan-table">
-                            <thead>
-                                <tr>
-                                    <th>Account No.</th>
-                                    <th>Amount</th>
-                                    <th>Loan Term (mos)</th>
-                                    <th>Type</th>
-                                    <th>Interest (%)</th>
-                                    <th>Service Fee</th>
-                                    <th>TakeHomePay</th>
-                                    <th>Status</th>
-                                    <th>Purpose</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {filteredLoans.map((loan) => (
-                                    <tr key={loan.account_number}>
-                                        <td>{loan.account}</td>
-                                        <td>{loan.loan_amount}</td>
-                                        <td>{loan.loan_period}</td>
-                                        <td>{loan.loan_type}</td>
-                                        <td>{loan.interest_rate}</td>
-                                        <td>{loan.service_fee}</td>
-                                        <td>{loan.takehomePay}</td>
-                                        <td>{loan.status}</td>
-                                        <td>{loan.purpose}</td>
-                                        <td>
-                                            <button
-                                                onClick={() => handlePayLoan(loan)}
-                                                className="action-button pay-button"
-                                            >
-                                                <FaDollarSign />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteLoan(loan)}
-                                                className="action-button delete-button"
-                                            >
-                                                <FaTrash />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <p>No loans available.</p>
+            <div className="loan-table-container">
+                <table className="loan-table">
+                    <thead>
+                        <tr>
+                            <th>Control Number</th>
+                            <th>Account Number</th>
+                            <th>Account Holder</th>
+                            <th>Loan Amount</th>
+                            <th>Loan Type</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredLoans.map((loan) => (
+                            <tr key={loan.control_number}>
+                                <td>{loan.control_number}</td>
+                                <td>{loan.account}</td>
+                                <td>{loan.account_holder || 'N/A'}</td>
+                                <td>{loan.loan_amount}</td>
+                                <td>{loan.loan_type}</td>
+                                <td>{loan.purpose}</td>
+                                <td>{loan.status}</td>
+                                <td>
+                                    <button
+                                        onClick={() => {
+                                            setEditingLoan(loan);
+                                            setFormVisible(true);
+                                        }}
+                                        className="action-button edit"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteLoan(loan)}
+                                        className="action-button delete"
+                                    >
+                                        Delete
+                                    </button>
+                                    <button
+                                        onClick={() => handlePayLoan(loan)}
+                                        className="action-button pay"
+                                    >
+                                        Pay
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         )}
-    </>
-)}
-
+ 
         {showPrintButton && newLoan && (
             <div className="buttons-container">
                 

@@ -220,10 +220,11 @@ class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
     serializer_class = LoanSerializer
     permission_classes = [AllowAny]
+    
 
     @action(detail=True, methods=['post'])
     def mark_as_paid(self, request, pk=None):
-        loan = self.get_object()
+        loan = self.get_object
         loan.mark_as_paid()
         return Response({'status': 'loan marked as paid'})
 
@@ -358,6 +359,7 @@ class PaymentScheduleViewSet(viewsets.ModelViewSet):
     queryset = PaymentSchedule.objects.all()
     serializer_class = PaymentScheduleSerializer
 
+
     @action(detail=False, methods=['get'], url_path='summaries')
     def payment_schedule_summaries(self, request):
         loan_type = request.query_params.get('loan_type', None)
@@ -411,7 +413,7 @@ class PaymentScheduleViewSet(viewsets.ModelViewSet):
 
         # Mark the payment schedule as paid
         schedule.is_paid = True
-        schedule.status = 'Paid'
+        schedule.status = 'Paid' 
         schedule.save()
 
         # Now check if all payment schedules are paid

@@ -13,7 +13,17 @@ const Payments = () => {
   const [error, setError] = useState('');
   const [accountDetails, setAccountDetails] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loanTypeFilter, setLoanTypeFilter] = useState('All'); // Options: 'All', 'Regular', 'Emergency'
+  const [loanTypeFilter, setLoanTypeFilter] = useState('All');
+  
+  // State to hold the generated OR number for each schedule
+  const [generatedOrNumbers, setGeneratedOrNumbers] = useState({});
+
+  const generateOrNumber = (scheduleId) => {
+    // Generate OR number based on the schedule ID and timestamp for uniqueness
+    const timestamp = Date.now();
+    const randomSuffix = Math.floor(Math.random() * 1000); // Random 3-digit number
+    return `OR-${scheduleId}-${timestamp}-${randomSuffix}`;
+  };
 
   const fetchAccountSummaries = async () => {
     setLoading(true);
@@ -61,8 +71,16 @@ const Payments = () => {
   
       console.log(response.data);  // Log the response to check the structure
   
-      const paidSchedules = response.data.filter(schedule => schedule.is_paid);
-      setSchedules(paidSchedules);
+      // Filter out schedules that are paid
+      const paidSchedules = response.data.filter(schedule => schedule.is_paid || schedule.status === 'Paid');
+  
+      const schedulesWithOrNumbers = paidSchedules.map(schedule => {
+        // Generate OR number for each schedule
+        const orNumber = generateOrNumber(schedule.id);
+        return { ...schedule, or_number: orNumber , loan_amount: schedule.loan_amount || 0}; // Add OR number to schedule
+      });
+  
+      setSchedules(schedulesWithOrNumbers);
       setSelectedAccount(accountNumber);
   
       const memberResponse = await axios.get(
@@ -79,6 +97,7 @@ const Payments = () => {
   };
   
 
+
   const calculatePaidBalance = () => {
     return schedules
       .reduce((total, schedule) => {
@@ -91,14 +110,10 @@ const Payments = () => {
   };
 
   const filterSchedulesByLoanType = () => {
-    // Debugging: Log all schedules with their loan_type
-    console.log('All Schedules:', schedules.map(s => ({ id: s.id, loan_type: s.loan_type })));
-
     if (loanTypeFilter === 'All') {
-      return schedules; // Return all schedules when filter is "All"
+      return schedules;
     }
 
-    // Safely filter schedules by loan type (case-sensitive match)
     return schedules.filter(schedule => schedule.loan_type === loanTypeFilter);
   };
 
@@ -110,7 +125,6 @@ const Payments = () => {
   });
 
   const handleLoanTypeChange = (type) => {
-    console.log('Loan type filter set to:', type); // Debugging: Log the selected filter type
     setLoanTypeFilter(type);
   };
 
@@ -121,6 +135,25 @@ const Payments = () => {
     printWindow.document.close();
     printWindow.print();
   };
+
+  const handlePaymentSubmit = async (scheduleId, paymentAmount) => {
+    // Add logic to save payment and assign an OR number
+    const orNumber = generateOrNumber(scheduleId);
+
+    // Add logic to update the payment schedule or call the API to save this payment with OR number
+    try {
+      await axios.post('http://127.0.0.1:8000/payment-schedules/payment/', {
+        schedule_id: scheduleId,
+        payment_amount: paymentAmount,
+        or_number: orNumber,
+        // Add any other necessary fields here
+      });
+      alert(`Payment submitted with OR number: ${orNumber}`);
+    } catch (error) {
+      console.error('Error submitting payment:', error);
+    }
+  };
+  
 
   useEffect(() => {
     fetchAccountSummaries();
@@ -133,83 +166,26 @@ const Payments = () => {
     <div style={{ marginTop: '20px' }} className="payments-container">
       {!selectedAccount ? (
         <>
-          <h2
-            style={{
-              textAlign: 'center',
-              borderBottom: '2px solid #000000',
-              color: 'black',
-              width: '100%',
-              marginRight: '1000px',
-            }}
-          >
+          <h2 style={{ textAlign: 'center', borderBottom: '2px solid #000000' }}>
             Paid Payments Overview
           </h2>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
-            <div style={{ position: 'relative', display: 'inline-block', width: '30%' }}>
-              <input
-                type="text"
-                placeholder="Search Payments"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  padding: '7px 40px 10px 10px',
-                  fontSize: '16px',
-                  border: '2px solid #000000',
-                  borderRadius: '4px',
-                  width: '260px',
-                  marginLeft: '985px',
-                }}
-              />
-              <button
-                onClick={() => console.log('Search triggered')}
-                style={{
-                  position: 'absolute',
-                  top: '5%',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  backgroundColor: '#007bff',
-                  color: 'black',
-                  border: '2px solid #000000',
-                  borderRadius: '4px',
-                  padding: '10px',
-                  marginLeft: '1245px',
-                }}
-              >
-                <FaSearch />
-              </button>
-            </div>
+            <input
+              type="text"
+              placeholder="Search Payments"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button onClick={() => console.log('Search triggered')}>
+              <FaSearch />
+            </button>
           </div>
 
           {filteredSummaries.length > 0 ? (
-            <div
-              style={{
-                maxHeight: '450px',
-                overflowY: 'auto',
-                border: '2px solid black',
-                marginTop: '10px',
-                padding: '5px',
-                borderRadius: '5px',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-              }}
-            >
-              <table
-                className="account-summary-table"
-                style={{
-                  borderCollapse: 'collapse',
-                  width: '100%',
-                }}
-              >
+            <div>
+              <table>
                 <thead>
-                  <tr
-                    style={{
-                      borderBottom: '2px solid black',
-                      position: 'sticky',
-                      top: '-5px',
-                      backgroundColor: '#fff',
-                      zIndex: 1,
-                    }}
-                  >
+                  <tr>
                     <th>Account Number</th>
                     <th>Account Holder</th>
                     <th>Date</th>
@@ -218,12 +194,17 @@ const Payments = () => {
                 </thead>
                 <tbody>
                   {filteredSummaries.map((summary, index) => (
+<<<<<<< HEAD
                     <tr
                       key={`${summary.account_number}-${index}`}
                       onClick={() => fetchPaymentSchedules(summary.account_number)}
                       style={{ cursor: 'pointer' }}
                     >
                       <td style={{ color: 'white' }}>{summary.account_number || 'N/A'}</td>
+=======
+                    <tr key={`${summary.account_number}-${index}`} onClick={() => fetchPaymentSchedules(summary.account_number)}>
+                      <td>{summary.account_number || 'N/A'}</td>
+>>>>>>> 50b35e4c10e6fd4a6bd52f93d100f15dc9f4990a
                       <td>{summary.account_holder}</td>
                       <td>{summary.next_due_date ? new Date(summary.next_due_date).toLocaleDateString() : 'No Due Date'}</td>
                       <td>₱ {summary.total_balance?.toFixed(2)}</td>
@@ -240,59 +221,31 @@ const Payments = () => {
         <>
           <div id="print-section">
             {accountDetails && (
-              <div style={{ width: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <h3 style={{ color: 'black' }}>Payment History For:</h3>
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+              <div>
+                <h3>Payment History For:</h3>
+                <table>
                   <tbody>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Name:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' }}>
-                        {accountDetails.first_name} {accountDetails.last_name}
-                      </td>
+                      <td>Name:</td>
+                      <td>{accountDetails.first_name} {accountDetails.last_name}</td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Account Number:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' }}>
-                        {selectedAccount}
-                      </td>
+                      <td>Account Number:</td>
+                      <td>{selectedAccount}</td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Paid Balance:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' }}>
-                        ₱ {calculatePaidBalance()}
-                      </td>
+                      <td>Paid Balance:</td>
+                      <td>₱ {calculatePaidBalance()}</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             )}
-
-            <button
-              style={{
-                color: 'black',
-                padding: '5px 5px',
-                border: 'none',
-                cursor: 'pointer',
-                borderRadius: '5px',
-                marginLeft: '5px',
-              }}
-              onClick={() => setSelectedAccount(null)}
-            >
+            <button onClick={() => setSelectedAccount(null)}>
               <IoArrowBackCircle /> Back to List
             </button>
 
-            <button
-              onClick={handlePrint}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#28a745',
-                color: 'black',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                marginTop: '20px',
-              }}
-            >
+            <button onClick={handlePrint}>
               Print Payment History
             </button>
 
@@ -303,67 +256,29 @@ const Payments = () => {
             </div>
 
             {filterSchedulesByLoanType().length > 0 ? (
-              <div
-                style={{
-                  maxHeight: '385px',
-                  overflowY: 'auto',
-                  border: '2px solid black',
-                  marginTop: '20px',
-                  padding: '5px',
-                  borderRadius: '5px',
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                  width: '100%',
-                  marginRight: '400px',
-                }}
-              >
-                <style>
-                  {`
-                    div::-webkit-scrollbar {
-                      display: none;
-                    }
-
-                    @media print {
-                      button {
-                        display: none;
-                      }
-                    }
-                  `}
-                </style>
-                <table
-                  className="payment-schedule-table"
-                  style={{
-                    width: '100%',
-                    borderCollapse: 'collapse',
-                    textAlign: 'center',
-                    fontSize: '14px',
-                  }}
-                >
+              <div>
+                <table>
                   <thead>
-                    <tr
-                      style={{
-                        backgroundColor: 'red',
-                        color: 'black',
-                        position: 'sticky',
-                        top: '0',
-                        zIndex: '1',
-                      }}
-                    >
+                    <tr>
                       <th>Loan Type</th>
+                      <th>Loan Amount</th>
                       <th>Principal Amount</th>
                       <th>Paid Amount</th>
                       <th>Date Paid</th>
                       <th>Status</th>
+                      <th>OR Number</th> {/* Add OR Number to table */}
                     </tr>
                   </thead>
                   <tbody>
                     {filterSchedulesByLoanType().map((schedule, index) => (
                       <tr key={`${schedule.id}-${schedule.loan}-${index}`}>
                         <td>{schedule.loan_type || 'N/A'}</td>
+                        <td>₱ {parseFloat(schedule.loan_amount).toFixed(2)}</td>
                         <td>₱ {parseFloat(schedule.principal_amount).toFixed(2)}</td>
                         <td>₱ {parseFloat(schedule.payment_amount).toFixed(2)}</td>
                         <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
                         <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
+                        <td>{schedule.or_number}</td> {/* Display OR Number */}
                       </tr>
                     ))}
                   </tbody>
