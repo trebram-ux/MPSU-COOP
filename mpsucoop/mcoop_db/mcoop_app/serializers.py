@@ -116,24 +116,34 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = ['account_number', 'account_holder', 'shareCapital', 'status', 'created_at', 'updated_at']
 class PaymentScheduleSerializer(serializers.ModelSerializer):
-    loan_type = serializers.CharField(source='loan_type_annotated', read_only=True)  # Ibigay ang loan_type mula sa annotated field
+    loan_type = serializers.CharField(source='loan.loan_type', read_only=True)   # Ibigay ang loan_type mula sa annotated field
+    loan_amount = serializers.DecimalField(source='loan.loan_amount', max_digits=10, decimal_places=2)
 
     class Meta:
         model = PaymentSchedule
         fields = ['id', 'loan', 'principal_amount', 'interest_amount', 'payment_amount', 
-                  'due_date', 'balance', 'is_paid', 'service_fee_component', 'loan_type']
+                  'due_date', 'balance', 'is_paid', 'service_fee_component', 'loan_type', 'loan_amount']
 
 class LoanSerializer(serializers.ModelSerializer):
+    payment_schedules = PaymentSchedule.objects.select_related('loan').all()
+
     control_number = serializers.ReadOnlyField()
     bi_monthly_installment = serializers.SerializerMethodField()
     payment_schedule = PaymentScheduleSerializer(source='paymentschedule_set', many=True, read_only=True)
+    account_holder = serializers.SerializerMethodField()
 
     class Meta:
         model = Loan
         fields = ['control_number', 'account', 'loan_amount', 'loan_type', 'interest_rate', 
                   'loan_period', 'loan_period_unit', 'loan_date', 'due_date', 'status', 'takehomePay',
-                  'service_fee','penalty_rate', 'purpose', 'bi_monthly_installment', 'payment_schedule']
+                  'service_fee','penalty_rate', 'purpose', 'bi_monthly_installment', 'payment_schedule','account_holder']
         read_only_fields = ['control_number', 'loan_date', 'due_date', 'interest_rate',  'penalty_rate']
+        
+    def get_account_holder(self, obj):
+        if obj.account and obj.account.account_holder:
+            member = obj.account.account_holder
+            return f"{member.first_name} {member.middle_name or ''} {member.last_name}".strip()
+        return "N/A"
     def validate_control_number(self, value):
         try:
             uuid.UUID(str(value))
@@ -157,6 +167,7 @@ class LoanSerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+    
         class Meta:
             model = Payment
             fields = '__all__'
