@@ -11,6 +11,7 @@ from datetime import date, datetime
 
 from rest_framework import serializers
 from datetime import date, datetime
+from .models import AuditLog
 
 class ArchiveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -94,7 +95,7 @@ class MemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Member
-        fields = ['memId','accountN','share_capital',  'first_name', 'middle_name', 'last_name', 'email', 'phone_number', "birth_date", 'gender','religion', 'pstatus', 'address','user']
+        fields = '__all__'
 
 
     def get_accountN(self, obj):
@@ -170,3 +171,7 @@ class LedgerSerializer(serializers.ModelSerializer):
         model = Ledger
         fields = '__all__'
 
+class AuditLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuditLog
+        fields = '__all__'

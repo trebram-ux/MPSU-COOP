@@ -376,13 +376,13 @@ function Members() {
                   style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
                   placeholder="Annual Income"
                   name="ann_com"
-                  value={editingMember?.mem_co || newMember.mem_co || ''}
+                  value={editingMember?.ann_com || newMember.ann_com || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
 
               <div style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'block', fontWeight: 'bold' }}>Valid ID</label>
+              <label style={{ display: 'block', fontWeight: 'bold' }}>Issued Government ID</label>
               <select 
                 style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
                 name="valid_id"
@@ -398,12 +398,7 @@ function Members() {
                 <option value="Postal ID">Postal ID</option>
                 <option value="Voter's ID">Voter's ID</option>
                 <option value="PhilHealth ID">PhilHealth ID</option>
-                <option value="Senior Citizen ID">Senior Citizen ID</option>
-                <option value="PWD ID">PWD ID</option>
-                <option value="UMID">UMID</option>
-                <option value="Police Clearance">Police Clearance</option>
-                <option value="Barangay ID">Barangay ID</option>
-                <option value="Student ID">Student ID</option>
+                <option value="National ID">National ID</option>
               </select>
             </div>
 

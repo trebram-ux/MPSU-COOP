@@ -40,6 +40,7 @@ html, body {
     width: 99%; /* Full width relative to container */
     scrollbar-width: none; /* Hide scrollbar in Firefox */
     position: sticky;
+    overflow: hidden;
   }
   
   .adminDashboardMain::-webkit-scrollbar {

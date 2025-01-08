@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setError }) {
   const [amount, setAmount] = useState('');
+  const [formattedShareCapital, setFormattedShareCapital] = useState('');
 
   const formatAmount = (value) => {
-    // Remove non-numeric characters (except commas) and format with commas
-    return value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // Format numeric value with commas
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
+  useEffect(() => {
+    // Format the Share Capital dynamically whenever the account prop changes
+    setFormattedShareCapital(formatAmount(account.shareCapital || 0));
+  }, [account]);
+
   const handleChange = (e) => {
-    const formattedAmount = formatAmount(e.target.value);
+    // Format input value as user types
+    const formattedAmount = e.target.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     setAmount(formattedAmount);
   };
 
@@ -64,23 +71,23 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
     borderRadius: '4px',
     cursor: 'pointer',
     fontSize: '16px',
-    flex: '1', 
+    flex: '1',
   };
 
   const cancelButtonStyle = {
-    backgroundColor: '#6c757d',
+    backgroundColor: 'red',
   };
 
   const headerStyle = {
     color: 'black',
     textAlign: 'center',
     marginBottom: '30px',
-    marginTop: '30px'
+    marginTop: '30px',
   };
 
   const buttonContainerStyle = {
-    display: 'flex', 
-    justifyContent: 'space-between', 
+    display: 'flex',
+    justifyContent: 'space-between',
     marginTop: '10px',
   };
 
@@ -89,14 +96,21 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
       <h2 style={headerStyle}>
         {actionType === 'deposit' ? 'Deposit' : 'Withdraw'} Funds
       </h2>
+      {/* Display Share Capital */}
+      <div style={{ marginBottom: '20px', textAlign: 'center', color: 'black' }}>
+        <h3>Share Capital</h3>
+        <p style={{ fontSize: '20px', fontWeight: 'bold' }}>
+          {formattedShareCapital}
+        </p>
+      </div>
       <form onSubmit={handleSubmit} style={formStyle}>
         <label>
           Amount:
-          <input 
-            type="text" 
-            value={amount} 
-            onChange={handleChange} 
-            required 
+          <input
+            type="text"
+            value={amount}
+            onChange={handleChange}
+            required
             style={inputStyle}
           />
         </label>
@@ -104,9 +118,9 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
           <button type="submit" style={buttonStyle}>
             {actionType === 'deposit' ? 'Deposit' : 'Withdraw'}
           </button>
-          <button 
-            type="button" 
-            onClick={onClose} 
+          <button
+            type="button"
+            onClick={onClose}
             style={{ ...buttonStyle, ...cancelButtonStyle }}
           >
             Cancel

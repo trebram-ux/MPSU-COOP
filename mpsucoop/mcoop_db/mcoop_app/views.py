@@ -42,6 +42,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Archive
 from .serializers import ArchiveSerializer
+from .models import AuditLog  # Assuming you have an AuditLog model
+from .serializers import AuditLogSerializer
 class ArchiveViewSet(viewsets.ModelViewSet):
     serializer_class = ArchiveSerializer
 
@@ -882,3 +884,8 @@ class PaymentsByAccountView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class AuditTrailView(APIView):
+    def get(self, request):
+        logs = AuditLog.objects.all()
+        serializer = AuditLogSerializer(logs, many=True)
+        return Response(serializer.data)

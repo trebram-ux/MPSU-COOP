@@ -15,14 +15,13 @@ function Accounts() {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [actionType, setActionType] = useState('');
   const [members, setMembers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchAccounts();
     fetchMembers();
   }, []);
 
-  // Fetch accounts data
   const fetchAccounts = async () => {
     try {
       const response = await axios.get('http://localhost:8000/accounts/');
@@ -34,7 +33,6 @@ function Accounts() {
     }
   };
 
-  // Fetch members data
   const fetchMembers = async () => {
     try {
       const response = await axios.get('http://localhost:8000/members/');
@@ -46,7 +44,6 @@ function Accounts() {
     }
   };
 
-  // Handle account deletion
   const handleDeleteAccount = async (account_number) => {
     try {
       await axios.delete(`http://localhost:8000/accounts/${account_number}/`);
@@ -56,30 +53,25 @@ function Accounts() {
     }
   };
 
-  // Open deposit/withdraw form
   const openForm = (account, type) => {
     setSelectedAccount(account);
     setActionType(type);
     setShowForm(true);
   };
 
-  // Close the form
   const closeForm = () => {
     setShowForm(false);
     setSelectedAccount(null);
     setActionType('');
   };
 
-  // Get account holder's name by matching account holder ID to member data
-const getAccountHolderName = (member) => {
-  if (member && member.first_name && member.middle_name && member.last_name) {
-    return `${member.first_name} ${member.middle_name} ${member.last_name}`;
-  }
-  return 'Account Holder Not Found';
-};
+  const getAccountHolderName = (member) => {
+    if (member && member.first_name && member.middle_name && member.last_name) {
+      return `${member.first_name} ${member.middle_name} ${member.last_name}`;
+    }
+    return 'Account Holder Not Found';
+  };
 
-
-  // Filter accounts based on search query
   const filteredAccounts = accounts.filter((account) => {
     const accountNumber = account.account_number.toString();
     const accountHolderName = getAccountHolderName(account.account_holder).toLowerCase();
@@ -89,12 +81,10 @@ const getAccountHolderName = (member) => {
     );
   });
 
-  // Show loading state while fetching accounts or members
   if (loadingAccounts || loadingMembers) {
     return <div>Loading...</div>;
   }
 
-  // Show error if any occurs while fetching data
   if (error) {
     return <div>Error: {error.message}</div>;
   }
@@ -163,8 +153,8 @@ const getAccountHolderName = (member) => {
             marginTop: '-10px',
             padding: '5px',
             borderRadius: '5px',
-            scrollbarWidth: 'none', // For Firefox
-            msOverflowStyle: 'none', // For IE and Edge
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
           }}
         >
           <table
@@ -194,9 +184,11 @@ const getAccountHolderName = (member) => {
                 <tr key={account.account_number} style={{ textAlign: 'center', fontSize: '16px' }}>
                   <td style={{ padding: '5px', fontSize: '16px' }}>{account.account_number}</td>
                   <td style={{ padding: '5px', fontSize: '16px' }}>
-                    {getAccountHolderName(account.account_holder)} {/* Display account holder's name */}
+                    {getAccountHolderName(account.account_holder)}
                   </td>
-                  <td style={{ padding: '5px', fontSize: '16px' }}>{account.shareCapital}</td>
+                  <td style={{ padding: '5px', fontSize: '16px' }}>
+                    {Number(account.shareCapital).toLocaleString()} {/* Format with 2 decimal places */}
+                  </td>
                   <td style={{ padding: '5px', fontSize: '16px' }}>{account.status}</td>
                   <td
                     style={{
@@ -242,7 +234,6 @@ const getAccountHolderName = (member) => {
         </div>
       )}
 
-      {/* Show deposit/withdraw form when applicable */}
       {showForm && actionType !== 'add' && (
         <DepositWithdrawForm
           onClose={closeForm}

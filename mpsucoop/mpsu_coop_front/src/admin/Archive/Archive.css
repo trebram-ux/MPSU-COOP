@@ -1,38 +1,39 @@
 /* Container for archived records */
 .archived-records {
   padding: 20px;
+  color: black;
 }
 
 /* Title Styling */
 .title {
   font-size: 2rem;
   margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 2px solid #000000;
 }
 
-/* Search Bar Styling */
-.search-bar {
+/* Dropdown styling */
+.dropdown {
   margin-bottom: 20px;
   display: flex;
   align-items: center;
+  width: 200px;
 }
 
-.search-input {
+.dropdown-select {
   width: 100%;
   padding: 8px;
   font-size: 1rem;
-  margin-right: 10px;
-  border: 1px solid #ccc;
+  border: 2px solid #000000;
   border-radius: 4px;
-}
-
-.search-icon {
-  font-size: 1.5rem;
-  color: #007bff;
+  outline: none;
+  background-color: #908f8f;
+  cursor: pointer;
 }
 
 /* Box styling for each section (members and loans) */
 .records-box {
-  margin-bottom: 30px;
+  margin-bottom: 50px;
 }
 
 /* Table Styling */
@@ -40,44 +41,39 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  
 }
 
 /* Table header style */
 .records-table thead th {
-  background-color: #f8f9fa;
+  background-color: #757575;
   padding: 10px;
   text-align: left;
   font-weight: bold;
-  border: 1px solid #ddd;
+  border: 2px solid #000000;
+  
 }
 
 /* Table row styling */
 .records-table tbody td {
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 2px solid #000000;
 }
 
 /* Make the table body scrollable */
 .records-table tbody {
   display: block;
-  max-height: 200px; /* Set the maximum height for scrolling */
+  height: 420px;
   overflow-y: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: none;
 }
 
 /* Keep the table header fixed */
 .records-table thead, .records-table tbody tr {
   display: table;
-  width: 100%;
+  width: 99%;
   table-layout: fixed;
-}
-
-/* Adjust table layout for smooth scrolling */
-.records-table tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.records-table tbody tr:nth-child(odd) {
-  background-color: #ffffff;
 }
 
 /* For better accessibility and readability */
@@ -86,3 +82,40 @@
   padding: 12px 8px;
 }
 
+/* Search Bar Styling */
+.search-bar {
+  margin-bottom: 1px;
+  display: flex;
+  align-items: center;
+  width: 15%;
+  position: fixed;
+  margin-left: 67%;
+}
+
+/* Input Field */
+.search-input {
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: 2px solid #000000;
+  border-radius: 5px;
+}
+
+/* Search Icon */
+.search-icon {
+  font-size: 1.5rem;
+  color: #007bff;
+  margin-left: 100px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .search-input {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  .search-icon {
+    font-size: 1.3rem;
+  }
+}

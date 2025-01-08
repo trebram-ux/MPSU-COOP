@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { IoArrowBackCircle } from "react-icons/io5";
 import { FaSearch } from 'react-icons/fa';
+import Receipt from './Receipt';
+import ReactDOM from 'react-dom';
+import { SiFormspree } from "react-icons/si";
 
 axios.defaults.withCredentials = false;
 
@@ -15,6 +18,7 @@ const PaymentSchedule = () => {
   const [paying, setPaying] = useState(false);
   const [loanType, setLoanType] = useState('Regular'); // Default is 'Regular'
   const [searchQuery, setSearchQuery] = useState('');
+  const [receiptPrinted, setReceiptPrinted] = useState(false);
 
   // Fetch account summaries
   const fetchAccountSummaries = async () => {
@@ -124,6 +128,8 @@ const PaymentSchedule = () => {
         }
       );
       console.log('Payment schedule marked as paid:', response.data);
+  
+      // Update the status to 'Paid' for the current schedule
       setSchedules((prevSchedules) =>
         prevSchedules.map((s) =>
           s.id === id ? { ...s, is_paid: true, status: 'Paid' } : s
@@ -135,7 +141,17 @@ const PaymentSchedule = () => {
       setPaying(false);
     }
   };
-
+  
+  // New helper function to check if previous payments are paid
+  const arePreviousPaymentsPaid = (scheduleId) => {
+    const index = schedules.findIndex((schedule) => schedule.id === scheduleId);
+    if (index > 0) {
+      // Check if the previous schedule is marked as paid
+      return schedules[index - 1].is_paid;
+    }
+    return true; // If it's the first schedule, no previous payment exists
+  };
+  
   // Calculate remaining balance
   const calculateRemainingBalance = () => {
     return schedules
@@ -156,96 +172,126 @@ const PaymentSchedule = () => {
     }
   };
 
-  // Print Receipt
-  const generateReceipt = (schedule) => {
-    // Ensure accountDetails and schedule are available
-    if (!accountDetails || !schedule) {
-      console.error("Missing data for generating receipt");
-      return;
-    }
-  
-    console.log("Generating receipt...");
-  
-    // Open a new window for the receipt
-    const receiptWindow = window.open("", "Receipt", "width=600,height=400");
-  
-    if (!receiptWindow) {
-      console.error("Failed to open window.");
-      return;
-    }
-  
-    console.log("Window opened, preparing to write content...");
-  
-    // Wait for the window to load and then write the content
-    setTimeout(() => {
-      console.log("Writing content to the window...");
-  
-      // Use string interpolation to insert loanType dynamically
-      const receiptContent = `
-        <!DOCTYPE html>
-        <html lang="en">
+    const handlePrintReceipt = (PaymentSchedule) => {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank', 'width=800,height=600', 'position=center');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
         <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Receipt Test</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                h1 { text-align: center; }
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                th, td { border: 1px solid black; padding: 10px; text-align: left; }
-                .footer { margin-top: 20px; text-align: center; font-size: 12px; }
-            </style>
+          <title>Print Official Receipt</title>
         </head>
         <body>
-            <h1>Payment Receipt</h1>
-            <table>
-                <tr>
-                  <th>Loan Type</th>
-                  <td>${loanType}</td>
-                </tr>
-                <tr>
-                    <th>Account Number</th>
-                    <td>${selectedAccount}</td>
-                </tr>
-                <tr>
-                  <th>Account Holder</th>
-                  <td>${accountDetails ? `${accountDetails.first_name} ${accountDetails.middle_name} ${accountDetails.last_name}` : 'N/A'}</td>
-                </tr>
-                <tr>
-                  <th>Payment Amount</th>
-                  <td>₱ ${(isNaN(schedule.payment_amount) ? 0 : parseFloat(schedule.payment_amount)).toFixed(2)}</td>
-                </tr>
-                <tr>
-                    <th>Due Date</th>
-                    <td>${new Date(schedule.due_date).toLocaleDateString()}</td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td>${schedule.is_paid ? "Paid" : "Ongoing"}</td>
-                </tr>
-            </table>
-            <div class="footer">
-                <p>Thank you for your payment!</p>
-            </div>
+          <div id="print-content"></div>
+          <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"></script>
         </body>
-        </html>
-      `;
-  
-      // Write content to the new window
-      receiptWindow.document.write(receiptContent);
-      receiptWindow.document.close();
-  
-      console.log("Content written. Attempting to print...");
-  
-      // Wait a moment before printing
-      setTimeout(() => {
-        console.log("Attempting to print...");
-        receiptWindow.print();
-      }, 500); // Delay before printing
-  
-    }, 100); // Delay before writing to the window
+      </html>
+    `);
+
+    ReactDOM.render(
+      <Receipt prefilledData={PaymentSchedule} />,
+      printWindow.document.getElementById('print-content')
+    );
+
+    // Trigger print after rendering
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
   };
-  
+
+// Function to handle when receipt is printed
+const handleReceiptPrinted = () => {
+  setReceiptPrinted(true);
+};
+
+const generateReceipt = (schedule) => {
+  // Ensure accountDetails and schedule are available
+  if (!accountDetails || !schedule) {
+    console.error("Missing data for generating receipt");
+    return;
+  }
+
+  console.log("Generating receipt...");
+
+  // Open a new window for the receipt
+  const receiptWindow = window.open("", "Receipt", "width=600,height=400");
+
+  if (!receiptWindow) {
+    console.error("Failed to open window.");
+    return;
+  }
+
+  console.log("Window opened, preparing to write content...");
+
+  // Wait for the window to load and then write the content
+  setTimeout(() => {
+    console.log("Writing content to the window...");
+
+    const receiptContent = ` 
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Receipt Test</title>
+          <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h1 { text-align: center; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid black; padding: 10px; text-align: left; }
+              .footer { margin-top: 20px; text-align: center; font-size: 12px; }
+          </style>
+      </head>
+      <body>
+          <h1>Acknowledgement Receipt</h1>
+          <table>
+              <tr>
+                <th>Loan Type</th>
+                <td>${loanType}</td>
+              </tr>
+              <tr>
+                  <th>Account Number</th>
+                  <td>${selectedAccount}</td>
+              </tr>
+              <tr>
+                <th>Account Holder</th>
+                <td>${accountDetails ? `${accountDetails.first_name} ${accountDetails.middle_name} ${accountDetails.last_name}` : 'N/A'}</td>
+              </tr>
+              <tr>
+                <th>Payment Amount</th>
+                <td>₱ ${(isNaN(schedule.payment_amount) ? 0 : parseFloat(schedule.payment_amount)).toFixed(2)}</td>
+              </tr>
+              <tr>
+                  <th>Due Date</th>
+                  <td>${new Date(schedule.due_date).toLocaleDateString()}</td>
+              </tr>
+              <tr>
+                  <th>Status</th>
+                  <td>${schedule.is_paid ? "Paid" : "Ongoing"}</td>
+              </tr>
+          </table>
+          <div class="footer">
+              <p>Thank you for your payment!</p>
+          </div>
+      </body>
+      </html>
+    `;
+
+    receiptWindow.document.write(receiptContent);
+    receiptWindow.document.close();
+
+    console.log("Content written. Attempting to print...");
+
+    // Wait a moment before printing
+    setTimeout(() => {
+      console.log("Attempting to print...");
+      receiptWindow.print();
+      handleReceiptPrinted(); // Mark as printed after the print
+    }, 500); // Delay before printing
+  }, 100); // Delay before writing to the window
+};
   
   // Initial fetch of account summaries when the component mounts
   useEffect(() => {
@@ -271,6 +317,30 @@ const PaymentSchedule = () => {
           >
             Ongoing Payment Schedules
           </h2>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault(); // Prevent default link behavior
+              handlePrintReceipt();
+            }}
+            style={{
+              padding: '5px',
+              cursor: 'pointer',
+              color: 'black',
+              textDecoration: 'none',
+              display: 'inline-block',
+              textAlign: 'center',
+              fontSize: '14px',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.color = 'goldenrod'; 
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.color = 'black';
+            }}
+          >
+            <SiFormspree /><strong>Official Receipt</strong>
+          </a>
 
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
             <div style={{ position: 'relative', display: 'inline-block', width: '30%' }}>
@@ -453,6 +523,7 @@ const PaymentSchedule = () => {
                   <th>Action</th>
                 </tr>
               </thead>
+              
               <tbody>
                 {schedules.map((schedule) => (
                   <tr key={schedule.id}>
@@ -478,21 +549,27 @@ const PaymentSchedule = () => {
                     >
                       {!schedule.is_paid && (
                         <button
-                          style={{
-                            backgroundColor: 'goldenrod',
-                            color: 'black',
-                            border: '2px solid black',
-                            padding: '5px 10px',
-                            borderRadius: '5px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            flex: '1',
-                          }}
-                          onClick={() => markAsPaid(schedule.id)}
-                        >
-                          {paying ? 'Processing...' : 'Pay'}
-                        </button>
+                        style={{
+                          backgroundColor: 'goldenrod',
+                          color: 'black',
+                          border: '2px solid black',
+                          padding: '5px 10px',
+                          borderRadius: '5px',
+                          cursor: arePreviousPaymentsPaid(schedule.id) ? 'pointer' : 'not-allowed',
+                          fontSize: '14px',
+                          flex: '1',
+                        }}
+                        onClick={() => {
+                          if (arePreviousPaymentsPaid(schedule.id)) {
+                            markAsPaid(schedule.id);
+                          }
+                        }}
+                        disabled={!arePreviousPaymentsPaid(schedule.id)} // Disable if previous payment is not paid
+                      >
+                        {paying ? 'Processing...' : 'Pay'}
+                      </button>
                       )}
+
                       <button
                         onClick={() => generateReceipt(schedule)}
                         style={{
@@ -506,8 +583,9 @@ const PaymentSchedule = () => {
                           flex: '1',
                         }}
                       >
-                        Print Receipt
+                        {receiptPrinted ? 'View Receipt' : 'Print Receipt'}
                       </button>
+
                     </div>
                   </td>
                   </tr>

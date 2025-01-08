@@ -123,13 +123,62 @@ class Member(models.Model):
     birth_date = models.DateField()
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=12)
-    gender = models.CharField(max_length=20, choices=[('Male', 'Male'), ('Female', 'Female')], default='Male')
+    gender = models.CharField(
+        max_length=20, 
+        choices=[('Male', 'Male'), ('Female', 'Female'), ('Others', 'Others')], 
+        default='Male'
+    )
     religion = models.CharField(max_length=100, default='Catholic')
-    pstatus = models.CharField(max_length=50, choices=[('Single', 'Single'), ('Married', 'Married'), ('Widower', 'Widower'), ('Separated', 'Separated')], default='Single')
+    pstatus = models.CharField(
+        max_length=50, 
+        choices=[
+            ('Single', 'Single'), 
+            ('Married', 'Married'), 
+            ('Divorced', 'Divorced'), 
+            ('Widowed', 'Widowed'), 
+            ('In a relationship', 'In a relationship'), 
+            ('Engaged', 'Engaged'), 
+            ('Baak', 'Baak')
+        ], 
+        default='Single'
+    )
     address = models.TextField(blank=True, default='Not Provided')
-    account_number = models.OneToOneField('Account', on_delete=models.CASCADE, null=True, blank=True, related_name='member')
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='member_profile')
-    
+    account_number = models.OneToOneField(
+        'Account', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='member'
+    )
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='member_profile'
+    )
+    birth_place = models.CharField(max_length=100, blank=True, default='Not Provided')  # Allow blank and default value
+    age = models.CharField(max_length=100, blank=True, default='Unknown')  # Allow blank and default value
+    zip_code = models.CharField(max_length=100, blank=True, default='0000')  # Default for zip codes
+    height = models.CharField(max_length=100, blank=True, default='Not Provided')
+    weight = models.CharField(max_length=100, blank=True, default='Not Provided')
+    ann_com = models.CharField(max_length=100, blank=True, default='0')
+    valid_id = models.CharField(
+        max_length=50, 
+        choices=[
+            ('Philippine Passport', 'Philippine Passport'), 
+            ('Drivers License', 'Drivers License'), 
+            ('SSS ID', 'SSS ID'), 
+            ('GSIS ID', 'GSIS ID'), 
+            ('TIN ID', 'TIN ID'), 
+            ('Postal ID', 'Postal ID'), 
+            ('Voters ID', 'Voters ID'), 
+            ('PhilHealth ID', 'PhilHealth ID'), 
+            ('National ID', 'National ID')
+        ], 
+        default='TIN ID'
+    )
+    id_no = models.CharField(max_length=100, blank=True, default='Not Provided')  # Default for ID numbers
 
     def delete(self, *args, **kwargs):
         try:
@@ -259,7 +308,7 @@ class Loan(models.Model):
         max_length=50,choices=[('Ongoing', 'Ongoing'), ('Paid-off', 'Paid-off')],
         default='Ongoing'
     )
-    service_fee = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    service_fee = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.03'))
     takehomePay = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
     penalty_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('2.00'))
     purpose = models.CharField(max_length=200, choices=PURPOSE_CHOICES, default='Education')
@@ -447,3 +496,12 @@ class Ledger(models.Model):
 
     def __str__(self):
         return f"{self.transaction_type} of {self.amount} on {self.timestamp}"
+
+class AuditLog(models.Model):
+    action_type = models.CharField(max_length=50)
+    description = models.TextField()
+    user = models.CharField(max_length=100)  # Or a ForeignKey to your User model
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.action_type} by {self.user} at {self.timestamp}"

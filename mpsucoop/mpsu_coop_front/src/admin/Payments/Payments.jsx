@@ -223,7 +223,7 @@ const Payments = () => {
                       onClick={() => fetchPaymentSchedules(summary.account_number)}
                       style={{ cursor: 'pointer' }}
                     >
-                      <td>{summary.account_number || 'N/A'}</td>
+                      <td style={{ color: 'white' }}>{summary.account_number || 'N/A'}</td>
                       <td>{summary.account_holder}</td>
                       <td>{summary.next_due_date ? new Date(summary.next_due_date).toLocaleDateString() : 'No Due Date'}</td>
                       <td>₱ {summary.total_balance?.toFixed(2)}</td>
