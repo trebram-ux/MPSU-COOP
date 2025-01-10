@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
-import { FaTrash, FaDollarSign, FaSearch } from 'react-icons/fa';
+import { FaTrash, FaDollarSign, FaEdit, FaSearch } from 'react-icons/fa';
 import './LoanHistory.css';
 
 
@@ -48,12 +48,21 @@ const LoanManager = () => {
         fetchLoans();
     }, []);
 
-    const filteredLoans = loans.filter((loan) =>
-        `${loan.account}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        loan.loan_type.toString().includes(searchQuery)
-    );
-
-
+    const filteredLoans = loans.filter((loan) => {
+        const search = searchQuery.toLowerCase();
+        const matches = {
+            control_number: loan.control_number?.toString().includes(search),
+            account: loan.account?.toString().toLowerCase().includes(search),
+            account_holder: loan.account_holder?.toLowerCase().includes(search),
+            loan_type: loan.loan_type?.toLowerCase().includes(search),
+            purpose: loan.purpose?.toLowerCase().includes(search),
+            status: loan.status?.toLowerCase().includes(search),
+        };
+        console.log("Search Matches:", matches);
+        return Object.values(matches).some(match => match);
+    });
+    
+    
     // Fetch members from API
     useEffect(() => {
         const fetchMembers = async () => {
@@ -195,12 +204,22 @@ return (
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="search-input"
+                        style={{
+                            padding: '7px 40px 10px 10px',
+                            fontSize: '16px',
+                            border: '2px solid #000',
+                            borderRadius: '4px',
+                            width: '250px',
+                            marginLeft: '995px',
+                            marginBottom: '30px',
+                            marginTop: '-10px',
+                          }}
                     />
                     <button
                         onClick={() => console.log('Search triggered')}
                         style={{
                             position: 'absolute',
-                            top: '-10px',
+                            top: '-13px',
                             fontSize: '12px',
                             cursor: 'pointer',
                             backgroundColor: '#007bff',
@@ -208,7 +227,7 @@ return (
                             border: '2px solid #000000',
                             borderRadius: '4px',
                             padding: '10px',
-                            marginLeft: '1215px',
+                            marginLeft: '1245px',
                         }}
                     >
                         <FaSearch />
@@ -216,7 +235,7 @@ return (
                 </div>
             </div>
         )}
-        <div style={{ position: 'relative', marginBottom: '20px' }}>
+        <div style={{ position: 'relative', marginBottom: '10px' }}>
             {!formVisible && (
                 <button
                     onClick={() => setFormVisible(true)}
@@ -227,7 +246,7 @@ return (
                         border: '2px solid #000000',
                         borderRadius: '5px',
                         cursor: 'pointer',
-                        marginLeft: '1100px',
+                        marginLeft: '1123px',
                     }}
                 >
                     <AiOutlineUsergroupAdd /> Add Loan
@@ -391,26 +410,26 @@ return (
                                 <td>{loan.purpose}</td>
                                 <td>{loan.status}</td>
                                 <td>
-                                    <button
+                                    {/* <button
                                         onClick={() => {
                                             setEditingLoan(loan);
                                             setFormVisible(true);
                                         }}
-                                        className="action-button edit"
+                                        className="action-button edit-button"
                                     >
-                                        Edit
+                                        <FaEdit />
+                                    </button> */}
+                                    <button
+                                        onClick={() => handlePayLoan(loan)}
+                                        className="action-button pay-button"
+                                    >
+                                        <FaDollarSign />
                                     </button>
                                     <button
                                         onClick={() => handleDeleteLoan(loan)}
-                                        className="action-button delete"
+                                        className="action-button delete-button"
                                     >
-                                        Delete
-                                    </button>
-                                    <button
-                                        onClick={() => handlePayLoan(loan)}
-                                        className="action-button pay"
-                                    >
-                                        Pay
+                                        <FaTrash />
                                     </button>
                                 </td>
                             </tr>

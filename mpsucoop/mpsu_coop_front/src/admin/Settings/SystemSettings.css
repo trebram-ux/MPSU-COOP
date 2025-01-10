@@ -24,6 +24,7 @@
 /* System Settings Page Styles */
 .system-settings {
     padding: 20px;
+    font-size: 20px;
 }
 
 .error {

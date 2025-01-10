@@ -10,13 +10,12 @@ const Loans = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");  
+    const accessToken = localStorage.getItem("accessToken");
 
-    console.log("Access Token:", accessToken);  
     if (!accessToken) {
       setError("Please log in to view your loans.");
       setLoading(true);
-      navigate("/home");  
+      navigate("/home");
       return;
     }
 
@@ -36,8 +35,8 @@ const Loans = () => {
       const url = filter
         ? `http://localhost:8000/api/loans/by_account?account_number=${accountNumber}&filter=${filter}`
         : `http://localhost:8000/api/loans/by_account?account_number=${accountNumber}`;
-      
-      const accessToken = localStorage.getItem("accessToken");  
+
+      const accessToken = localStorage.getItem("accessToken");
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -50,7 +49,7 @@ const Loans = () => {
         const errorText = await response.text();
         if (response.status === 401) {
           setError("Session expired. Please log in again.");
-          navigate("/");  
+          navigate("/");
         } else {
           throw new Error(`Failed to fetch loans: ${response.status} - ${errorText}`);
         }
@@ -78,15 +77,13 @@ const Loans = () => {
     <div>
       <Topbar />
       <h2>MY Loans</h2>
-      
-      {/* Back Button */}
+
       <button onClick={() => navigate(-1)}>Back</button>
 
       <label htmlFor="filter">Filter Loans: </label>
       <select id="filter" onChange={(e) => setFilter(e.target.value)}>
         <option value="">All</option>
         <option value="Pending">Pending</option>
-        {/* <option value="Approved">Approved</option> */}
         <option value="Paid">Paid</option>
       </select>
 
@@ -117,12 +114,7 @@ const Loans = () => {
                 <td>{loan.status}</td>
                 <td>{loan.purpose}</td>
                 <td>
-                  <Link to={`/payment-schedules/${loan.control_number}`}>
-                    Schedules
-                  </Link><br/>
-                  {/* <Link to={`/payments/${loan.control_number}`}>
-                    Payments
-                  </Link> */}
+                  <Link to={`/payment-schedules/${loan.control_number}`}>Schedules</Link>
                 </td>
               </tr>
             ))}

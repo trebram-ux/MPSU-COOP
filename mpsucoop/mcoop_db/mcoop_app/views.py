@@ -44,6 +44,9 @@ from .models import Archive
 from .serializers import ArchiveSerializer
 from .models import AuditLog  # Assuming you have an AuditLog model
 from .serializers import AuditLogSerializer
+from django.views import View
+from .models import Account, ArchivedAccount
+
 class ArchiveViewSet(viewsets.ModelViewSet):
     serializer_class = ArchiveSerializer
 
@@ -888,6 +891,89 @@ class PaymentsByAccountView(APIView):
 
 class AuditTrailView(APIView):
     def get(self, request):
-        logs = AuditLog.objects.all()
+        logs = AuditLog.objects.all().order_by('-timestamp')  # Sort by latest
         serializer = AuditLogSerializer(logs, many=True)
         return Response(serializer.data)
+
+class WithdrawView(APIView):
+    def post(self, request, account_number):
+        try:
+            account = Account.objects.get(account_number=account_number)
+            amount = request.data.get('amount')
+
+            if not amount or float(amount) <= 0:
+                return Response({'message': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+            account.withdraw(amount)
+            return Response({'message': 'Withdrawal successful', 'account': str(account)}, status=status.HTTP_200_OK)
+        except Account.DoesNotExist:
+            return Response({'message': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+        except ValueError as e:
+            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UpdateStatusView(View):
+    def post(self, request, account_number):
+        try:
+            account = Account.objects.get(account_number=account_number)
+            if account.status == 'inactive':
+                return JsonResponse({'message': 'Account is already inactive'}, status=400)
+            account.status = 'inactive'
+            account.save()
+            return JsonResponse({'message': 'Account status updated to inactive'}, status=200)
+        except Account.DoesNotExist:
+            return JsonResponse({'message': 'Account not found'}, status=404)
+
+def archive_account(request, account_id):
+    if request.method == "POST":
+        account = get_object_or_404(Account, id=account_id)
+        
+        # Archive the account data
+        archived_data = {
+            'account_number': account.account_number,
+            'account_holder': {
+                'first_name': account.account_holder.first_name,
+                'middle_name': account.account_holder.middle_name,
+                'last_name': account.account_holder.last_name,
+            },
+            'shareCapital': account.shareCapital,
+            'status': account.status,
+        }
+        
+        # Create an archived record
+        ArchivedAccount.objects.create(
+            archive_type='Account',
+            archived_data=archived_data
+        )
+
+        # Soft delete by setting status to 'archived'
+        account.status = 'archived'
+        account.save()
+
+        return JsonResponse({'message': 'Account successfully archived'})
+
+@api_view(['DELETE'])
+def delete_account(request, account_number):
+    try:
+        account = Account.objects.get(account_number=account_number)
+        account.archive()  # Archive the account before deletion
+        account.delete()
+        return Response(status=204)  # No Content on successful deletion
+    except Account.DoesNotExist:
+        return Response(status=404, data={"message": "Account not found"})
+
+class ArchiveView(View):
+    def post(self, request):
+        data = json.loads(request.body)
+        archive_type = data.get('archive_type')
+        archived_data = data.get('archived_data')
+
+        # Archive the account
+        if archive_type == 'Account':
+            Archive.objects.create(archive_type=archive_type, archived_data=archived_data)
+            # Mark the account as archived
+            Account.objects.filter(id=archived_data['id']).update(archived=True)
+            return JsonResponse({'message': 'Account archived successfully.'})
+
+        return JsonResponse({'error': 'Invalid archive type.'}, status=400) 

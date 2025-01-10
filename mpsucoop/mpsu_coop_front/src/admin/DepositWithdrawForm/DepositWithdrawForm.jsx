@@ -4,25 +4,29 @@ import axios from 'axios';
 function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setError }) {
   const [amount, setAmount] = useState('');
   const [formattedShareCapital, setFormattedShareCapital] = useState('');
+  const [isInactive, setIsInactive] = useState(false);
 
   const formatAmount = (value) => {
-    // Format numeric value with commas
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
   useEffect(() => {
-    // Format the Share Capital dynamically whenever the account prop changes
     setFormattedShareCapital(formatAmount(account.shareCapital || 0));
+    setIsInactive(account.status === 'Inactive');
   }, [account]);
 
   const handleChange = (e) => {
-    // Format input value as user types
     const formattedAmount = e.target.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     setAmount(formattedAmount);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isInactive) {
+      setError('Account is inactive. Cannot perform transactions.');
+      return;
+    }
 
     const numericAmount = parseFloat(amount.replace(/,/g, ''));
 
@@ -37,6 +41,19 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
         : `http://localhost:8000/accounts/${account.account_number}/withdraw/`;
 
       await axios.post(endpoint, { amount: numericAmount });
+
+      if (actionType === 'withdraw') {
+        const remainingShareCapital = account.shareCapital - numericAmount;
+
+        if (remainingShareCapital <= 0) {
+          // Update user status to inactive if share capital becomes 0
+          await axios.patch(`http://localhost:8000/accounts/${account.account_number}/`, {
+            status: 'inactive',
+          });
+          setIsInactive(true);
+        }
+      }
+
       fetchAccounts();
       onClose();
     } catch (err) {
@@ -52,6 +69,7 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
     padding: '20px',
     border: '2px solid black',
     borderRadius: '8px',
+    fontSize: '20px',
   };
 
   const inputStyle = {
@@ -75,7 +93,7 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
   };
 
   const cancelButtonStyle = {
-    backgroundColor: 'red',
+    backgroundColor: 'rgb(240, 50, 50)',
   };
 
   const headerStyle = {
@@ -96,37 +114,44 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
       <h2 style={headerStyle}>
         {actionType === 'deposit' ? 'Deposit' : 'Withdraw'} Funds
       </h2>
-      {/* Display Share Capital */}
       <div style={{ marginBottom: '20px', textAlign: 'center', color: 'black' }}>
         <h3>Share Capital</h3>
         <p style={{ fontSize: '20px', fontWeight: 'bold' }}>
           {formattedShareCapital}
         </p>
       </div>
-      <form onSubmit={handleSubmit} style={formStyle}>
-        <label>
-          Amount:
-          <input
-            type="text"
-            value={amount}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
-        </label>
-        <div style={buttonContainerStyle}>
-          <button type="submit" style={buttonStyle}>
-            {actionType === 'deposit' ? 'Deposit' : 'Withdraw'}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ ...buttonStyle, ...cancelButtonStyle }}
-          >
-            Cancel
-          </button>
+      {isInactive ? (
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <h3>Thank You!</h3>
+          <p>Your account is inactive. No further actions are available.</p>
         </div>
-      </form>
+      ) : (
+        <form onSubmit={handleSubmit} style={formStyle}>
+          <label>
+            Amount:
+            <input
+              type="text"
+              value={amount}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+              disabled={isInactive}
+            />
+          </label>
+          <div style={buttonContainerStyle}>
+            <button type="submit" style={buttonStyle} disabled={isInactive}>
+              {actionType === 'deposit' ? 'Deposit' : 'Withdraw'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{ ...buttonStyle, ...cancelButtonStyle }}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ from datetime import date, datetime
 from rest_framework import serializers
 from datetime import date, datetime
 from .models import AuditLog
+from rest_framework.views import APIView
 
 class ArchiveSerializer(serializers.ModelSerializer):
     class Meta:
@@ -116,6 +117,7 @@ class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = ['account_number', 'account_holder', 'shareCapital', 'status', 'created_at', 'updated_at']
+
 class PaymentScheduleSerializer(serializers.ModelSerializer):
     loan_type = serializers.CharField(source='loan.loan_type', read_only=True)   # Ibigay ang loan_type mula sa annotated field
     loan_amount = serializers.DecimalField(source='loan.loan_amount', max_digits=10, decimal_places=2)
@@ -185,4 +187,50 @@ class LedgerSerializer(serializers.ModelSerializer):
 class AuditLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditLog
-        fields = '__all__'
+        fields = ['id', 'action_type', 'description', 'user', 'timestamp']
+
+class WithdrawView(APIView):
+    def post(self, request, account_number):
+        try:
+            account = Account.objects.get(account_number=account_number)
+            amount = request.data.get('amount')
+
+            if not amount or float(amount) <= 0:
+                return Response({'message': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+            amount = float(amount)
+
+            if account.shareCapital < amount:
+                return Response({'message': 'Insufficient share capital'}, status=status.HTTP_400_BAD_REQUEST)
+
+            account.shareCapital -= amount
+
+            if account.shareCapital <= 0:
+                account.shareCapital = 0  # Ensure no negative values
+                account.status = 'Inactive'
+
+            account.save()
+
+            return Response(AccountSerializer(account).data, status=status.HTTP_200_OK)
+        except Account.DoesNotExist:
+            return Response({'message': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UpdateStatusView(APIView):
+    def patch(self, request, account_number):
+        try:
+            account = Account.objects.get(account_number=account_number)
+            status_update = request.data.get('status')
+
+            if status_update not in ['Active', 'Inactive']:
+                return Response({'message': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
+
+            account.status = status_update
+            account.save()
+
+            return Response(AccountSerializer(account).data, status=status.HTTP_200_OK)
+        except Account.DoesNotExist:
+            return Response({'message': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

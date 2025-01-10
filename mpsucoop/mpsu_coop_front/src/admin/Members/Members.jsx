@@ -428,7 +428,7 @@ function Members() {
   
         <>
         <div className={styles.tableHeader}>
-            <h2 style={{ padding: '20px', textAlign: 'center', borderBottom: '2px solid #000000', color: 'black'}}>MEMBERS</h2>
+            <h2 style={{ width: '97%', marginTop: '-10px',  padding: '20px', textAlign: 'center', borderBottom: '2px solid #000000', color: 'black'}}>MEMBERS</h2>
             {/* <a
             href="#"
             onClick={(e) => {
@@ -461,30 +461,30 @@ function Members() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-                padding: '7px 40px 10px 10px',
-                fontSize: '16px',
-                border: '2px solid #000000',
-                borderRadius: '4px',
-                width: '200px',
-                marginLeft: '999px',
-                marginBottom: '50px',
-                marginTop: '-18px'
+              padding: '7px 40px 10px 10px',
+              fontSize: '16px',
+              border: '2px solid #000',
+              borderRadius: '4px',
+              width: '250px',
+              marginLeft: '1005px',
+              marginBottom: '30px',
+              marginTop: '-10px',
             }}
         />
         <button
             onClick={() => console.log('Search triggered')}
             style={{
-                position: 'absolute',
-                marginTop: '-65px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                backgroundColor: '#007bff',
-                color: 'black',
-                border: '2px solid #000000',
-                borderRadius: '4px',
-                padding: '10px',
-                marginLeft: '1200px',
-            }}
+              position: 'absolute',
+              top: '-14px',
+              fontSize: '12px',
+              cursor: 'pointer',
+              backgroundColor: '#007bff',
+              color: 'black',
+              border: '2px solid #000000',
+              borderRadius: '4px',
+              padding: '10px',
+              marginLeft: '1255px',
+          }}
           >
             <FaSearch />
         </button>                           
@@ -501,7 +501,7 @@ function Members() {
                   borderRadius: '5px',
                   cursor: 'pointer',
                   position: 'relative', 
-                  marginLeft: '1090px', 
+                  marginLeft: '1140px', 
                   marginBottom: '0px'
               }}
             >
@@ -511,7 +511,8 @@ function Members() {
 
         <div
           style={{
-            maxHeight: '380px',
+            maxHeight: '425px',
+            width: '99%',
             overflowY: 'auto',
             border: '2px solid black',
             marginTop: '20px',
@@ -534,7 +535,7 @@ function Members() {
               width: '100%',
               borderCollapse: 'collapse',
               textAlign: 'center',
-              fontSize: '14px',
+              fontSize: '20px',
             }}
           >
             <thead>
@@ -563,14 +564,14 @@ function Members() {
                     textAlign: 'center',
                   }}
                 >
-                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '15px'}}>
+                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '20px'}}>
                     {member.accountN || 'No Account'}
                   </td>
-                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '15px' }}>
+                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '20px' }}>
                     {`${member.first_name} ${member.middle_name || ''} ${member.last_name}`.trim()}
                   </td>
-                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '15px' }}>{member.email}</td>
-                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '15px' }}>{member.phone_number}</td>
+                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '20px' }}>{member.email}</td>
+                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '20px' }}>{member.phone_number}</td>
                   <td style={{ padding: '10px', border: '1px solid black', display: 'flex', justifyContent: 'center', gap: '5px' }}>
                     <button
                       onClick={() => handleViewMember(member)}

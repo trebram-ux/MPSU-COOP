@@ -5,17 +5,16 @@
 
 /* Loan Manager Header */
 .loan-manager-header {
+    width: 97%;
+    margin-top: -10px;
+    padding: 20px;
     text-align: center;
     border-bottom: 2px solid #000000;
     color: black;
 }
 
+
 /* Search Container */
-.search-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-}
 
 .search-wrapper {
     position: relative;
@@ -52,22 +51,12 @@
     margin-bottom: 20px;
 }
 
-.add-loan-button {
-    background-color: #28a745;
-    color: black;
-    padding: 10px 20px;
-    border: 2px solid #000000;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-left: 1100px;
-}
-
 /* Loan Form */
 .loan-form {
     border: 2px solid black;
     padding: 8px;
     border-radius: 5px;
-    margin-top: 20px;
+    margin-top: 10px;
     margin-left: 100px;
     width: 500px;
 }
@@ -111,14 +100,16 @@
 
 /* Loan Table */
 .loan-table-container {
-    max-height: 428px;
+    max-height: 420px;
     overflow-y: auto;
     border: 2px solid black;
-    margin-top: 10px;
+    margin-top: 5px;
     padding: 5px;
     border-radius: 5px;
     scrollbar-width: none; 
-    width: 100%;
+    width: 102%;
+    margin-left: -20px;
+    font-size: 16px;
 }
 
 .loan-table-container::-webkit-scrollbar {

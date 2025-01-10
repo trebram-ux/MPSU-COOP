@@ -308,11 +308,7 @@ const generateReceipt = (schedule) => {
         <>
           <h2
             style={{
-              textAlign: 'center',
-              borderBottom: '2px solid #000000',
-              color: 'black',
-              width: '100%',
-              marginRight: '1000px',
+              width: '98%', marginTop: '-25px',  padding: '20px', textAlign: 'center', borderBottom: '2px solid #000000', color: 'black'
             }}
           >
             Ongoing Payment Schedules
@@ -352,17 +348,19 @@ const generateReceipt = (schedule) => {
                 style={{
                   padding: '7px 40px 10px 10px',
                   fontSize: '16px',
-                  border: '2px solid #000000',
+                  border: '2px solid #000',
                   borderRadius: '4px',
-                  width: '260px',
-                  marginLeft: '1005px',
+                  width: '270px',
+                  marginLeft: '980px',
+                  marginBottom: '10px',
+                  marginTop: '-10px',
                 }}
               />
               <button
                 onClick={() => console.log('Search triggered')}
                 style={{
                   position: 'absolute',
-                  top: '5%',
+                  top: '-13px',
                   fontSize: '12px',
                   cursor: 'pointer',
                   backgroundColor: '#007bff',
@@ -370,7 +368,7 @@ const generateReceipt = (schedule) => {
                   border: '2px solid #000000',
                   borderRadius: '4px',
                   padding: '10px',
-                  marginLeft: '1265px',
+                  marginLeft: '1215px',
                 }}
               >
                 <FaSearch />
@@ -381,7 +379,7 @@ const generateReceipt = (schedule) => {
           {filteredSummaries.length > 0 ? (
             <div
               style={{
-                maxHeight: '450px',
+                maxHeight: '430px',
                 overflowY: 'auto',
                 border: '2px solid black',
                 marginTop: '10px',
@@ -389,6 +387,7 @@ const generateReceipt = (schedule) => {
                 borderRadius: '5px',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
+                fontSize: '20px' 
               }}
             >
               <table
@@ -406,6 +405,7 @@ const generateReceipt = (schedule) => {
                       top: '-5px',
                       backgroundColor: '#fff',
                       zIndex: 1,
+                      fontSize: '20px' 
                     }}
                   >
                     <th>Account Number</th>
@@ -500,7 +500,7 @@ const generateReceipt = (schedule) => {
                 width: '100%',
                 borderCollapse: 'collapse',
                 textAlign: 'center',
-                fontSize: '14px',
+                fontSize: '18px',
               }}
             >
               <thead>

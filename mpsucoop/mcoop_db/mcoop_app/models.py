@@ -216,7 +216,7 @@ class Account(models.Model):
     account_number = models.CharField(max_length=20, primary_key=True)
     account_holder = models.OneToOneField(Member, on_delete=models.CASCADE, related_name='accountN')
     shareCapital = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'), validators=[MinValueValidator(Decimal('0.00'))])
-    status = models.CharField(max_length=50, choices=[('Active', 'Active'), ('Closed', 'Closed')])
+    status = models.CharField(max_length=10, choices=[('active', 'Active'), ('inactive', 'Inactive')], default='active')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -225,7 +225,7 @@ class Account(models.Model):
             archive_type='Account',
             archived_data={
                 "account_number": self.account_number,
-                "account_holder": self.account_holder.memId,
+                "account_holder": self.account_holder,
                 "shareCapital": str(self.shareCapital),
                 "status": self.status,
                 "created_at": self.created_at,
@@ -236,7 +236,7 @@ class Account(models.Model):
     def close_account(self):
         if self.status == 'Active':
             self.archive()
-            self.status = 'Closed'
+            self.status = 'Inactive'
             self.save()
 
     def deposit(self, amount):
@@ -687,3 +687,12 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.action_type} by {self.user} at {self.timestamp}"
+
+class ArchivedAccount(models.Model):
+    archive_type = models.CharField(max_length=50)
+    archived_data = models.JSONField()  # Store archived data as JSON
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Archived Account {self.id}"
