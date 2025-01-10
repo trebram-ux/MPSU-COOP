@@ -107,8 +107,15 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Or your email provider's SMTP server
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'vhi299992@gmail.com'
+EMAIL_HOST_PASSWORD = 'xodw haqg brda cclk'
+FRONTEND_URL = 'http://localhost:3000'  # React app URL
 
-# AUTH_USER_MODEL= "mcoop_app.CustomUser"
+# AUTH_USER_MODEL = 'mcoop_app.CustomUser'
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

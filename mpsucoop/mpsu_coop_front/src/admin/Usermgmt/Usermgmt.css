@@ -1,0 +1,74 @@
+.member-management-container {
+    width: 100%;
+    padding: 20px;
+}
+
+.table-container {
+    max-height: 400px; /* You can adjust this based on the desired height */
+    overflow-y: auto;  /* Enable vertical scrolling */
+    margin-top: 20px;
+}
+
+.member-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ddd;
+}
+
+.member-table th, .member-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.member-table th {
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.member-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+button {
+    padding: 5px 10px;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #007BFF;
+    color: white;
+}
+
+.edit-member-form {
+    margin-top: 20px;
+}
+
+.edit-member-form form {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-member-form label {
+    margin: 5px 0;
+}
+
+.edit-member-form input {
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.edit-member-form button {
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.edit-member-form button:hover {
+    background-color: #0056b3;
+}

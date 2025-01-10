@@ -9,7 +9,7 @@ from .views import (
     PaymentViewSet,
     UserListView, ResetPasswordView,
     ActiveLoansByAccountView,RegisterMemberView, AccountTransactionView, MemberLoginView,LogoutView, MemberProfileView, MemberLoanListView, TokenObtainPairView, SystemSettingsView,
-    payment_schedules_by_loan, AccountDetailView, get_payments, MemberPaymentsView,PaymentListByScheduleView, PaymentsByAccountView, ArchiveViewSet,loan_summary
+    payment_schedules_by_loan, AccountDetailView, get_payments, MemberPaymentsView,PaymentListByScheduleView, PaymentsByAccountView, ArchiveViewSet,loan_summary, LogActionAPIView, GetAuditLogsAPIView
 )
 from rest_framework_simplejwt import views as jwt_views
 import logging
@@ -27,6 +27,8 @@ urlpatterns = [
     path('', include(router.urls)),
     path('users/', UserListView.as_view(), name='user_list'),
     path('api/loan-summary/', views.loan_summary, name='loan_summary'),
+    path('forgot-password/', views.forgot_password, name='forgot-password'),
+    path('reset-password/<uidb64>/<token>/', views.reset_password, name='reset-password'),
     # path('api/archived-records/', ArchivedRecordsView.as_view(), name='archived_records'),
     path('api/account/<str:account_number>/transactions/', AccountTransactionView.as_view(), name='account-transactions'),
     path('users/<int:pk>/reset-password/', ResetPasswordView.as_view(), name='reset_password'),
@@ -48,6 +50,8 @@ urlpatterns = [
     path('payments/<int:payment_schedule_id>/', PaymentListByScheduleView.as_view(), name='payment-list-by-schedule'),
     path('api/payments/<int:paymentScheduleId>/', views.get_payments_by_schedule, name='get_payments_by_schedule'),
     path('api/payments/by_account/', PaymentsByAccountView.as_view(), name='payments-by-account'),
+    path('log-action/', LogActionAPIView.as_view(), name='log_action'),
+    path('audit-logs/', GetAuditLogsAPIView.as_view(), name='audit_logs'),
     # Optionally log or print when Django processes a request to the API
     
 ]   

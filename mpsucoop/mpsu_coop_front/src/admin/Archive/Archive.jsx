@@ -1,55 +1,91 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './Archive.css';  // Assuming you'll use a separate CSS file for better styling management
+import './Archive.css';
 
 const ArchivedRecords = () => {
   const [archivedUsers, setArchivedUsers] = useState([]);
   const [archivedLoans, setArchivedLoans] = useState([]);
   const [auditTrail, setAuditTrail] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState('members');  // Default to members
+  const [activeTab, setActiveTab] = useState('members'); // Default tab
+  const [actionType, setActionType] = useState('');
+  const [actionDescription, setActionDescription] = useState('');
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState(null); // Error state
 
   useEffect(() => {
-    // Fetch archived members
-    axios.get('http://localhost:8000/archives/?archive_type=Member')
-      .then(response => setArchivedUsers(response.data || []))
-      .catch(error => console.error('Error fetching archived members:', error));
-
-    // Fetch archived loans
-    axios.get('http://localhost:8000/archives/?archive_type=Loan')
-      .then(response => setArchivedLoans(response.data || []))
-      .catch(error => console.error('Error fetching archived loans:', error));
-
-    // Fetch audit trail
-    axios.get('http://localhost:8000/api/audit-trail/')
-      .then(response => setAuditTrail(response.data || []))
-      .catch(error => console.error('Error fetching audit trail:', error));
+    fetchArchivedData();
+    fetchAuditTrail();
   }, []);
 
-  // Filter audit trail, archived members, and loans based on search term
-  const filteredAuditTrail = auditTrail.filter(log =>
-    log.action_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.user.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const fetchArchivedData = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('authToken'); // Update as needed
+      const [membersResponse, loansResponse] = await Promise.all([
+        axios.get('http://localhost:8000/archives/?archive_type=Member', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get('http://localhost:8000/archives/?archive_type=Loan', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+      setArchivedUsers(membersResponse.data || []);
+      setArchivedLoans(loansResponse.data || []);
+    } catch (err) {
+      console.error('Error fetching archived data:', err);
+      setError('Failed to fetch archived data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredArchivedUsers = archivedUsers.filter(user =>
-    user.archived_data.memId.toString().includes(searchTerm) ||
-    user.archived_data.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.archived_data.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.archived_data.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const fetchAuditTrail = async () => {
+    try {
+      const token = localStorage.getItem('authToken'); // Update as needed
+      const response = await axios.get('http://localhost:8000/audit-logs/', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAuditTrail(response.data || []);
+    } catch (err) {
+      console.error('Error fetching audit trail:', err);
+      setError('Failed to fetch audit logs.');
+    }
+  };
 
-  const filteredArchivedLoans = archivedLoans.filter(loan =>
-    loan.archived_data.loan_amount.toString().includes(searchTerm) ||
-    loan.archived_data.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const logAction = async (event) => {
+    event.preventDefault();
+    if (!actionType || !actionDescription) {
+      alert('Both action type and description are required.');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('authToken'); // Update as needed
+      await axios.post(
+        'http://localhost:8000/log-action/',
+        { action_type: actionType, description: actionDescription },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert('Action logged successfully!');
+      setActionType('');
+      setActionDescription('');
+      fetchAuditTrail(); // Refresh logs
+    } catch (err) {
+      console.error('Error logging action:', err);
+      alert('Failed to log action.');
+    }
+  };
+
+  const filterRecords = (records, keys) =>
+    records.filter(record =>
+      keys.some(key =>
+        record.archived_data[key]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
 
   return (
     <div className="archived-records">
       <h1 className="title">Archived Records</h1>
-
-      {/* Search Bar */}
       <input
         type="text"
         placeholder="Search Records"
@@ -57,12 +93,10 @@ const ArchivedRecords = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
         className="search-bar"
       />
-
-      {/* Dropdown to Switch Tabs */}
       <div className="dropdown">
-        <select 
-          value={activeTab} 
-          onChange={(e) => setActiveTab(e.target.value)} 
+        <select
+          value={activeTab}
+          onChange={(e) => setActiveTab(e.target.value)}
           className="dropdown-select"
         >
           <option value="members">Archived Members</option>
@@ -71,8 +105,11 @@ const ArchivedRecords = () => {
         </select>
       </div>
 
-      {/* Display based on activeTab */}
-      {activeTab === 'members' && (
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="error">{error}</p>
+      ) : activeTab === 'members' ? (
         <div className="records-box">
           <h2>Archived Members</h2>
           <table className="records-table">
@@ -86,8 +123,8 @@ const ArchivedRecords = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredArchivedUsers.length > 0 ? (
-                filteredArchivedUsers.map(user => (
+              {filterRecords(archivedUsers, ['memId', 'first_name', 'last_name', 'email']).length ? (
+                filterRecords(archivedUsers, ['memId', 'first_name', 'last_name', 'email']).map(user => (
                   <tr key={user.id}>
                     <td>{user.archived_data.memId}</td>
                     <td>{user.archived_data.first_name}</td>
@@ -104,9 +141,7 @@ const ArchivedRecords = () => {
             </tbody>
           </table>
         </div>
-      )}
-
-      {activeTab === 'loans' && (
+      ) : activeTab === 'loans' ? (
         <div className="records-box">
           <h2>Archived Loans</h2>
           <table className="records-table">
@@ -118,8 +153,8 @@ const ArchivedRecords = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredArchivedLoans.length > 0 ? (
-                filteredArchivedLoans.map(loan => (
+              {filterRecords(archivedLoans, ['loan_amount', 'status']).length ? (
+                filterRecords(archivedLoans, ['loan_amount', 'status']).map(loan => (
                   <tr key={loan.id}>
                     <td>{loan.archived_data.loan_amount}</td>
                     <td>{loan.archived_data.status}</td>
@@ -134,11 +169,31 @@ const ArchivedRecords = () => {
             </tbody>
           </table>
         </div>
-      )}
-
-      {activeTab === 'auditTrail' && (
+      ) : (
         <div className="records-box">
           <h2>Audit Trail</h2>
+          <form onSubmit={logAction} className="log-action-form">
+            <select
+              value={actionType}
+              onChange={(e) => setActionType(e.target.value)}
+              className="dropdown-select"
+            >
+              <option value="">Select Action Type</option>
+              <option value="CREATE">Create</option>
+              <option value="UPDATE">Update</option>
+              <option value="DELETE">Delete</option>
+              <option value="LOGIN">Login</option>
+              <option value="LOGOUT">Logout</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Action Description"
+              value={actionDescription}
+              onChange={(e) => setActionDescription(e.target.value)}
+              className="search-bar"
+            />
+            <button type="submit" className="submit-button">Log Action</button>
+          </form>
           <table className="records-table">
             <thead>
               <tr>
@@ -149,8 +204,8 @@ const ArchivedRecords = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredAuditTrail.length > 0 ? (
-                filteredAuditTrail.map(log => (
+              {auditTrail.length ? (
+                auditTrail.map(log => (
                   <tr key={log.id}>
                     <td>{log.action_type}</td>
                     <td>{log.description}</td>

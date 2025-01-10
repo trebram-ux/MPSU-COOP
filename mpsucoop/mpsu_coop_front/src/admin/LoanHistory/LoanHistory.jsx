@@ -58,15 +58,14 @@ const LoanManager = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await fetch('/api/member'); 
+                const response = await fetch("http://localhost:8000/api/members/");
                 if (!response.ok) {
-                    throw new Error('Failed to fetch members');
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log('Fetched members:', data); // Debug log
-                setMembers(data); // Update state with members
+                setMembers(data.members);
             } catch (error) {
-                console.error('Error fetching members:', error);
+                console.error("Error fetching members:", error);
             }
         };
 

@@ -194,10 +194,13 @@ function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+                <a href="" onClick={() => navigate('/forgot-password')}>Forgot Password?</a>
+              
               {error && <div className="alert alert-danger">{error}</div>}
               <button type="submit" className="btn btn-primary">
                 {loading ? 'Logging in...' : 'Log in'}
               </button>
+
               <button onClick={handleBackToRoleSelection} className="btn btn-secondary">
                 Back
               </button>
