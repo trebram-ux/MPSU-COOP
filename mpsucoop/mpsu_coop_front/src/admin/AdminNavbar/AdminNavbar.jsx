@@ -12,6 +12,7 @@ const navItems = [
   { icon: faCalendarAlt, label: 'Payment Schedules', key: 'payment-schedules' },
   { icon: faArchive, label: 'Archive', key: 'archived-records' },
   { icon: faGear, label: 'Settings', key: 'system-settings' },
+  { icon: faGear, label: 'Usermgmt', key: 'user-mgmt' },
 ];
 
 function AdminNavbar({ onLinkClick }) {

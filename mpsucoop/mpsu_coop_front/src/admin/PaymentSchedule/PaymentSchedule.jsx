@@ -16,7 +16,7 @@ const PaymentSchedule = () => {
   const [error, setError] = useState('');
   const [accountDetails, setAccountDetails] = useState(null);
   const [paying, setPaying] = useState(false);
-  const [loanType, setLoanType] = useState('Regular'); // Default is 'Regular'
+  const [loanType, setLoanType] = useState('Regular'); 
   const [searchQuery, setSearchQuery] = useState('');
   const [receiptPrinted, setReceiptPrinted] = useState(false);
 

@@ -1,4 +1,6 @@
 from rest_framework import generics, status, viewsets, filters
+from datetime import timedelta
+from decimal import Decimal, ROUND_HALF_UP
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
@@ -16,7 +18,7 @@ from django.db import transaction
 from .models import Member, Account, Loan, PaymentSchedule, Payment, Ledger
 from .serializers import (
     MemberSerializer, AccountSerializer, LoanSerializer, 
-    PaymentScheduleSerializer, PaymentSerializer,LedgerSerializer, MemberTokenSerializer
+    PaymentScheduleSerializer, PaymentSerializer,LedgerSerializer, MemberTokenSerializer,RegisterMemberSerializer
 )
 from uuid import UUID
 from rest_framework.decorators import api_view, permission_classes
@@ -35,6 +37,7 @@ from rest_framework import serializers
 from rest_framework.views import APIView
 from .models import SystemSettings
 from .serializers import SystemSettingsSerializer
+from rest_framework.authentication import TokenAuthentication
 import logging
 
 logger = logging.getLogger(__name__)
@@ -48,6 +51,8 @@ from django.views import View
 from .models import Account, ArchivedAccount
 
 class ArchiveViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
     serializer_class = ArchiveSerializer
 
     def get_queryset(self):
@@ -79,23 +84,32 @@ class SystemSettingsView(APIView):
         return Response(serializer.errors, status=400)
 
 class RegisterMemberView(generics.CreateAPIView):
+    serializer_class = RegisterMemberSerializer
+
     def post(self, request, *args, **kwargs):
-        account_number = request.data.get('account_number')
-        email = request.data.get('email')
-        password = request.data.get('password')
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        account_number = serializer.validated_data['account_number']
+        email = serializer.validated_data['email']
+        password = serializer.validated_data['password']
 
         try:
             account = Account.objects.get(account_number=account_number)
             if account.account_holder.email != email:
-                return Response({"error": "Email does not match records"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Email does not match records."}, status=status.HTTP_400_BAD_REQUEST)
+
+            if User.objects.filter(username=account_number).exists():
+                return Response({"error": "Account number is already registered."}, status=status.HTTP_400_BAD_REQUEST)
 
             user = User.objects.create_user(username=account_number, email=email, password=password)
             account.account_holder.user = user
             account.account_holder.save()
+
             return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
         except Account.DoesNotExist:
             return Response({"error": "Invalid account number."}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
@@ -130,6 +144,89 @@ def member_login(request):
         }, status=status.HTTP_200_OK)
     else:
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+import json
+from django.http import JsonResponse 
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
+
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.models import User
+import json
+from django.http import JsonResponse
+
+def forgot_password(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)  # Decode the JSON body
+            email = data.get("email")
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+        print("Email:", email)  # For debugging
+
+        users = User.objects.filter(email=email)
+        
+        if users.exists():
+            for user in users:
+                token_generator = PasswordResetTokenGenerator()
+                token = token_generator.make_token(user)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                reset_link = f"http://localhost:3000/reset-password/{uid}/{token}"
+
+                send_mail(
+                    "Password Reset Request",
+                    f"Hi {user.username},\n\nUse the following link to reset your password:\n\n{reset_link}",
+                    "your-email@gmail.com",
+                    [email],
+                    fail_silently=False,
+                )
+                return JsonResponse({
+                "message": "Password reset email(s) sent successfully",
+                "uid": uid,
+                "token": token
+            })
+            return JsonResponse({"message": "Password reset email(s) sent successfully"})
+        else:
+            return JsonResponse({"error": "No user with this email exists"}, status=404)
+
+
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_decode
+from django.http import JsonResponse
+
+def reset_password(request, uidb64, token):
+    if request.method == "POST":
+        try:
+            # Decode the user ID from the URL
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+        except (User.DoesNotExist, ValueError, TypeError):
+            return JsonResponse({"error": "Invalid user"}, status=400)
+
+        # Validate the password reset token
+        token_generator = PasswordResetTokenGenerator()
+        if token_generator.check_token(user, token):
+            # Get the new password from the request body (for JSON requests)
+            try:
+                new_password = request.data.get("password")
+            except AttributeError:
+                new_password = request.POST.get("password")  # For form-based requests
+
+            if new_password:
+                # Set and hash the new password
+                user.set_password(new_password)
+                user.save()
+                return JsonResponse({"message": "Password reset successful"})
+            else:
+                return JsonResponse({"error": "Password not provided"}, status=400)
+        else:
+            return JsonResponse({"error": "Invalid or expired token"}, status=400)
 
 
 
@@ -177,7 +274,16 @@ class MemberViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = MemberFilter  
     search_fields = ['accountN__account_number']  
-
+class UserDeleteView(APIView):
+    permission_classes = [IsAuthenticated]  
+    
+    def delete(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)  
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
@@ -218,6 +324,14 @@ class AccountViewSet(viewsets.ModelViewSet):
         amount = request.data.get('amount')
         return self._handle_transaction(account, amount, 'withdraw')
 
+
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status, viewsets
+from django.db import transaction
+from django.utils.timezone import now
+from .models import Loan, PaymentSchedule
+from .serializers import LoanSerializer, PaymentScheduleSerializer
 
 class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
@@ -607,14 +721,14 @@ class LoanSummaryView(APIView):
         
         total_received = Loan.objects.aggregate(Sum('loan_amount'))['loan_amount__sum'] or 0
         total_returned = Payment.objects.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
-        service_fees = Loan.objects.aggregate(Sum('service_fee'))['service_fee__sum'] or 0
+        # service_fees = Loan.objects.aggregate(Sum('service_fee'))['service_fee__sum'] or 0
         penalties = Loan.objects.aggregate(Sum('penalty_fee'))['penalty_fee__sum'] or 0
-        profit = (total_received - total_returned) + service_fees + penalties
+        profit = (total_received - total_returned)  + penalties
 
         
         ongoing_loans = Loan.objects.filter(status='Ongoing').count()
         completed_loans = Loan.objects.filter(status='Paid-off').count()
-        pending_loans = Loan.objects.filter(status='Pending').count()
+        
 
         
         total_payment_schedules = PaymentSchedule.objects.aggregate(Sum('amount_due'))['amount_due__sum'] or 0
@@ -632,13 +746,13 @@ class LoanSummaryView(APIView):
                 'received': total_received,
                 'returned': total_returned,
                 'profit': profit,
-                'serviceFees': service_fees,
+                # 'serviceFees': service_fees,
                 'penalties': penalties,
             },
             'loans': {
                 'ongoing': ongoing_loans,
                 'completed': completed_loans,
-                'pending': pending_loans,
+                
             },
             'paymentSchedules': total_payment_schedules,
             'totalLoansCount': total_loans_count,
@@ -657,7 +771,7 @@ from .models import Loan
 
 def loan_summary(request):
     # Count borrowers (distinct members with loans)
-    active_borrowers = Loan.objects.filter(status='Pending').values('account__account_number').distinct().count()
+    active_borrowers = Loan.objects.filter(status='Ongoing').values('account__account_number').distinct().count()
     paid_off_borrowers = Loan.objects.filter(status='Paid-off').values('account__account_number').distinct().count()
 
     # Net total loan amount
@@ -666,7 +780,7 @@ def loan_summary(request):
     )['total_loan'] or 0  # Default to 0 if no loans
 
     # Count loans by status
-    ongoing_loans = Loan.objects.filter(status='Pending').count()
+    ongoing_loans = Loan.objects.filter(status='Ongoing').count()
     completed_loans = Loan.objects.filter(status='Paid-off').count()
 
     # Prepare the response data
@@ -682,7 +796,6 @@ def loan_summary(request):
         'loans': {
             'ongoing': ongoing_loans,
             'completed': completed_loans,
-            'pending': ongoing_loans  # Pending loans are ongoing by default
         }
     }
 
@@ -842,10 +955,7 @@ def get_payments_by_schedule(request, paymentScheduleId):
         return Response({"error": "Payment schedule not found"}, status=status.HTTP_404_NOT_FOUND)
     
 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Payment
+
 
 class PaymentsByAccountView(APIView):
     permission_classes = [IsAuthenticated]
@@ -889,91 +999,32 @@ class PaymentsByAccountView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class AuditTrailView(APIView):
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import AuditLog
+from .serializers import AuditLogSerializer
+
+class LogActionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        user = request.user.username  # Get username from the authenticated user
+        action_type = data.get('action_type')
+        description = data.get('description')
+
+        if not action_type or not description:
+            return Response({"error": "Both action_type and description are required."}, status=400)
+
+        # Create audit log
+        AuditLog.objects.create(user=user, action_type=action_type, description=description)
+        return Response({"message": "Action logged successfully."})
+
+class GetAuditLogsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        logs = AuditLog.objects.all().order_by('-timestamp')  # Sort by latest
+        logs = AuditLog.objects.all()
         serializer = AuditLogSerializer(logs, many=True)
         return Response(serializer.data)
-
-class WithdrawView(APIView):
-    def post(self, request, account_number):
-        try:
-            account = Account.objects.get(account_number=account_number)
-            amount = request.data.get('amount')
-
-            if not amount or float(amount) <= 0:
-                return Response({'message': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
-
-            account.withdraw(amount)
-            return Response({'message': 'Withdrawal successful', 'account': str(account)}, status=status.HTTP_200_OK)
-        except Account.DoesNotExist:
-            return Response({'message': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
-        except ValueError as e:
-            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-class UpdateStatusView(View):
-    def post(self, request, account_number):
-        try:
-            account = Account.objects.get(account_number=account_number)
-            if account.status == 'inactive':
-                return JsonResponse({'message': 'Account is already inactive'}, status=400)
-            account.status = 'inactive'
-            account.save()
-            return JsonResponse({'message': 'Account status updated to inactive'}, status=200)
-        except Account.DoesNotExist:
-            return JsonResponse({'message': 'Account not found'}, status=404)
-
-def archive_account(request, account_id):
-    if request.method == "POST":
-        account = get_object_or_404(Account, id=account_id)
-        
-        # Archive the account data
-        archived_data = {
-            'account_number': account.account_number,
-            'account_holder': {
-                'first_name': account.account_holder.first_name,
-                'middle_name': account.account_holder.middle_name,
-                'last_name': account.account_holder.last_name,
-            },
-            'shareCapital': account.shareCapital,
-            'status': account.status,
-        }
-        
-        # Create an archived record
-        ArchivedAccount.objects.create(
-            archive_type='Account',
-            archived_data=archived_data
-        )
-
-        # Soft delete by setting status to 'archived'
-        account.status = 'archived'
-        account.save()
-
-        return JsonResponse({'message': 'Account successfully archived'})
-
-@api_view(['DELETE'])
-def delete_account(request, account_number):
-    try:
-        account = Account.objects.get(account_number=account_number)
-        account.archive()  # Archive the account before deletion
-        account.delete()
-        return Response(status=204)  # No Content on successful deletion
-    except Account.DoesNotExist:
-        return Response(status=404, data={"message": "Account not found"})
-
-class ArchiveView(View):
-    def post(self, request):
-        data = json.loads(request.body)
-        archive_type = data.get('archive_type')
-        archived_data = data.get('archived_data')
-
-        # Archive the account
-        if archive_type == 'Account':
-            Archive.objects.create(archive_type=archive_type, archived_data=archived_data)
-            # Mark the account as archived
-            Account.objects.filter(id=archived_data['id']).update(archived=True)
-            return JsonResponse({'message': 'Account archived successfully.'})
-
-        return JsonResponse({'error': 'Invalid archive type.'}, status=400) 

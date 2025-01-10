@@ -11,6 +11,7 @@ import Payments from '../Payments/Payments';
 import Settings from '../Settings/SystemSettings';
 import Ledger from '../Ledger/Ledger';
 import Archive from '../Archive/Archive';
+import Usermgmt from '../Usermgmt/Usermgmt';
 
 
 function AdminDashboard() {
@@ -37,6 +38,8 @@ function AdminDashboard() {
         return <Archive/>;
       case 'system-settings': 
         return <Settings />;
+      case 'user-mgmt': 
+        return <Usermgmt />;
         
       default:
         return (

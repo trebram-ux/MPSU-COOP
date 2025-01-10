@@ -47,7 +47,7 @@ def create_account_for_member(sender, instance, created, **kwargs):
         )
 @receiver(post_save, sender=Loan)
 def handle_loan_post_save(sender, instance, created, **kwargs):
-    if created and instance.status == 'Pending':
+    if created and instance.status == 'Ongoing':
         if not instance.due_date:
             instance.generate_payment_schedule()
 

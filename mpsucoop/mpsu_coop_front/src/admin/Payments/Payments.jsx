@@ -251,9 +251,19 @@ const Payments = () => {
                       style={{ cursor: 'pointer' }}
                     >
                       <td style={{ color: 'white' }}>{summary.account_number || 'N/A'}</td>
+<<<<<<< HEAD
                       <td>{summary.account_holder}</td>
                       <td>{summary.next_due_date ? new Date(summary.next_due_date).toLocaleDateString() : 'No Due Date'}</td>
                       <td>₱ {summary.total_balance?.toFixed(2)}</td>
+=======
+                      <td>{summary.account_holder || 'N/A'}</td>
+                      <td>
+                        {summary.next_due_date
+                          ? new Date(summary.next_due_date).toLocaleDateString()
+                          : 'No Due Date'}
+                      </td>
+                      <td>₱ {summary.total_balance?.toFixed(2) || '0.00'}</td>
+>>>>>>> 20182c3357d703bac6a7f66f92d77d423d3c307c
                     </tr>
                   ))}
                 </tbody>

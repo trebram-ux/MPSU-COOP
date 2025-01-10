@@ -14,15 +14,22 @@ from django.core.exceptions import ValidationError
 import logging
 logger = logging.getLogger(__name__)
 
-
-
-
-
-
-
 import json
 from django.core.exceptions import ValidationError
 from datetime import date, datetime
+
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils.timezone import now
+from datetime import timedelta
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        return now() < self.created_at + timedelta(hours=1)  # Token valid for 1 hour
 
 class Archive(models.Model):
     ARCHIVE_TYPES = [
@@ -65,7 +72,7 @@ class Archive(models.Model):
 class SystemSettings(models.Model):
    
     interest_rate = models.DecimalField(
-        max_digits=5, decimal_places=2, default=Decimal('5.00'), verbose_name="Interest Rate"
+        max_digits=5, decimal_places=2, default=Decimal('0.00'), verbose_name="Interest Rate"
     )
     service_fee_rate_emergency = models.DecimalField(
         max_digits=5, decimal_places=2, default=Decimal('0.01'), verbose_name="Emergency Loan Service Fee Rate"
@@ -150,16 +157,10 @@ class Member(models.Model):
         blank=True, 
         related_name='member'
     )
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='member_profile'
-    )
-    birth_place = models.CharField(max_length=100, blank=True, default='Not Provided')  # Allow blank and default value
-    age = models.CharField(max_length=100, blank=True, default='Unknown')  # Allow blank and default value
-    zip_code = models.CharField(max_length=100, blank=True, default='0000')  # Default for zip codes
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='member_profile')
+    birth_place = models.CharField(max_length=100, blank=True, default='Not Provided')  
+    age = models.CharField(max_length=100, blank=True, default='Unknown')  
+    zip_code = models.CharField(max_length=100, blank=True, default='0000')  
     height = models.CharField(max_length=100, blank=True, default='Not Provided')
     weight = models.CharField(max_length=100, blank=True, default='Not Provided')
     ann_com = models.CharField(max_length=100, blank=True, default='0')
@@ -391,7 +392,7 @@ class Account(models.Model):
 #         total_paid = self.payments.aggregate(total_paid=Sum('payment_amount'))['total_paid'] or 0
 #         return total_paid >= (self.loan_amount / 2)
 #     def generate_payment_schedule(self):
-#         """Generates bi-monthly payment schedule and distributes service fees."""
+#         """Generates bi_monthly payment schedule and distributes service fees."""
 #         if PaymentSchedule.objects.filter(loan=self).exists():
 #             return
         
@@ -399,7 +400,7 @@ class Account(models.Model):
 #         total_periods = total_months * 2  
 #         bi_monthly_rate = (self.interest_rate / Decimal('100')) / 24  
 
-#         # Bi-monthly payments calculation
+#         # bi_monthly payments calculation
 #         loan_principal = self.loan_amount
 #         total_interest = loan_principal * bi_monthly_rate * total_periods
 #         total_amount_due = loan_principal + total_interest
@@ -550,7 +551,14 @@ class Loan(models.Model):
 
     def check_loan_eligibility_for_reloan(self):
         """Check if at least 50% of the loan is paid off."""
-        total_paid = self.payments.aggregate(total_paid=Sum('payment_amount'))['total_paid'] or 0
+        # Aggregate the total payments linked to this loan through PaymentSchedule
+        total_paid = Payment.objects.filter(
+            payment_schedule__loan=self
+        ).aggregate(
+            total_paid=Sum('payment_amount')
+        )['total_paid'] or 0
+
+        # Check if total payments are at least 50% of the loan amount
         return total_paid >= (self.loan_amount / 2)
     def generate_payment_schedule(self):
         """Generates bi-monthly payment schedule and distributes service fees."""
@@ -650,6 +658,7 @@ class PaymentSchedule(models.Model):
         return f"Payment Schedule for {self.account_number}"
         
 
+
 class Payment(models.Model):
     OR = models.CharField(max_length=50, primary_key=True, unique=True)
     payment_schedule = models.ForeignKey(PaymentSchedule, on_delete=models.CASCADE, related_name='payments')
@@ -680,9 +689,16 @@ class Ledger(models.Model):
         return f"{self.transaction_type} of {self.amount} on {self.timestamp}"
 
 class AuditLog(models.Model):
-    action_type = models.CharField(max_length=50)
+    ACTION_TYPES = [
+        ('CREATE', 'Create'),
+        ('UPDATE', 'Update'),
+        ('DELETE', 'Delete'),
+        ('LOGIN', 'Login'),
+        ('LOGOUT', 'Logout'),
+    ]
+    action_type = models.CharField(max_length=50, choices=ACTION_TYPES)
     description = models.TextField()
-    user = models.CharField(max_length=100)  # Or a ForeignKey to your User model
+    user = models.CharField(max_length=100)  # Store username or email from JWT
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -8,7 +8,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import Archive
 from rest_framework import serializers
 from datetime import date, datetime
-
+from typing import Union
 from rest_framework import serializers
 from datetime import date, datetime
 from .models import AuditLog
@@ -52,7 +52,15 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
+class RegisterMemberSerializer(serializers.Serializer):
+    account_number = serializers.CharField(max_length=20)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
 
+    def validate_account_number(self, value):
+        if not Account.objects.filter(account_number=value).exists():
+            raise serializers.ValidationError("Invalid account number.")
+        return value
 class MemberTokenSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         username_or_account = attrs.get("username") or attrs.get("account_number")
@@ -106,12 +114,18 @@ class MemberSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         account_data = validated_data.pop('accountN', None)
+        # Ensure user is not associated by default
+        validated_data['user'] = None  
+
+        # Create the member instance
         member = Member.objects.create(**validated_data)
 
+        # Create associated account only if account data is provided
         if account_data:
             Account.objects.create(account_holder=member, **account_data)
-        
+
         return member
+
 class AccountSerializer(serializers.ModelSerializer):
     account_holder = MemberSerializer(read_only=True)
     class Meta:
@@ -125,11 +139,10 @@ class PaymentScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentSchedule
         fields = ['id', 'loan', 'principal_amount', 'interest_amount', 'payment_amount', 
-                  'due_date', 'balance', 'is_paid', 'service_fee_component', 'loan_type', 'loan_amount']
+                  'due_date', 'balance', 'is_paid',  'loan_type', 'loan_amount']
 
 class LoanSerializer(serializers.ModelSerializer):
     payment_schedules = PaymentSchedule.objects.select_related('loan').all()
-
     control_number = serializers.ReadOnlyField()
     bi_monthly_installment = serializers.SerializerMethodField()
     payment_schedule = PaymentScheduleSerializer(source='paymentschedule_set', many=True, read_only=True)
@@ -138,8 +151,8 @@ class LoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loan
         fields = ['control_number', 'account', 'loan_amount', 'loan_type', 'interest_rate', 
-                  'loan_period', 'loan_period_unit', 'loan_date', 'due_date', 'status', 'takehomePay',
-                  'service_fee','penalty_rate', 'purpose', 'bi_monthly_installment', 'payment_schedule','account_holder']
+                  'loan_period', 'loan_period_unit', 'loan_date', 'due_date', 'status', 'takehomePay'
+                  ,'penalty_rate', 'purpose', 'bi_monthly_installment', 'payment_schedule','account_holder']
         read_only_fields = ['control_number', 'loan_date', 'due_date', 'interest_rate',  'penalty_rate']
         
     def get_account_holder(self, obj):
@@ -154,16 +167,34 @@ class LoanSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Invalid UUID format.")
         return value
     def get_bi_monthly_installment(self, obj):
+        # Calculate total number of bi-monthly periods
         total_periods = (obj.loan_period * 2) if obj.loan_period_unit == 'years' else obj.loan_period * 2
-        bi_monthly_rate = (obj.interest_rate / Decimal('100')) / 24  
+        print(f"Total periods: {total_periods}")
+        
+        # Correct bi-monthly interest rate calculation
+        bi_monthly_rate = (obj.interest_rate / Decimal('100')) / 24  # Divide by 24 for bi-monthly
+        print(f"Bi-monthly interest rate: {bi_monthly_rate}")
+        
+        # Calculate total interest
         total_interest = (obj.loan_amount * bi_monthly_rate * total_periods)
+        print(f"Total interest: {total_interest}")
+        
+        # Total amount due
         total_amount_due = obj.loan_amount + total_interest
+        print(f"Total amount due: {total_amount_due}")
+        
+        # Calculate bi-monthly installment
         bi_monthly_payment = total_amount_due / Decimal(total_periods)
+        
+        
+        # Return rounded value
         return bi_monthly_payment.quantize(Decimal('0.01'))
+
+
 
     def create(self, validated_data):
         loan = Loan.objects.create(**validated_data)
-        if loan.status == 'Pending':
+        if loan.status == 'Ongoing':
             loan.generate_payment_schedule()
         return loan
 
@@ -187,6 +218,7 @@ class LedgerSerializer(serializers.ModelSerializer):
 class AuditLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditLog
+<<<<<<< HEAD
         fields = ['id', 'action_type', 'description', 'user', 'timestamp']
 
 class WithdrawView(APIView):
@@ -234,3 +266,6 @@ class UpdateStatusView(APIView):
             return Response({'message': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+=======
+        fields = ['id', 'action_type', 'description', 'user', 'timestamp']
+>>>>>>> 20182c3357d703bac6a7f66f92d77d423d3c307c
