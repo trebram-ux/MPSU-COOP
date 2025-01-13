@@ -3,6 +3,7 @@
   flex-direction: column;
   align-items: center;
   background-color: #0d512c;
+  border: 3px solid rgb(0, 0, 0);
   color: white;
   border-radius: 0 15px 15px 0;
   box-shadow: inset 0px 0px 20px 0px rgb(8, 29, 9);

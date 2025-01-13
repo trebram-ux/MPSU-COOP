@@ -16,7 +16,9 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
   }, [account]);
 
   const handleChange = (e) => {
-    const formattedAmount = e.target.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const formattedAmount = e.target.value
+      .replace(/\D/g, '')
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     setAmount(formattedAmount);
   };
 
@@ -28,25 +30,45 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
       return;
     }
 
-    const numericAmount = parseFloat(amount.replace(/,/g, ''));
+    let numericAmount = 0;
 
-    if (isNaN(numericAmount) || numericAmount <= 0) {
-      setError('Invalid amount');
-      return;
+    if (actionType === 'deposit') {
+      numericAmount = parseFloat(amount.replace(/,/g, ''));
+
+      if (isNaN(numericAmount) || numericAmount <= 0) {
+        setError('Invalid amount for deposit.');
+        return;
+      }
+    }
+
+    if (actionType === 'withdraw') {
+      numericAmount = account.shareCapital; // Automatically withdraw full share capital
+
+      if (numericAmount <= 0) {
+        setError('Insufficient funds to withdraw.');
+        return;
+      }
     }
 
     try {
-      const endpoint = actionType === 'deposit'
-        ? `http://localhost:8000/accounts/${account.account_number}/deposit/`
-        : `http://localhost:8000/accounts/${account.account_number}/withdraw/`;
+      const endpoint =
+        actionType === 'deposit'
+          ? `http://localhost:8000/accounts/${account.account_number}/deposit/`
+          : `http://localhost:8000/accounts/${account.account_number}/withdraw/`;
 
-      await axios.post(endpoint, { amount: numericAmount });
+      if (actionType === 'deposit') {
+        // Include amount for Deposit
+        await axios.post(endpoint, { amount: numericAmount });
+      } else {
+        // Include amount for Withdrawal
+        await axios.post(endpoint, { amount: numericAmount });
+      }
 
+      // Update account status if Withdraw leaves share capital at 0
       if (actionType === 'withdraw') {
         const remainingShareCapital = account.shareCapital - numericAmount;
 
         if (remainingShareCapital <= 0) {
-          // Update user status to inactive if share capital becomes 0
           await axios.patch(`http://localhost:8000/accounts/${account.account_number}/`, {
             status: 'inactive',
           });
@@ -70,14 +92,6 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
     border: '2px solid black',
     borderRadius: '8px',
     fontSize: '20px',
-  };
-
-  const inputStyle = {
-    padding: '10px',
-    margin: '10px 0',
-    border: '2px solid black',
-    borderRadius: '4px',
-    fontSize: '16px',
   };
 
   const buttonStyle = {
@@ -127,20 +141,27 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
         </div>
       ) : (
         <form onSubmit={handleSubmit} style={formStyle}>
-          <label>
-            Amount:
-            <input
-              type="text"
-              value={amount}
-              onChange={handleChange}
-              required
-              style={inputStyle}
-              disabled={isInactive}
-            />
-          </label>
+          {actionType === 'deposit' && ( // Input box only for Deposit
+            <label>
+              Amount:
+              <input
+                type="text"
+                value={amount}
+                onChange={handleChange}
+                required
+                style={{
+                  padding: '10px',
+                  margin: '10px 0',
+                  border: '2px solid black',
+                  borderRadius: '4px',
+                  fontSize: '16px',
+                }}
+              />
+            </label>
+          )}
           <div style={buttonContainerStyle}>
-            <button type="submit" style={buttonStyle} disabled={isInactive}>
-              {actionType === 'deposit' ? 'Deposit' : 'Withdraw'}
+            <button type="submit" style={buttonStyle}>
+              {actionType === 'deposit' ? 'Deposit' : 'Withdrawal'}
             </button>
             <button
               type="button"

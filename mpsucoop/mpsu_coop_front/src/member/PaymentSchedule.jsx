@@ -46,41 +46,73 @@ const PaymentSchedule = () => {
   }
 
   return (
-    <div>
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', marginTop: '220px' }}>
       <Topbar />
-      <h2>MY PAYMENT SCHEDULES</h2>
-      
-      
-      <button onClick={() => navigate(-1)}>Back</button>
+      <h2 style={{ textAlign: 'center', color: 'black' }}>MY PAYMENT SCHEDULES</h2>
+
+      <button 
+        onClick={() => navigate(-1)} 
+        style={{
+          backgroundColor: 'red',
+          padding: '10px 15px',
+          border: '1px solid black',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontSize: '16px',
+          marginBottom: '20px',
+        }}>
+        Back
+      </button>
 
       {paymentSchedules.length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Due Date</th>
-              <th>Principal Amount</th>
-              <th>Interest Amount</th>
-              <th>Service Fee</th>
-              <th>Amount Due</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paymentSchedules.map((schedule) => (
-              <tr key={schedule.id} style={{ color: 'black' }}>
-                <td>{schedule.due_date}</td>
-                <td>{schedule.principal_amount}</td>
-                <td>{schedule.interest_amount}</td>
-                <td>{schedule.service_fee_component}</td>
-                <td>{schedule.payment_amount || "N/A"}</td>
-                <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
-                {schedule.is_paid ? "Paid" : "Pending"}</td>
+        <div 
+          style={{
+            overflowY: 'auto', 
+            maxHeight: '400px', 
+            border: '2px solid black', 
+            borderRadius: '5px', 
+            padding: '10px',
+            marginTop: '10px',
+            width: '150%',
+            marginLeft: '-25%',
+          }}
+        >
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ backgroundColor: 'red' }}>
+                <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Due Date</th>
+                <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Principal Amount</th>
+                <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Interest Amount</th>
+                <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Service Fee</th>
+                <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Amount Due</th>
+                <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paymentSchedules.map((schedule) => (
+                <tr key={schedule.id} style={{ color: 'black' }}>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.due_date}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.principal_amount}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.interest_amount}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.service_fee_component}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.payment_amount || "N/A"}</td>
+                  <td 
+                    style={{
+                      padding: '10px', 
+                      border: '1px solid #ddd', 
+                      color: schedule.is_paid ? 'green' : 'red',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {schedule.is_paid ? "Paid" : "Pending"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <div>No payment schedules found for this loan.</div>
+        <div style={{ marginTop: '20px', fontSize: '16px', color: '#555' }}>No payment schedules found for this loan.</div>
       )}
     </div>
   );

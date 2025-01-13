@@ -215,8 +215,7 @@ const Payments = () => {
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 width: '103.5%',
-                marginLeft: '-30px',
-                fontSize: '20px' 
+                marginLeft: '-30px'
               }}
             >
               <table
@@ -234,7 +233,6 @@ const Payments = () => {
                       top: '-5px',
                       backgroundColor: '#fff',
                       zIndex: 1,
-                      fontSize: '20px' 
                     }}
                   >
                     <th>Account Number</th>
@@ -251,19 +249,9 @@ const Payments = () => {
                       style={{ cursor: 'pointer' }}
                     >
                       <td style={{ color: 'white' }}>{summary.account_number || 'N/A'}</td>
-<<<<<<< HEAD
                       <td>{summary.account_holder}</td>
                       <td>{summary.next_due_date ? new Date(summary.next_due_date).toLocaleDateString() : 'No Due Date'}</td>
                       <td>₱ {summary.total_balance?.toFixed(2)}</td>
-=======
-                      <td>{summary.account_holder || 'N/A'}</td>
-                      <td>
-                        {summary.next_due_date
-                          ? new Date(summary.next_due_date).toLocaleDateString()
-                          : 'No Due Date'}
-                      </td>
-                      <td>₱ {summary.total_balance?.toFixed(2) || '0.00'}</td>
->>>>>>> 20182c3357d703bac6a7f66f92d77d423d3c307c
                     </tr>
                   ))}
                 </tbody>
@@ -282,20 +270,20 @@ const Payments = () => {
                 <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                   <tbody>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold'  }}>Name:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px' }}>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Name:</td>
+                      <td style={{ padding: '5px', border: '2px solid black' }}>
                         {accountDetails.first_name} {accountDetails.last_name}
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold'  }}>Account Number:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px' }}>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Account Number:</td>
+                      <td style={{ padding: '5px', border: '2px solid black' }}>
                         {selectedAccount}
                       </td>
                     </tr>
                     <tr>
                       <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Paid Balance:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px' }}>
+                      <td style={{ padding: '5px', border: '2px solid black' }}>
                         ₱ {calculatePaidBalance()}
                       </td>
                     </tr>
@@ -374,7 +362,7 @@ const Payments = () => {
                   width: '100%',
                   borderCollapse: 'collapse',
                   textAlign: 'center',
-                  fontSize: '20px',
+                  fontSize: '14px',
                 }}
               >
                 <thead>

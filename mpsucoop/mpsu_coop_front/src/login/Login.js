@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './login.css';
@@ -12,11 +12,31 @@ function Login() {
   const [showSignup, setShowSignup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState('');
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockoutTime, setLockoutTime] = useState(0);
+
   const navigate = useNavigate();
+
+  // Handle countdown timer for lockout
+  useEffect(() => {
+    let timer;
+    if (isLocked && lockoutTime > 0) {
+      timer = setInterval(() => {
+        setLockoutTime((prev) => prev - 1);
+      }, 1000);
+    } else if (isLocked && lockoutTime === 0) {
+      setIsLocked(false);
+      setFailedAttempts(0); // Reset attempts after lockout
+      setError('');
+    }
+    return () => clearInterval(timer);
+  }, [isLocked, lockoutTime]);
 
   const handleRoleSelection = (selectedRole) => {
     setRole(selectedRole);
     setError('');
+    setShowSignup(false);  // Make sure Signup form hides when a role is selected
   };
 
   const handleBackToRoleSelection = () => {
@@ -29,8 +49,27 @@ function Login() {
     setPassword('');
   };
 
+  const triggerLockout = () => {
+    setIsLocked(true);
+    setLockoutTime(60); // Lockout duration in seconds
+    setError('Too many failed attempts. Please wait 60 seconds.');
+  };
+
+  const handleFailedAttempt = () => {
+    setFailedAttempts((prev) => {
+      const newAttempts = prev + 1;
+      if (newAttempts >= 3) {
+        triggerLockout();
+      } else {
+        setError(`Invalid login. ${3 - newAttempts} attempt(s) remaining.`);
+      }
+      return newAttempts;
+    });
+  };
+
   const handleMemberLoginSubmit = async (e) => {
     e.preventDefault();
+    if (isLocked) return; // Prevent login attempts during lockout
     setLoading(true);
     const credentials = { account_number, password };
 
@@ -45,13 +84,14 @@ function Login() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        handleFailedAttempt();
         throw new Error(errorData.detail || 'Login failed');
       }
 
       const data = await response.json();
-      localStorage.setItem('accessToken', data.access);  // Save access token
-      localStorage.setItem('account_number', data.account_number);  // Corrected key name
-      localStorage.setItem('userRole', 'member');  
+      localStorage.setItem('accessToken', data.access);
+      localStorage.setItem('account_number', data.account_number);
+      localStorage.setItem('userRole', 'member');
       console.log('Member login successful');
       navigate('/home');
     } catch (err) {
@@ -59,10 +99,11 @@ function Login() {
     } finally {
       setLoading(false);
     }
-};
+  };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    if (isLocked) return; // Prevent login attempts during lockout
     setLoading(true);
     const credentials = { username, password };
 
@@ -77,12 +118,13 @@ function Login() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        handleFailedAttempt();
         throw new Error(errorData.detail || 'Login failed');
       }
 
       const data = await response.json();
       localStorage.setItem('accessToken', data.access);
-      localStorage.setItem('userRole', 'admin');  
+      localStorage.setItem('userRole', 'admin');
       console.log('Admin login successful');
       navigate('/admin-dashboard');
     } catch (err) {
@@ -92,7 +134,6 @@ function Login() {
     }
   };
 
-  // Signup/Register 
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -118,6 +159,7 @@ function Login() {
 
       console.log('Signup successful');
       setShowSignup(false);
+      setRole(''); // Reset role to allow further login attempts
       navigate('/');
     } catch (err) {
       setError(err.message);
@@ -132,6 +174,15 @@ function Login() {
       <div className="login-box">
         <div className="login-container">
           <h1>MPSU Employees Credit Cooperative</h1>
+
+          {isLocked ? (
+            <div className="alert alert-warning">
+              Too many failed attempts. Please wait {lockoutTime} seconds.
+            </div>
+          ) : error && (
+            <div className="alert alert-danger">{error}</div>
+          )}
+
           {!showSignup && !role ? (
             <div className="role-selection">
               <p>Who is signing in?</p>
@@ -194,13 +245,13 @@ function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-                <a href="" onClick={() => navigate('/forgot-password')}>Forgot Password?</a>
-              
+              <a href="#" onClick={() => navigate('/forgot-password')}>
+                Forgot Password?
+              </a>
               {error && <div className="alert alert-danger">{error}</div>}
               <button type="submit" className="btn btn-primary">
                 {loading ? 'Logging in...' : 'Log in'}
               </button>
-
               <button onClick={handleBackToRoleSelection} className="btn btn-secondary">
                 Back
               </button>

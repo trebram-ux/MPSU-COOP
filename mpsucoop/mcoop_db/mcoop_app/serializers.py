@@ -14,6 +14,7 @@ from datetime import date, datetime
 from .models import AuditLog
 from rest_framework.views import APIView
 
+
 class ArchiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Archive
@@ -92,10 +93,6 @@ class MemberTokenSerializer(TokenObtainPairSerializer):
         
         raise serializers.ValidationError("Invalid member credentials.")
 
-
-
-
-
 class MemberSerializer(serializers.ModelSerializer):
     accountN = serializers.CharField(source='accountN.account_number', read_only=True)
     share_capital = serializers.DecimalField(source='accountN.shareCapital', max_digits=15, decimal_places=2, read_only=True)
@@ -105,7 +102,6 @@ class MemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
         fields = '__all__'
-
 
     def get_accountN(self, obj):
         return obj.accountN.account_number if hasattr(obj, 'accountN') else None
@@ -218,7 +214,6 @@ class LedgerSerializer(serializers.ModelSerializer):
 class AuditLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditLog
-<<<<<<< HEAD
         fields = ['id', 'action_type', 'description', 'user', 'timestamp']
 
 class WithdrawView(APIView):
@@ -266,6 +261,4 @@ class UpdateStatusView(APIView):
             return Response({'message': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-=======
         fields = ['id', 'action_type', 'description', 'user', 'timestamp']
->>>>>>> 20182c3357d703bac6a7f66f92d77d423d3c307c

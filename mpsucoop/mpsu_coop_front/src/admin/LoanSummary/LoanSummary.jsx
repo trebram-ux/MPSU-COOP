@@ -51,7 +51,7 @@ const LoanSummary = () => {
         </p>
         <div className="loan-details">
           <span className="loan-label">Returned: {loanSummary.netTotalLoan.returned}</span>
-          <span className="loan-label">Profit: {loanSummary.netTotalLoan.profit}</span>
+          {/* <span className="loan-label">Profit: {loanSummary.netTotalLoan.profit}</span> */}
         </div>
       </div>
 
@@ -63,7 +63,6 @@ const LoanSummary = () => {
         <div className="loan-details">
           <span className="loan-label">Ongoing: {loanSummary.loans.ongoing}</span>
           <span className="loan-label">Completed: {loanSummary.loans.completed}</span>
-          <span className="loan-label">Pending: {loanSummary.loans.pending}</span>
         </div>
       </div>
     </div>

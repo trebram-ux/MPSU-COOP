@@ -162,13 +162,13 @@ const LoanManager = () => {
     }; 
 
     // Handle loan payment and redirect to payment schedule
-    const handlePayLoan = (loan) => {
-        setSelectedLoanForPayment(loan);
-        setPaymentFormVisible(true);
+    // const handlePayLoan = (loan) => {
+    //     setSelectedLoanForPayment(loan);
+    //     setPaymentFormVisible(true);
 
-        // Redirect to payment-schedules page
-        navigate('/payment-schedules'); // Use navigate here
-    };
+    //     // Redirect to payment-schedules page
+    //     navigate('/payment-schedules'); // Use navigate here
+    // };
     
 
     const resetForm = () => {
@@ -418,12 +418,12 @@ return (
                                     >
                                         <FaEdit />
                                     </button> */}
-                                    <button
+                                    {/* <button
                                         onClick={() => handlePayLoan(loan)}
                                         className="action-button pay-button"
                                     >
                                         <FaDollarSign />
-                                    </button>
+                                    </button> */}
                                     <button
                                         onClick={() => handleDeleteLoan(loan)}
                                         className="action-button delete-button"

@@ -223,52 +223,96 @@ function Members() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Date of Birth:</label>
-                  <input type="date" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'center' }}>
+              <div style={{ flex: '1', minWidth: '200px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Date of Birth:</label>
+                <input
+                  type="date"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #000',
+                    borderRadius: '3px',
+                  }}
                   placeholder="Birth Date"
                   name="birth_date"
+                  min="1980-01-01"
+                  max="2005-12-31"
                   value={editingMember?.birth_date || newMember.birth_date || ''}
-                  onChange={(e) =>
-                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-                  }
-                  />
-                </div>
-                <div style={{ flex: '2' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Birth Place:</label>
-                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  onChange={(e) => {
+                    const selectedDate = new Date(e.target.value);
+                    const today = new Date();
+                    let age = today.getFullYear() - selectedDate.getFullYear();
+                    const monthDiff = today.getMonth() - selectedDate.getMonth();
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+                      age -= 1;
+                    }
+
+                    const updatedMember = editingMember
+                      ? { ...editingMember, birth_date: e.target.value, age: age > 0 ? age : '' }
+                      : { ...newMember, birth_date: e.target.value, age: age > 0 ? age : '' };
+
+                    editingMember ? setEditingMember(updatedMember) : setNewMember(updatedMember);
+                  }}
+                />
+              </div>
+
+              <div style={{ flex: '2', minWidth: '300px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Birth Place:</label>
+                <input
+                  type="text"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #000',
+                    borderRadius: '3px',
+                  }}
                   placeholder="Birth Place"
                   name="birth_place"
                   value={editingMember?.birth_place || newMember.birth_place || ''}
                   onChange={(e) =>
-                  handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
                   }
-                  />
-                </div>
-                <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Age:</label>
-                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
-                  placeholder='Age'
+                />
+              </div>
+
+              <div style={{ flex: '1', minWidth: '100px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Age:</label>
+                <input
+                  type="text"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #000',
+                    borderRadius: '3px',
+                  }}
+                  placeholder="Age"
                   name="age"
                   value={editingMember?.age || newMember.age || ''}
-                  onChange={(e) =>
-                  handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-                  }
-                  />
-                </div>
-                <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Zip Code:</label>
-                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  readOnly
+                />
+              </div>
+
+              <div style={{ flex: '1', minWidth: '200px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Zip Code:</label>
+                <input
+                  type="text"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #000',
+                    borderRadius: '3px',
+                  }}
                   placeholder="Zip Code"
                   name="zip_code"
                   value={editingMember?.zip_code || newMember.zip_code || ''}
                   onChange={(e) =>
                     handleInputChange(e, editingMember ? setEditingMember : setNewMember)
                   }
-                  />
-                </div>
+                />
               </div>
+            </div>
+            </div>
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <div style={{ flex: '1' }}>
@@ -413,7 +457,6 @@ function Members() {
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
-            </div>
             </div>
             </div>
 

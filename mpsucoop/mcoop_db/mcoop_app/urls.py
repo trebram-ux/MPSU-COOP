@@ -15,7 +15,7 @@ from rest_framework_simplejwt import views as jwt_views
 import logging
 from .views import WithdrawView
 from .views import UpdateStatusView
-from mcoop_app.views import AuditTrailView
+# from mcoop_app.views import AuditTrailView
 
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ urlpatterns = [
     path('accounts/<str:account_number>/withdraw/', WithdrawView.as_view(), name='withdraw'),
     path('accounts/<str:account_number>/update-status/', UpdateStatusView.as_view(), name='update-status'),
     path('accounts/<int:id>/', views.delete_account, name='delete_account'),
-    path('api/audit-trail/', AuditTrailView.as_view(), name='audit-trail'),
+    # path('api/audit-trail/', AuditTrailView.as_view(), name='audit-trail'),
 
 
     

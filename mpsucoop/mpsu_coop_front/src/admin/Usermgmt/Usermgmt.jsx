@@ -101,10 +101,10 @@ const AdminMemberManagement = () => {
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th>Username</th>
+                            <th>Account Number</th>
                             <th>Email</th>
                             <th>Password</th> {/* Display Password column */}
-                            <th>Actions</th>
+                            {/* <th>Actions</th> */}
                         </tr>
                     </thead>
                     <tbody>
@@ -116,11 +116,11 @@ const AdminMemberManagement = () => {
                                   <td>{fullName}</td>
                                   <td>{member.user ? member.user.username : 'N/A'}</td>
                                   <td>{member.user ? member.user.email : 'N/A'}</td>
-                                  <td>{member.user && member.user.password ? member.user.password : 'N/A'}</td>
-                                  <td>
+                                  <td>{member.user && member.user.password ? member.user.password : '******'}</td>
+                                  {/* <td>
                                       <button onClick={() => handleEditToggle(member.memId)}>Edit</button>
                                       <button onClick={() => handleDelete(member.memId)}>Delete</button>
-                                  </td>
+                                  </td> */}
                               </tr>
                           );
                       })}

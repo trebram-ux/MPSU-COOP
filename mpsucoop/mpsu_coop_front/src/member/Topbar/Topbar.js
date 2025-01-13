@@ -17,14 +17,19 @@ const Topbar = () => {
   };
 
   const topbarStyle = {
-    height: '50px',
-    backgroundColor: '#D5ED9F',
-    color: 'green',
+    height: '150px',
+    backgroundColor: 'green',
+    color: 'goldenrod',
     padding: '10px 20px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderRadius: '0 30px 30px 0',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+
   };
 
   const logoContainerStyle = {
@@ -33,7 +38,7 @@ const Topbar = () => {
   };
 
   const navHeaderStyle = {
-    fontSize: '20px',
+    fontSize: '40px',
     fontWeight: 'bold',
     textTransform: 'uppercase',
     margin: 0,
@@ -57,14 +62,15 @@ const Topbar = () => {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    fontSize: '12px',
+    fontSize: '24px',
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    marginTop: '10px'
+    marginTop: '10px',
+    gap: '10px'
   };
 
   const navIconStyle = {
-    fontSize: '20px',
+    fontSize: '24px',
     marginBottom: '5px',
   };
 

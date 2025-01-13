@@ -106,23 +106,24 @@ const Home = () => {
   return (
     <div>
       <Topbar />
-      <div style={{ backgroundColor: '#D5ED9F', Height: '100vh', Width: '210vh', fontFamily: 'Arial, sans-serif', color: 'black', width: '100%' }}>
+      <div style={{ backgroundColor: '#D5ED9F', height: '100%', width: '100%', fontFamily: 'Arial, sans-serif', color: 'black' }}>
         <div style={{ padding: '20px' }}>
           <section id="welcome">
-            <h2 style={{ fontWeight: 'bolder', color: 'black', marginLeft: '10px', borderBottom: '3px solid black', fontSize: '30px' }}>
+            <h2 style={{ fontWeight: 'bolder', color: 'black', marginLeft: '10px', borderBottom: '3px solid black', fontSize: '50px', width: '100%' }}>
               WELCOME!!
             </h2>
           </section>
 
-          <div style={{ display: 'flex', gap: '100px', marginTop: '60px', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '60px', marginTop: '60px', justifyContent: 'center' }}>
             {/* Left Card */}
             <div
               style={{
-                backgroundColor:  'rgb(213, 242, 145)',
+                backgroundColor: 'rgb(213, 242, 145)',
                 borderRadius: '8px',
-                width: '600px',
+                width: '800px',
                 padding: '20px',
-                height: '220px',
+                height: '400px',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
               }}
             >
               <h3
@@ -132,24 +133,19 @@ const Home = () => {
                   borderBottom: '3px solid rgb(0, 0, 0)',
                   paddingBottom: '10px',
                   textAlign: 'center',
+                  fontSize: '30px',
                 }}
               >
                 {memberData.first_name?.toUpperCase()} {memberData.middle_name?.toUpperCase()} {memberData.last_name?.toUpperCase()}
               </h3>
-              <p style={{ textAlign: 'center' }}>
+              <p style={{ textAlign: 'center', fontSize: '30px' }}>
                 <strong>ACCOUNT NUMBER:</strong> {memberData.accountN || 'N/A'}
               </p>
-              <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '18px' }}>
-                SHARE CAPITAL: <span style={{ fontWeight: '900' }}>{memberData.share_capital || 'N/A'}</span>
+              <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '30px' }}>
+                SHARE CAPITAL: <span style={{ fontSize: '30px', fontWeight: '900' }}>{memberData.share_capital || 'N/A'}</span>
               </p>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-around',
-                  marginTop: '20px',
-                }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '50px' }}>
                 <div
                   style={{
                     backgroundColor: 'green',
@@ -160,8 +156,8 @@ const Home = () => {
                     fontWeight: 'bold',
                   }}
                 >
-                  <p style={{ margin: 0, fontSize: '12px' }}>REGULAR LOAN</p>
-                  <strong>{loanData.regular_loan_amount || '1,500,000.00'}</strong>
+                  <p style={{ margin: 0, fontSize: '30px' }}>REGULAR LOAN</p>
+                  <p style={{ margin: 0, fontSize: '30px' }}>{loanData.regular_loan_amount || '1,500,000.00'}</p>
                 </div>
                 <div
                   style={{
@@ -173,32 +169,33 @@ const Home = () => {
                     fontWeight: 'bold',
                   }}
                 >
-                  <p style={{ margin: 0, fontSize: '12px' }}>EMERGENCY LOAN</p>
-                  <strong>{loanData.emergency_loan_amount || '50,000.00'}</strong>
+                  <p style={{ margin: 0, fontSize: '30px' }}>EMERGENCY LOAN</p>
+                  <p style={{ margin: 0, fontSize: '30px' }}>{loanData.emergency_loan_amount || '50,000.00'}</p>
                 </div>
               </div>
             </div>
 
             {/* Right Card */}
             <section style={{ flex: 1 }}>
-              <div style={{ backgroundColor: '#c8f7ce', borderRadius: '8px', width: '600px', padding: '20px' }}>
-                <h3 style={{ textAlign: 'left', color: 'black' }}>
+              <div style={{ backgroundColor: '#c8f7ce', borderRadius: '8px', width: '600px', padding: '20px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}>
+                <h3 style={{ textAlign: 'left', color: 'black', fontSize: '30px' }}>
                   {nearestPaymentSchedule ? `Loan Due on: ${new Date(nearestPaymentSchedule.due_date).toLocaleDateString()}` : 'Loan Due Date: N/A'}
                 </h3>
-                <div style={{ textAlign: 'left', margin: '20px 0' }}>
+                <div style={{ textAlign: 'left', margin: '20px 0', fontSize: '30px'}}>
                   <p style={{ fontSize: '30px', fontWeight: 'bold', color: 'blue' }}>
                     {nearestPaymentSchedule?.payment_amount || 0}
                   </p>
 
                   <p>Amount Paid:</p>
                   <p>{totalAmountPaid} out of {totalPaymentAmount}</p>
-                  <div style={{ backgroundColor: 'red', borderRadius: '20px', height: '8px', width: '2%' }}>
+                  <div style={{ backgroundColor: 'red', borderRadius: '20px', height: '8px', width: '100%', fontSize: '30px' }}>
                     <div
                       style={{
                         height: '10%',
                         width: `${(totalAmountPaid / totalPaymentAmount) * 100}%`,
                         borderRadius: '20px',
-                        backgroundColor: 'green',
+                        backgroundColor: 'red',
+                        fontSize: '30px'
                       }}
                     ></div>
                     <div
@@ -209,6 +206,7 @@ const Home = () => {
                         position: 'absolute',
                         top: 0,
                         left: `${(totalAmountPaid / totalPaymentAmount) * 100}%`,
+                        fontSize: '30px'
                       }}
                     ></div>
                   </div>

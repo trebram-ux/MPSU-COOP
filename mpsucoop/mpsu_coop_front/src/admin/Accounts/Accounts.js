@@ -40,7 +40,8 @@ function Accounts() {
   const openForm = (account, type) => {
     if (type === 'withdraw') {
       const confirmFullWithdrawal = window.confirm(
-        `Do you want to withdraw the full amount of ${Number(account.shareCapital).toLocaleString()}?`
+        `Do you want to withdraw the full amount of ${Number(account.shareCapital).toLocaleString()}? 
+        Notice: Your Account will be marked Inactive`
       );
 
       if (!confirmFullWithdrawal) {
@@ -60,13 +61,11 @@ function Accounts() {
   };
 
   const deleteAccount = async (accountId, accountData) => {
-    console.log('Deleting account:', accountId, accountData); // Log account details
-  
     const confirmDelete = window.confirm('Are you sure you want to delete this account? This will archive it.');
     if (!confirmDelete) return;
   
     try {
-      // Step 1: Archive the account first
+      // Step 1: Archive the account
       const archivePayload = {
         archive_type: 'Account',
         archived_data: accountData,
@@ -83,12 +82,12 @@ function Accounts() {
   
       alert('Account successfully deleted and removed from active accounts.');
   
-      // Step 3: Update the state to remove the deleted account from the table
+      // Step 3: Update the active accounts list to remove the archived account
       setAccounts((prevAccounts) =>
-        prevAccounts.filter((account) => account.account_number !== accountId) // Ensure you use correct field here
+        prevAccounts.filter((account) => account.account_number !== accountId)  // Ensure correct field is used here
       );
   
-      // Refresh the archived records
+      // Trigger a refresh of archived records to reflect the move
       triggerRefreshArchivedRecords();
     } catch (err) {
       console.error('Error deleting the account:', err);
@@ -96,7 +95,7 @@ function Accounts() {
     }
   };
   
-  
+
   const triggerRefreshArchivedRecords = () => {
     setRefreshArchives(!refreshArchives);
   };
