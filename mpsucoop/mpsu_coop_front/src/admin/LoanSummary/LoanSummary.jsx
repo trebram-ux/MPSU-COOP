@@ -40,7 +40,7 @@ const LoanSummary = () => {
         </p>
         <div className="loan-details">
           <span className="loan-label">Active: {loanSummary.borrowers.active}</span>
-          <span className="loan-label">Paid-off: {loanSummary.borrowers.paidOff}</span>
+          <span className="loan-label">Completed: {loanSummary.borrowers.paidOff}</span>
         </div>
       </div>
 

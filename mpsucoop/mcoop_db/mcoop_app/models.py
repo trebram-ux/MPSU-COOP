@@ -29,7 +29,7 @@ class PasswordResetToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def is_valid(self):
-        return now() < self.created_at + timedelta(hours=1)  # Token valid for 1 hour
+        return now() < self.created_at + timedelta(hours=1)  
 
 class Archive(models.Model):
     ARCHIVE_TYPES = [
@@ -47,14 +47,12 @@ class Archive(models.Model):
     archived_at = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
-        # Ensure that date fields are serialized as strings before saving
         if isinstance(self.archived_data, dict):
             for key, value in self.archived_data.items():
-                if isinstance(value, (date, datetime)):  # Check if value is a date or datetime
-                    # Convert the date or datetime to string
-                    self.archived_data[key] = value.strftime('%Y-%m-%d')  # You can customize the date format as needed
+                if isinstance(value, (date, datetime)): 
+                    self.archived_data[key] = value.strftime('%Y-%m-%d')  
 
-        # Custom validation based on the archive type
+        
         if self.archive_type in ['Member', 'Loan', 'Account'] and not isinstance(self.archived_data, dict):
             raise ValidationError(f"{self.archive_type} archive must have a dictionary format.")
         
@@ -62,7 +60,6 @@ class Archive(models.Model):
         return f"{self.archive_type} archived on {self.archived_at}"
 
     def save(self, *args, **kwargs):
-        # Convert date/datetime objects to string during save (in case of JSON serialization)
         if isinstance(self.archived_data, dict):
             for key, value in self.archived_data.items():
                 if isinstance(value, (date, datetime)):
@@ -211,8 +208,6 @@ class Member(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.middle_name} {self.last_name}"
 
-
-
 class Account(models.Model):
     account_number = models.CharField(max_length=20, primary_key=True)
     account_holder = models.OneToOneField(Member, on_delete=models.CASCADE, related_name='accountN')
@@ -241,10 +236,16 @@ class Account(models.Model):
             self.save()
 
     def deposit(self, amount):
+        max_deposit_limit = Decimal('1000000.00')  # Maximum allowed deposit
+
         if self.status == 'Active':
-            self.shareCapital += Decimal(amount)  
-            self.save()
+            if self.shareCapital + Decimal(amount) > max_deposit_limit:
+                logger.error(f"Deposit failed: Exceeds maximum limit for account {self.account_number}.")
+                raise ValueError("Deposit failed: Total share capital cannot exceed 1,000,000.00.")
             
+            self.shareCapital += Decimal(amount)
+            self.save()
+
             Ledger.objects.create(
                 account_number=self,
                 transaction_type='Deposit',
@@ -252,7 +253,6 @@ class Account(models.Model):
                 description=f"Deposit to account {self.account_number}",
                 balance_after_transaction=self.shareCapital
             )
-            
         else:
             logger.error(f"Deposit failed: Account {self.account_number} is not active.")
             raise ValueError("Account is not active. Cannot deposit.")
@@ -279,6 +279,7 @@ class Account(models.Model):
 
     def __str__(self):
         return f"Account {self.account_number} - {self.account_holder.memId}"
+
 
 
 
@@ -468,7 +469,7 @@ class Loan(models.Model):
     loan_date = models.DateField(auto_now_add=True)
     due_date = models.DateField(null=True, blank=True)
     status = models.CharField(
-        max_length=50,choices=[('Ongoing', 'Ongoing'), ('Paid-off', 'Paid-off')],
+        max_length=50,choices=[('Ongoing', 'Ongoing'), ('Completed', 'Completed')],
         default='Ongoing'
     )
     service_fee = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.03'))
@@ -514,10 +515,10 @@ class Loan(models.Model):
         if not self.penalty_rate:
             self.penalty_rate = self.system_settings.penalty_rate
             
-        # service fee is based on loan duration/ term
+    
         self.calculate_service_fee()
         
-        self.takehomePay = self.loan_amount - self.service_fee
+        self.takehomePay = self.loan_amount 
         
         if not self.due_date:
             self.due_date = self.calculate_due_date()
@@ -528,14 +529,21 @@ class Loan(models.Model):
             self.generate_payment_schedule()
     
     def calculate_service_fee(self):
-        """Calculate the service fee based on loan duration."""
         total_years = self.loan_period if self.loan_period_unit == 'years' else self.loan_period / 12
-        
         if self.loan_type == 'Emergency':
             self.service_fee = self.loan_amount * self.system_settings.service_fee_rate_emergency
         else:
-            rate = self.system_settings.get_regular_loan_service_fee_rate(total_years)
-            self.service_fee = self.loan_amount * rate.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            if total_years <= 1:
+                rate = self.system_settings.service_fee_rate_regular_1yr
+            elif total_years <= 2:
+                rate = self.system_settings.service_fee_rate_regular_2yr
+            elif total_years <= 3:
+                rate = self.system_settings.service_fee_rate_regular_3yr
+            else:
+                rate = self.system_settings.service_fee_rate_regular_4yr
+            self.service_fee = self.loan_amount * rate
+        self.service_fee = self.service_fee.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
 
 
         
@@ -551,49 +559,40 @@ class Loan(models.Model):
 
     def check_loan_eligibility_for_reloan(self):
         """Check if at least 50% of the loan is paid off."""
-        # Aggregate the total payments linked to this loan through PaymentSchedule
         total_paid = Payment.objects.filter(
             payment_schedule__loan=self
         ).aggregate(
             total_paid=Sum('payment_amount')
         )['total_paid'] or 0
 
-        # Check if total payments are at least 50% of the loan amount
-        return total_paid >= (self.loan_amount / 2)
+
+
     def generate_payment_schedule(self):
-        """Generates bi-monthly payment schedule and distributes service fees."""
         if PaymentSchedule.objects.filter(loan=self).exists():
             return
-        
         total_months = self.loan_period * (12 if self.loan_period_unit == 'years' else 1)
-        total_periods = total_months * 2  
-        bi_monthly_rate = (self.interest_rate / Decimal('100')) / 24  
-
-        # Bi-monthly payments calculation
+        total_periods = total_months * 2
+        bi_monthly_rate = (self.interest_rate / Decimal('100')) / 24
         loan_principal = self.loan_amount
         total_interest = loan_principal * bi_monthly_rate * total_periods
         total_amount_due = loan_principal + total_interest
         bi_monthly_payment = total_amount_due / Decimal(total_periods)
-
-        
-
         for period in range(total_periods):
             due_date = self.loan_date + timedelta(days=(period * 15))
-            principal_payment = loan_principal / Decimal(total_periods)
-            interest_payment = total_interest / Decimal(total_periods)
-            balance_due = total_amount_due - (bi_monthly_payment * (period + 1))
-
-            service_fee_component = self.service_fee / total_periods
-
+            service_fee_component = Decimal('0.00')
+            if (period + 1) % 24 == 0:
+                service_fee_component = (self.service_fee / (self.loan_period // 1)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             PaymentSchedule.objects.create(
                 loan=self,
-                principal_amount=principal_payment.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                interest_amount=interest_payment.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                payment_amount=bi_monthly_payment.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                service_fee_component=service_fee_component.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                principal_amount=(loan_principal / total_periods).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                interest_amount=(total_interest / total_periods).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                service_fee_component=service_fee_component,
                 due_date=due_date,
-                balance=balance_due.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                balance=(total_amount_due - bi_monthly_payment * (period + 1)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             )
+
+
+            
 
     def __str__(self):
         return f"Loan {self.control_number} for {self.account} ({self.status})"
@@ -601,13 +600,14 @@ class Loan(models.Model):
 class PaymentSchedule(models.Model):
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)
     principal_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    installment_order = models.PositiveIntegerField(default=0)
     interest_amount = models.DecimalField(max_digits=15, decimal_places=2)
     payment_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
     service_fee_component = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     due_date = models.DateField()
     balance = models.DecimalField(max_digits=15, decimal_places=2)
     is_paid = models.BooleanField(default=False)
-    loan_type = models.CharField(max_length=20, choices=[('Regular', 'Regular'), ('Emergency', 'Emergency')], default='Regular')  # Add loan_type field
+    loan_type = models.CharField(max_length=20, choices=[('Regular', 'Regular'), ('Emergency', 'Emergency')], default='Regular')  
     
     def __str__(self):
         return f"Payment for Loan {self.loan.control_number} on {self.due_date}"
@@ -622,41 +622,21 @@ class PaymentSchedule(models.Model):
         remaining_balance_ratio = self.balance / self.loan.loan_amount
         self.service_fee_component = (self.loan.service_fee * remaining_balance_ratio).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-    def save(self, *args, **kwargs):
-        self.calculate_service_fee_component()
-        super().save(*args, **kwargs)
-
     def calculate_payment_amount(self):
-        """Calculates the total amount due, including service fees."""
+        """Calculates the total amount due, including service fees for specific installment orders."""
         self.calculate_service_fee_component()
-        self.payment_amount = self.principal_amount + self.interest_amount + self.service_fee_component
+        if self.installment_order in [24, 48, 72, 96]:
+            self.payment_amount = self.principal_amount + self.interest_amount + self.service_fee_component
+        else:
+            self.payment_amount = self.principal_amount + self.interest_amount
 
     def save(self, *args, **kwargs):
         self.calculate_payment_amount()
         super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Payment Schedule for {self.account_number}"
-        
-    def calculate_service_fee_component(self):
-        """Recalculate service fee based on remaining balance."""
-        remaining_balance_ratio = self.balance / self.loan.loan_amount
-        self.service_fee_component = (self.loan.service_fee * remaining_balance_ratio).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        return f"Payment Schedule for {self.loan.account_number} - Installment {self.installment_order}"
 
-    def save(self, *args, **kwargs):
-        self.calculate_service_fee_component()
-        super().save(*args, **kwargs)
-
-    def calculate_payment_amount(self):
-        """Calculates the total amount due, including service fees."""
-        self.calculate_service_fee_component()
-        self.payment_amount = self.principal_amount + self.interest_amount + self.service_fee_component
-
-    def save(self, *args, **kwargs):
-        self.calculate_payment_amount()
-        super().save(*args, **kwargs)
-    def __str__(self):
-        return f"Payment Schedule for {self.account_number}"
-        
 
 
 class Payment(models.Model):
@@ -698,7 +678,7 @@ class AuditLog(models.Model):
     ]
     action_type = models.CharField(max_length=50, choices=ACTION_TYPES)
     description = models.TextField()
-    user = models.CharField(max_length=100)  # Store username or email from JWT
+    user = models.CharField(max_length=100)  
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -706,7 +686,7 @@ class AuditLog(models.Model):
 
 class ArchivedAccount(models.Model):
     archive_type = models.CharField(max_length=50)
-    archived_data = models.JSONField()  # Store archived data as JSON
+    archived_data = models.JSONField()  
     
     created_at = models.DateTimeField(auto_now_add=True)
 
