@@ -60,42 +60,35 @@ function Accounts() {
     setActionType('');
   };
 
-  const deleteAccount = async (accountId, accountData) => {
+  const deleteAccount = async (accountNumber, accountData) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this account? This will archive it.');
     if (!confirmDelete) return;
   
     try {
-      // Step 1: Archive the account
       const archivePayload = {
         archive_type: 'Account',
         archived_data: accountData,
       };
   
-      const archiveResponse = await axios.post('http://localhost:8000/archives/', archivePayload);
-      console.log('Archive response:', archiveResponse.data);
-  
+      await axios.post('http://localhost:8000/archives/', archivePayload);
       alert('Account successfully archived.');
   
-      // Step 2: Delete the account from the active table
-      const deleteResponse = await axios.delete(`http://localhost:8000/accounts/${accountId}/`);
-      console.log('Delete response:', deleteResponse.data);
+      await axios.delete(`http://localhost:8000/accounts/${accountNumber}/`);
+      alert('Account successfully removed from active accounts.');
   
-      alert('Account successfully deleted and removed from active accounts.');
-  
-      // Step 3: Update the active accounts list to remove the archived account
       setAccounts((prevAccounts) =>
-        prevAccounts.filter((account) => account.account_number !== accountId)  // Ensure correct field is used here
+        prevAccounts.filter((account) => account.account_number !== accountNumber)
       );
   
-      // Trigger a refresh of archived records to reflect the move
       triggerRefreshArchivedRecords();
     } catch (err) {
-      console.error('Error deleting the account:', err);
-      alert('An error occurred while deleting the account. Please try again.');
+      console.error('Error deleting the account:', err.response || err.message || err);
+      alert(`An error occurred: ${err.response?.data?.message || 'Unable to complete the operation. Please try again.'}`);
     }
   };
   
-
+  
+  
   const triggerRefreshArchivedRecords = () => {
     setRefreshArchives(!refreshArchives);
   };
@@ -227,16 +220,14 @@ function Accounts() {
                         </>
                       ) : (
                         <button
-                          onClick={() => deleteAccount(account.id, account)}
+                          onClick={() => deleteAccount(account.account_number, account)}
                           style={{
                             border: '2px solid #000',
                             padding: '5px',
                             cursor: 'pointer',
                             color: 'black',
-                            backgroundColor: 'red',
-                            color: 'BLACK',
+                            backgroundColor: 'goldenrod',
                             width: '60px',
-                            backgroundColor: 'goldenrod'
                           }}
                         >
                           Move to Archive
@@ -265,3 +256,4 @@ function Accounts() {
 }
 
 export default Accounts;
+

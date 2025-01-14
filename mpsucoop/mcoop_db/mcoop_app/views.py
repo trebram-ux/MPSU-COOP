@@ -1090,11 +1090,13 @@ def archive_account(request, account_id):
 @api_view(['DELETE'])
 def delete_account(request, account_number):
     try:
+        print(f"Trying to delete account with number: {account_number}")  # Debugging line
         account = Account.objects.get(account_number=account_number)
         account.archive()  # Archive the account before deletion
         account.delete()
         return Response(status=204)  # No Content on successful deletion
     except Account.DoesNotExist:
+        print(f"Account with number {account_number} does not exist.")  # Debugging line
         return Response(status=404, data={"message": "Account not found"})
 
 class ArchiveView(View):

@@ -52,7 +52,7 @@ function Login() {
   const triggerLockout = () => {
     setIsLocked(true);
     setLockoutTime(60); // Lockout duration in seconds
-    setError('Too many failed attempts. Please wait 60 seconds.');
+    setError('Too many failed attempts. Please wait 60 seconds.(Marunong kang Maghintay)');
   };
 
   const handleFailedAttempt = () => {
