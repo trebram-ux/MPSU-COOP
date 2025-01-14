@@ -45,11 +45,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Archive
 from .serializers import ArchiveSerializer
-from .models import AuditLog  # Assuming you have an AuditLog model
+from .models import AuditLog  
 from .serializers import AuditLogSerializer
 from django.views import View
 from .models import Account, ArchivedAccount
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_decode
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
+import json
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.core.mail import send_mail
+from django.contrib.auth import get_user_model
+from django.utils.timezone import now
+from django.db.models import Q
+import logging
 
+logger = logging.getLogger(__name__)
 class ArchiveViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]
@@ -146,33 +159,29 @@ def member_login(request):
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-import json
-from django.http import JsonResponse 
-from django.core.mail import send_mail
-from django.contrib.auth.models import User
 
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.core.mail import send_mail
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.contrib.auth.models import User
-import json
-from django.http import JsonResponse
+
+User = get_user_model()
 
 def forgot_password(request):
     if request.method == "POST":
         try:
-            data = json.loads(request.body)  # Decode the JSON body
-            email = data.get("email")
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+            data = json.loads(request.body)
+            email = data.get("email", "").strip().lower()
 
-        print("Email:", email)  # For debugging
+            if not email:
+                return JsonResponse({"error": "Email is required"}, status=400)
 
-        users = User.objects.filter(email=email)
-        
-        if users.exists():
-            for user in users:
+           
+            archived_emails = Archive.objects.filter(
+                archive_type='Member'
+            ).values_list('archived_data__email', flat=True)
+
+            
+            member = Member.objects.filter(email__iexact=email).exclude(email__in=archived_emails).first()
+
+            if member and member.user:
+                user = member.user  
                 token_generator = PasswordResetTokenGenerator()
                 token = token_generator.make_token(user)
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -180,57 +189,60 @@ def forgot_password(request):
 
                 send_mail(
                     "Password Reset Request",
-                    f"Hi {user.username},\n\nUse the following link to reset your password:\n\n{reset_link}",
+                    f"Hi {user.username},\n\nReset your password here:\n{reset_link}",
                     "your-email@gmail.com",
                     [email],
                     fail_silently=False,
                 )
+
                 return JsonResponse({
-                "message": "Password reset email(s) sent successfully",
-                "uid": uid,
-                "token": token
-            })
-            return JsonResponse({"message": "Password reset email(s) sent successfully"})
-        else:
-            return JsonResponse({"error": "No user with this email exists"}, status=404)
+                    "message": "Password reset email sent.",
+                    "uid": uid,
+                    "token": token
+                })
+            else:
+                return JsonResponse({"error": "No active user with this email exists"}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
 
 
-from django.contrib.auth.models import User
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.http import urlsafe_base64_decode
-from django.http import JsonResponse
+
+
+
+
 
 def reset_password(request, uidb64, token):
     if request.method == "POST":
         try:
-            # Decode the user ID from the URL
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
         except (User.DoesNotExist, ValueError, TypeError):
             return JsonResponse({"error": "Invalid user"}, status=400)
 
-        # Validate the password reset token
         token_generator = PasswordResetTokenGenerator()
-        if token_generator.check_token(user, token):
-            # Get the new password from the request body (for JSON requests)
-            try:
-                new_password = request.data.get("password")
-            except AttributeError:
-                new_password = request.POST.get("password")  # For form-based requests
-
-            if new_password:
-                # Set and hash the new password
-                user.set_password(new_password)
-                user.save()
-                return JsonResponse({"message": "Password reset successful"})
-            else:
-                return JsonResponse({"error": "Password not provided"}, status=400)
-        else:
+        if not token_generator.check_token(user, token):
             return JsonResponse({"error": "Invalid or expired token"}, status=400)
 
+        
+        data = json.loads(request.body)
+        new_password = data.get("password")
 
+        if not new_password:
+            return JsonResponse({"error": "Password cannot be empty"}, status=400)
 
+        try:
+            validate_password(new_password, user)  
+        except ValidationError as e:
+            return JsonResponse({"error": e.messages}, status=400)
 
+        user.set_password(new_password)
+        user.save()
+        return JsonResponse({"message": "Password reset successful"})
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
     
 class MemberLoginView(TokenObtainPairView):
@@ -298,19 +310,33 @@ class AccountViewSet(viewsets.ModelViewSet):
         except (TypeError, ValueError):
             return Response({"error": "Invalid amount format."}, status=status.HTTP_400_BAD_REQUEST)
 
+        max_deposit_limit = Decimal('1000000.00')  # Maximum allowed balance
+        print(f"Account current balance: {account.shareCapital}, Deposit amount: {amount}")
+
         try:
             if transaction_type == 'deposit':
+                if account.shareCapital + amount > max_deposit_limit:
+                    return Response({
+                        "error": f"Deposit failed: Total balance cannot exceed {max_deposit_limit:.2f}. Current balance is {account.shareCapital:.2f}."
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
                 account.deposit(amount)
                 message = "Deposit successful!"
+
             elif transaction_type == 'withdraw':
                 account.withdraw(amount)
                 message = "Withdrawal successful!"
+
             else:
                 return Response({"error": "Invalid transaction type."}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"message": message, "new_balance": account.shareCapital}, status=status.HTTP_200_OK)
+
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
     @action(detail=True, methods=['post'], url_path='deposit')
     def deposit(self, request, pk=None):
@@ -325,13 +351,7 @@ class AccountViewSet(viewsets.ModelViewSet):
         return self._handle_transaction(account, amount, 'withdraw')
 
 
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework import status, viewsets
-from django.db import transaction
-from django.utils.timezone import now
-from .models import Loan, PaymentSchedule
-from .serializers import LoanSerializer, PaymentScheduleSerializer
+
 
 class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
@@ -341,7 +361,7 @@ class LoanViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def mark_as_paid(self, request, pk=None):
-        loan = self.get_object
+        loan = self.get_object()
         loan.mark_as_paid()
         return Response({'status': 'loan marked as paid'})
 
@@ -352,15 +372,15 @@ class LoanViewSet(viewsets.ModelViewSet):
         return Response({'status': 'loan archived'})
 
     def get_queryset(self):
-        
         control_number = self.request.query_params.get('control_number', None)
         if control_number:
             try:
                 uuid.UUID(control_number)
             except ValueError:
-                return Loan.objects.none() 
+                return Loan.objects.none()
             return Loan.objects.filter(control_number=control_number)
         return super().get_queryset()
+
     @action(detail=False, methods=['post'])
     def create_loan(self, request):
         account_number = request.data.get('account_number')
@@ -376,17 +396,15 @@ class LoanViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         loan_data = request.data
-        loan_data['service_fee'] = None 
 
         try:
             with transaction.atomic():
                 new_loan = Loan.objects.create(**loan_data)
-                new_loan.calculate_service_fee() 
-                new_loan.takehomePay = new_loan.loan_amount - new_loan.service_fee
-                new_loan.save()  
-                
-                self.create_payment_schedule(new_loan)  
-                
+                new_loan.takehomePay = new_loan.loan_amount 
+                new_loan.save()
+
+                self.create_payment_schedule(new_loan)
+
                 return Response({
                     "status": "Loan created successfully",
                     "control_number": new_loan.control_number
@@ -396,20 +414,16 @@ class LoanViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": f"Error creating loan: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-
-        
     def create_payment_schedule(self, loan):
-        
         loan_amount = loan.loan_amount
         loan_period = loan.loan_period
 
-        
         installment_amount = loan_amount / loan_period
 
         for month in range(loan_period):
             PaymentSchedule.objects.create(
                 loan=loan,
-                due_date=timezone.now() + timezone.timedelta(days=(month * 30)),  
+                due_date=timezone.now() + timezone.timedelta(days=(month * 30)),
                 balance=installment_amount,
                 installment_amount=installment_amount,
                 status='Pending'
@@ -420,54 +434,33 @@ class LoanViewSet(viewsets.ModelViewSet):
         loan = self.get_object()
         payment_schedule = PaymentSchedule.objects.filter(loan=loan)
         return Response(PaymentScheduleSerializer(payment_schedule, many=True).data)
+
     def create(self, request, *args, **kwargs):
         """
-        Override create to calculate service fee and other fields if needed.
+        Override create to handle loan creation without service fee calculation.
         """
         loan_data = request.data
         loan_amount = float(loan_data.get('loan_amount', 0))
-        loan_period = int(loan_data.get('loan_period', 0))
-        
-        
-        if loan_period <= 12:
-            service_fee = loan_amount * 0.01
-        elif loan_period <= 24:
-            service_fee = loan_amount * 0.015
-        elif loan_period <= 36:
-            service_fee = loan_amount * 0.02
-        else:
-            service_fee = loan_amount * 0.025
-        
-        loan_data['service_fee'] = service_fee
-        takehomePay = loan_amount - service_fee
-        loan_data['takehomePay'] = takehomePay
+        loan_data['takehomePay'] = loan_amount  # No service fee deduction
+
         serializer = self.get_serializer(data=loan_data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     @action(detail=False, methods=['get'])
     def by_account(self, request):
-        # Extract the account number from query parameters
         account_number = request.query_params.get('account_number', None)
         
         if not account_number:
             return Response({"detail": "Account number not provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Log the received account number for debugging
-        print(f"[DEBUG] Account number received: {account_number}")
-        
-        # Query loans associated with the account number
         try:
             loans = Loan.objects.filter(account__account_number=account_number)
-            print(f"[DEBUG] Found {loans.count()} loans for account number: {account_number}")
-
-            # Serialize the data
             serializer = LoanSerializer(loans, many=True)
             return Response(serializer.data)
         except Exception as e:
-            # Log and return any unexpected errors
-            print(f"[ERROR] Error fetching loans for account number {account_number}: {str(e)}")
             return Response(
                 {"detail": "An error occurred while fetching loans."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -490,14 +483,14 @@ class PaymentScheduleViewSet(viewsets.ModelViewSet):
             due_date=Subquery(earliest_due_date)
         )
 
-        if loan_type:  # Filter by loan_type if provided (Regular or Emergency)
+        if loan_type:  
             summaries = summaries.filter(loan__loan_type=loan_type)
 
         summaries = summaries.annotate(
             account_number=F('loan__account__account_number'),
             next_due_date=F('due_date'),
             total_balance=Sum('balance'),
-            loan_type_annotated=F('loan__loan_type')  # No need to specify source here
+            loan_type_annotated=F('loan__loan_type')  
         ).values('account_number', 'next_due_date', 'total_balance', 'loan_type_annotated').distinct()
 
         return Response(summaries)
@@ -528,12 +521,10 @@ class PaymentScheduleViewSet(viewsets.ModelViewSet):
     def mark_as_paid(self, request, pk=None):
         schedule = self.get_object()
 
-        # Mark the payment schedule as paid
         schedule.is_paid = True
         schedule.status = 'Paid' 
         schedule.save()
 
-        # Now check if all payment schedules are paid
         update_loan_status(schedule.loan)
 
         return Response({'status': 'Payment marked as paid.'}, status=status.HTTP_200_OK)
@@ -549,18 +540,16 @@ def mark_as_paid(request, id):
                 return JsonResponse({'status': 'Payment marked as paid.'}, status=status.HTTP_200_OK)
             except PaymentSchedule.DoesNotExist:
                 return JsonResponse({'error': 'Payment schedule not found.'}, status=status.HTTP_404_NOT_FOUND)
-from django.db.models import Q
 
 def update_loan_status(loan):
-    # Check if all payment schedules are marked as paid
     all_paid = loan.paymentschedule_set.filter(is_paid=False).count() == 0
 
     if all_paid:
-        loan.status = 'Paid-off'  # or 'Paid-off'
+        loan.status = 'Completed'  
         loan.save()
 
-        # Optionally, archive the loan (you can add a separate 'archived' field or flag)
-        loan.archived = True  # Assuming you have an archived field
+       
+        loan.archived = True  
         loan.save()
 
     else:
@@ -588,9 +577,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 
-import logging
 
-logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
 def get_payments(request, control_number):
@@ -620,7 +607,6 @@ def get_payments(request, control_number):
         return Response({"error": "Invalid UUID format."}, status=status.HTTP_400_BAD_REQUEST)
     
     except Exception as e:
-        # Log the exception for debugging
         logger.error(f"Error fetching payments: {str(e)}")
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -727,7 +713,7 @@ class LoanSummaryView(APIView):
 
         
         ongoing_loans = Loan.objects.filter(status='Ongoing').count()
-        completed_loans = Loan.objects.filter(status='Paid-off').count()
+        completed_loans = Loan.objects.filter(status='Completed').count()
         
 
         
@@ -746,7 +732,6 @@ class LoanSummaryView(APIView):
                 'received': total_received,
                 'returned': total_returned,
                 'profit': profit,
-                # 'serviceFees': service_fees,
                 'penalties': penalties,
             },
             'loans': {
@@ -770,28 +755,25 @@ from django.http import JsonResponse
 from .models import Loan
 
 def loan_summary(request):
-    # Count borrowers (distinct members with loans)
     active_borrowers = Loan.objects.filter(status='Ongoing').values('account__account_number').distinct().count()
     paid_off_borrowers = Loan.objects.filter(status='Paid-off').values('account__account_number').distinct().count()
 
-    # Net total loan amount
     total_net_loan = Loan.objects.aggregate(
         total_loan=Sum('loan_amount')
-    )['total_loan'] or 0  # Default to 0 if no loans
+    )['total_loan'] or 0  
 
-    # Count loans by status
     ongoing_loans = Loan.objects.filter(status='Ongoing').count()
-    completed_loans = Loan.objects.filter(status='Paid-off').count()
+    completed_loans = Loan.objects.filter(status='Completed').count()
 
-    # Prepare the response data
+  
     data = {
         'borrowers': {
             'active': active_borrowers,
             'paidOff': paid_off_borrowers
         },
         'netTotalLoan': {
-            'returned': total_net_loan,  # If you need separate calculation, adjust accordingly
-            'profit': 0  # Add your profit calculation logic here if necessary
+            'returned': total_net_loan, 
+            'profit': 0  
         },
         'loans': {
             'ongoing': ongoing_loans,

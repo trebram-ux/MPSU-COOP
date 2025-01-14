@@ -15,7 +15,6 @@ function Login() {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState(0);
-
   const navigate = useNavigate();
 
   // Handle countdown timer for lockout

@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 from .models import Member, Account, Loan, PaymentSchedule, Payment,Ledger,SystemSettings
 from django.contrib.auth import authenticate
+from rest_framework.response import Response
+from rest_framework import status
 import uuid
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import Archive
@@ -21,26 +23,24 @@ class ArchiveSerializer(serializers.ModelSerializer):
         fields = ['id', 'archive_type', 'archived_data', 'archived_at']
 
     def validate_archived_data(self, value):
-        # Perform custom validation logic for archived data
+        #  custom validation logic for archived data
         if not isinstance(value, dict):
             raise serializers.ValidationError("Archived data must be a valid dictionary.")
         
-        # Ensure any date fields are converted to string in the data
+       
         for key, val in value.items():
             if isinstance(val, (date, datetime)):
-                value[key] = val.strftime('%Y-%m-%d')  # Convert date or datetime to string
+                value[key] = val.strftime('%Y-%m-%d')  
         return value
 
     def to_representation(self, instance):
-        # Convert any date fields to string during serialization
         representation = super().to_representation(instance)
         
-        # Iterate through archived_data and convert date fields to string
         if 'archived_data' in representation:
             archived_data = representation['archived_data']
             for key, value in archived_data.items():
                 if isinstance(value, (date, datetime)):
-                    archived_data[key] = value.strftime('%Y-%m-%d')  # Customize format as needed
+                    archived_data[key] = value.strftime('%Y-%m-%d')  
         return representation
 
 
@@ -110,13 +110,10 @@ class MemberSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         account_data = validated_data.pop('accountN', None)
-        # Ensure user is not associated by default
         validated_data['user'] = None  
 
-        # Create the member instance
         member = Member.objects.create(**validated_data)
 
-        # Create associated account only if account data is provided
         if account_data:
             Account.objects.create(account_holder=member, **account_data)
 
@@ -135,7 +132,7 @@ class PaymentScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentSchedule
         fields = ['id', 'loan', 'principal_amount', 'interest_amount', 'payment_amount', 
-                  'due_date', 'balance', 'is_paid',  'loan_type', 'loan_amount']
+                  'due_date', 'balance', 'is_paid',  'loan_type', 'loan_amount','installment_order']
 
 class LoanSerializer(serializers.ModelSerializer):
     payment_schedules = PaymentSchedule.objects.select_related('loan').all()
@@ -163,27 +160,21 @@ class LoanSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Invalid UUID format.")
         return value
     def get_bi_monthly_installment(self, obj):
-        # Calculate total number of bi-monthly periods
         total_periods = (obj.loan_period * 2) if obj.loan_period_unit == 'years' else obj.loan_period * 2
         print(f"Total periods: {total_periods}")
         
-        # Correct bi-monthly interest rate calculation
-        bi_monthly_rate = (obj.interest_rate / Decimal('100')) / 24  # Divide by 24 for bi-monthly
+        bi_monthly_rate = (obj.interest_rate / Decimal('100')) / 24  
         print(f"Bi-monthly interest rate: {bi_monthly_rate}")
         
-        # Calculate total interest
         total_interest = (obj.loan_amount * bi_monthly_rate * total_periods)
         print(f"Total interest: {total_interest}")
         
-        # Total amount due
         total_amount_due = obj.loan_amount + total_interest
         print(f"Total amount due: {total_amount_due}")
         
-        # Calculate bi-monthly installment
         bi_monthly_payment = total_amount_due / Decimal(total_periods)
         
         
-        # Return rounded value
         return bi_monthly_payment.quantize(Decimal('0.01'))
 
 
@@ -233,7 +224,7 @@ class WithdrawView(APIView):
             account.shareCapital -= amount
 
             if account.shareCapital <= 0:
-                account.shareCapital = 0  # Ensure no negative values
+                account.shareCapital = 0  
                 account.status = 'Inactive'
 
             account.save()

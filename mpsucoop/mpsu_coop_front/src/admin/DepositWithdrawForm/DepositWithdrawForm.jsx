@@ -24,50 +24,51 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (isInactive) {
       setError('Account is inactive. Cannot perform transactions.');
       return;
     }
-
+  
     let numericAmount = 0;
-
+  
     if (actionType === 'deposit') {
-      numericAmount = parseFloat(amount.replace(/,/g, ''));
-
+      numericAmount = parseFloat(amount.replace(/,/g, ''));  // Ensure no commas
       if (isNaN(numericAmount) || numericAmount <= 0) {
         setError('Invalid amount for deposit.');
         return;
       }
     }
-
+  
     if (actionType === 'withdraw') {
-      numericAmount = account.shareCapital; // Automatically withdraw full share capital
-
+      numericAmount = account.shareCapital;
       if (numericAmount <= 0) {
         setError('Insufficient funds to withdraw.');
         return;
       }
     }
-
+  
     try {
       const endpoint =
         actionType === 'deposit'
           ? `http://localhost:8000/accounts/${account.account_number}/deposit/`
           : `http://localhost:8000/accounts/${account.account_number}/withdraw/`;
-
-      if (actionType === 'deposit') {
-        // Include amount for Deposit
-        await axios.post(endpoint, { amount: numericAmount });
-      } else {
-        // Include amount for Withdrawal
-        await axios.post(endpoint, { amount: numericAmount });
-      }
-
-      // Update account status if Withdraw leaves share capital at 0
+  
+      const response = await axios.post(
+        endpoint,
+        { amount: numericAmount.toString() },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      console.log("Response:", response);  // Log the response
+  
       if (actionType === 'withdraw') {
         const remainingShareCapital = account.shareCapital - numericAmount;
-
+  
         if (remainingShareCapital <= 0) {
           await axios.patch(`http://localhost:8000/accounts/${account.account_number}/`, {
             status: 'inactive',
@@ -75,13 +76,20 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
           setIsInactive(true);
         }
       }
-
+  
       fetchAccounts();
       onClose();
     } catch (err) {
-      setError(err.response ? err.response.data.message : err.message);
+      // Log error response if available
+      if (err.response) {
+        console.error("Error response data:", err.response.data);  // Log error response
+        setError(err.response?.data?.error || 'An error occurred while processing your request.');
+      } else {
+        setError('An error occurred while processing your request.');
+      }
     }
   };
+  
 
   const formStyle = {
     display: 'flex',

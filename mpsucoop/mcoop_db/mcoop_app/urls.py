@@ -31,7 +31,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('users/', UserListView.as_view(), name='user_list'),
     path('api/loan-summary/', views.loan_summary, name='loan_summary'),
-    path('forgot-password/', views.forgot_password, name='forgot-password'),
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('reset-password/<uidb64>/<token>/', views.reset_password, name='reset-password'),
     # path('api/archived-records/', ArchivedRecordsView.as_view(), name='archived_records'),
     path('api/account/<str:account_number>/transactions/', AccountTransactionView.as_view(), name='account-transactions'),

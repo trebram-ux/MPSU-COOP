@@ -287,6 +287,18 @@ return (
                     onChange={(e) => setLoanData({ ...loanData, account: e.target.value })}
                     required
                 />
+                <label>Loan Type:</label>
+                <select
+                    name="loan_type"
+                    value={loanData.loan_type}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, loan_type: e.target.value })
+                    }
+                    className="form-input"
+                >
+                    <option value="Regular">Regular</option>
+                    <option value="Emergency">Emergency</option>
+                </select>
 
                 <label>Loan Amount:</label>
                 <input
@@ -313,7 +325,7 @@ return (
                 />
 
                 <label>Loan Term Unit:</label>
-                <input
+                <select
                     name="loan_period_unit"
                     value={loanData.loan_period_unit}
                     onChange={(e) =>
@@ -321,20 +333,12 @@ return (
                     }
                     required
                     className="form-input"
-                />
-
-                <label>Loan Type:</label>
-                <select
-                    name="loan_type"
-                    value={loanData.loan_type}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, loan_type: e.target.value })
-                    }
-                    className="form-input"
                 >
-                    <option value="Regular">Regular</option>
-                    <option value="Emergency">Emergency</option>
-                </select>
+                    <option value="months">Month</option>
+                    <option value="years">Years</option>
+               </select>
+
+
 
                 <label>Purpose:</label>
                 <select
@@ -391,8 +395,8 @@ return (
                             <th>Control Number</th>
                             <th>Account Number</th>
                             <th>Account Holder</th>
-                            <th>Loan Amount</th>
                             <th>Loan Type</th>
+                            <th>Loan Amount</th>
                             <th>Purpose</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -404,8 +408,8 @@ return (
                                 <td>{loan.control_number}</td>
                                 <td>{loan.account}</td>
                                 <td>{loan.account_holder || 'N/A'}</td>
-                                <td>{loan.loan_amount}</td>
                                 <td>{loan.loan_type}</td>
+                                <td>{loan.loan_amount}</td>
                                 <td>{loan.purpose}</td>
                                 <td>{loan.status}</td>
                                 <td>
