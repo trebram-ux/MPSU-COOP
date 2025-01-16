@@ -15,6 +15,7 @@ const Payments = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loanTypeFilter, setLoanTypeFilter] = useState('All'); // Options: 'All', 'Regular', 'Emergency'
 
+
     // State to hold the generated OR number for each schedule
     const [generatedOrNumbers, setGeneratedOrNumbers] = useState({});
 
@@ -68,21 +69,21 @@ const Payments = () => {
           `http://127.0.0.1:8000/payment-schedules/?account_number=${accountNumber}`,
           { withCredentials: true }
         );
-    
-        console.log(response.data);  // Log the response to check the structure
-    
+     
+        console.log(response.data);  // Log the full response
+     
         // Filter out schedules that are paid
         const paidSchedules = response.data.filter(schedule => schedule.is_paid || schedule.status === 'Paid');
-    
+     
         const schedulesWithOrNumbers = paidSchedules.map(schedule => {
           // Generate OR number for each schedule
           const orNumber = generateOrNumber(schedule.id);
           return { ...schedule, or_number: orNumber , loan_amount: schedule.loan_amount || 0}; // Add OR number to schedule
         });
-    
+     
         setSchedules(schedulesWithOrNumbers);
         setSelectedAccount(accountNumber);
-    
+     
         const memberResponse = await axios.get(
           `http://127.0.0.1:8000/members/?account_number=${accountNumber}`,
           { withCredentials: true }
@@ -95,9 +96,7 @@ const Payments = () => {
         setLoading(false);
       }
     };
-    
-  
-  
+
     const calculatePaidBalance = () => {
       return filterSchedulesByLoanType()
         .reduce((total, schedule) => {
@@ -154,7 +153,6 @@ const Payments = () => {
       }
     };
     
-  
     useEffect(() => {
       fetchAccountSummaries();
     }, []);
@@ -166,7 +164,7 @@ const Payments = () => {
     <div style={{ marginTop: '20px' }} className="payments-container">
       {!selectedAccount ? (
         <>
-          <h2 style={{ width: '98%', marginTop: '-25px',  padding: '20px', textAlign: 'center', borderBottom: '2px solid #000000', color: 'black'}}>Paid Payments Overview</h2>
+          <h2 style={{ width: '98%', marginTop: '-25px',  padding: '20px', textAlign: 'center', color: 'black', fontSize: '30px'}}>Paid Payments Overview</h2>
             <div style={{ position: 'relative', display: 'inline-block', width: '30%' }}>
               <input
                 type="text"
@@ -196,7 +194,7 @@ const Payments = () => {
                   border: '2px solid #000000',
                   borderRadius: '4px',
                   padding: '10px',
-                  marginLeft: '1200px',
+                  marginLeft: '1190px',
                 }}
               >
                 <FaSearch />
@@ -206,16 +204,17 @@ const Payments = () => {
           {filteredSummaries.length > 0 ? (
             <div
               style={{
-                maxHeight: '470px',
+                maxHeight: '430px',
                 overflowY: 'auto',
-                border: '2px solid black',
+                boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
                 marginTop: '10px',
                 padding: '5px',
                 borderRadius: '5px',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 width: '103.5%',
-                marginLeft: '-30px'
+                marginLeft: '-30px',
+                fontSize: '20px'
               }}
             >
               <table
@@ -228,11 +227,12 @@ const Payments = () => {
                 <thead>
                   <tr
                     style={{
-                      borderBottom: '2px solid black',
+                      borderBottom: '1px solid black',
                       position: 'sticky',
                       top: '-5px',
-                      backgroundColor: '#fff',
+                      backgroundColor: 'black',
                       zIndex: 1,
+                      fontSize: '20px'
                     }}
                   >
                     <th>Account Number</th>
@@ -248,7 +248,7 @@ const Payments = () => {
                       onClick={() => fetchPaymentSchedules(summary.account_number)}
                       style={{ cursor: 'pointer' }}
                     >
-                      <td style={{ color: 'white' }}>{summary.account_number || 'N/A'}</td>
+                      <td style={{ color: 'blue' }}>{summary.account_number || 'N/A'}</td>
                       <td>{summary.account_holder}</td>
                       <td>{summary.next_due_date ? new Date(summary.next_due_date).toLocaleDateString() : 'No Due Date'}</td>
                       <td>₱ {summary.total_balance?.toFixed(2)}</td>
@@ -266,24 +266,24 @@ const Payments = () => {
           <div id="print-section">
             {accountDetails && (
               <div style={{ width: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <h3 style={{ color: 'black' }}>Payment History For:</h3>
+                <h3 style={{ color: 'black', fontSize: '20px', marginTop: '-50px'}}>Payment History For:</h3>
                 <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                   <tbody>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Name:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' }}>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Name:</td>
+                      <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px'  }}>
                         {accountDetails.first_name} {accountDetails.last_name}
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Account Number:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' }}>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Account Number:</td>
+                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px' }}>
                         {selectedAccount}
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Paid Balance:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' }}>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Paid Balance:</td>
+                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px', fontWeight: 'bold' }}>
                         ₱ {calculatePaidBalance()}
                       </td>
                     </tr>
@@ -291,54 +291,36 @@ const Payments = () => {
                 </table>
               </div>
             )}
-
-            <button
-              style={{
-                color: 'black',
-                padding: '5px 5px',
-                border: 'none',
-                cursor: 'pointer',
-                borderRadius: '5px',
-                marginLeft: '5px',
-              }}
-              onClick={() => setSelectedAccount(null)}
+            
+            <div
+            className = "button"
+            style = {{
+              display: 'inline-flex',
+              marginTop: '20px'
+            }}
             >
-              <IoArrowBackCircle /> Back to List
-            </button>
-
-            <button
-              onClick={handlePrint}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#28a745',
-                color: 'black',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                marginTop: '20px',
-              }}
+            <div
             >
-              Print Payment History
-            </button>
-
-            <div>
-              <button onClick={() => handleLoanTypeChange('All')}>All Loans</button>
-              <button onClick={() => handleLoanTypeChange('Regular')}>Regular Loans</button>
-              <button onClick={() => handleLoanTypeChange('Emergency')}>Emergency Loans</button>
+              <button onClick={() => setSelectedAccount(null)}><IoArrowBackCircle /> Back to List</button>
+              <button onClick={() => handleLoanTypeChange('All')}style={{ backgroundColor: loanTypeFilter === 'All' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', cursor: 'pointer'}}>All Loans</button>
+              <button onClick={() => handleLoanTypeChange('Regular')}style={{ backgroundColor: loanTypeFilter === 'Regular' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', cursor: 'pointer'}}>Regular Loans</button>
+              <button onClick={() => handleLoanTypeChange('Emergency')}style={{ backgroundColor: loanTypeFilter === 'Emergency' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', cursor: 'pointer'}}>Emergency Loans</button>
+              <button onClick={handlePrint}>Print Payment History</button>
             </div>
-
+            </div>
+            
             {filterSchedulesByLoanType().length > 0 ? (
               <div
               style={{
-                maxHeight: '330px',
+                maxHeight: '370px',
                 overflowY: 'auto',
-                border: '2px solid black',
-                marginTop: '20px',
+                boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
+                marginTop: '40px',
                 padding: '5px',
                 borderRadius: '5px',
                 scrollbarWidth: 'none', // For Firefox
                 msOverflowStyle: 'none', // For IE and Edge
-                width: '100%',
+                width: '99%',
                 marginRight: '400px',
               }}
             >
@@ -362,7 +344,7 @@ const Payments = () => {
                   width: '100%',
                   borderCollapse: 'collapse',
                   textAlign: 'center',
-                  fontSize: '14px',
+                  fontSize: '18px',
                 }}
               >
                 <thead>
@@ -375,6 +357,7 @@ const Payments = () => {
                       zIndex: '1',
                     }}
                   >
+                      <th>Approval Date</th>
                       <th>Loan Type</th>
                       <th>Loan Amount</th>
                       <th>Principal Amount</th>
@@ -386,18 +369,24 @@ const Payments = () => {
                   </thead>
                   
                   <tbody>
-                    {filterSchedulesByLoanType().map((schedule, index) => (
-                      <tr key={`${schedule.id}-${schedule.loan}-${index}`}>
-                        <td>{schedule.loan_type || 'N/A'}</td>
-                        <td>₱ {parseFloat(schedule.loan_amount).toFixed(2)}</td>
-                        <td>₱ {parseFloat(schedule.principal_amount).toFixed(2)}</td>
-                        <td>₱ {parseFloat(schedule.payment_amount).toFixed(2)}</td>
-                        <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
-                        <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
-                        <td>{schedule.or_number}</td> {/* Display OR Number */}
-                      </tr>
-                    ))}
-                  </tbody>
+  {filterSchedulesByLoanType().map((schedule, index) => (
+    <tr key={`${schedule.id}-${schedule.loan}-${index}`}>
+      <td>
+        {schedule.loan?.loan_date
+          ? new Date(schedule.loan.loan_date).toLocaleDateString()
+          : 'No Date Available'}
+      </td>
+      <td>{schedule.loan_type || 'N/A'}</td>
+      <td>₱ {parseFloat(schedule.loan_amount).toFixed(2)}</td>
+      <td>₱ {parseFloat(schedule.principal_amount).toFixed(2)}</td>
+      <td>₱ {parseFloat(schedule.payment_amount).toFixed(2)}</td>
+      <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
+      <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
+      <td>{schedule.or_number}</td>
+    </tr>
+  ))}
+</tbody>
+
                 </table>
               </div>
             ) : (

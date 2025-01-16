@@ -351,8 +351,6 @@ class AccountViewSet(viewsets.ModelViewSet):
         return self._handle_transaction(account, amount, 'withdraw')
 
 
-
-
 class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
     serializer_class = LoanSerializer
@@ -1072,14 +1070,11 @@ def archive_account(request, account_id):
 @api_view(['DELETE'])
 def delete_account(request, account_number):
     try:
-        print(f"Trying to delete account with number: {account_number}")  # Debugging line
         account = Account.objects.get(account_number=account_number)
-        account.archive()  # Archive the account before deletion
         account.delete()
-        return Response(status=204)  # No Content on successful deletion
+        return JsonResponse({'message': 'Account deleted successfully!'}, status=200)
     except Account.DoesNotExist:
-        print(f"Account with number {account_number} does not exist.")  # Debugging line
-        return Response(status=404, data={"message": "Account not found"})
+        return JsonResponse({'message': 'Account not found!'}, status=404)
 
 class ArchiveView(View):
     def post(self, request):

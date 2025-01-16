@@ -1,5 +1,5 @@
 .backg{
-  background-color: #ffffff;
+  box-shadow: inset 0px 0px 15px 0px rgb(154, 154, 154);
   display:flex;
   width: 1335px;
   min-height: 50px;
@@ -11,6 +11,7 @@
   color: #000;
   font-weight: 500px;
   justify-content: space-between;
+  margin-bottom: 30px;
 }
 
 @media (max-width: 991px) {

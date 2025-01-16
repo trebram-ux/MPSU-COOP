@@ -59,7 +59,7 @@ urlpatterns = [
     # Optionally log or print when Django processes a request to the API
     path('accounts/<str:account_number>/withdraw/', WithdrawView.as_view(), name='withdraw'),
     path('accounts/<str:account_number>/update-status/', UpdateStatusView.as_view(), name='update-status'),
-    path('accounts/<int:id>/', views.delete_account, name='delete_account'),
+    path('delete-account/<str:account_number>/', views.delete_account, name='delete_account'),
     # path('api/audit-trail/', AuditTrailView.as_view(), name='audit-trail'),
 
 

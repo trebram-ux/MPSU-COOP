@@ -226,7 +226,7 @@ return (
                             border: '2px solid #000000',
                             borderRadius: '4px',
                             padding: '10px',
-                            marginLeft: '1245px',
+                            marginLeft: '1225px',
                         }}
                     >
                         <FaSearch />
@@ -245,7 +245,10 @@ return (
                         border: '2px solid #000000',
                         borderRadius: '5px',
                         cursor: 'pointer',
-                        marginLeft: '1123px',
+                        position: 'relative', 
+                        marginRight: '1150px', 
+                        marginTop: '-65px',
+                        position: 'fixed'
                     }}
                 >
                     <AiOutlineUsergroupAdd /> Add Loan
@@ -457,7 +460,7 @@ return (
                         fontSize: "16px",
                         cursor: "pointer",
                         borderRadius: "5px",
-                        marginLeft: '300px',
+                        marginLeft: '100px',
                         marginTop: '5px'
 
                     }}

@@ -119,7 +119,7 @@ function Accounts() {
 
   return (
     <div style={{ width: '99%', padding: '10px' }}>
-      <h2 style={{ width: '97%', marginTop: '-10px', padding: '20px', textAlign: 'center', borderBottom: '2px solid #000000', color: 'black' }}>
+      <h2 style={{ width: '97%', marginTop: '-10px', padding: '20px', textAlign: 'center', color: 'black', fontSize: '30px' }}>
         ACCOUNTS
       </h2>
 
@@ -165,7 +165,7 @@ function Accounts() {
               maxHeight: '460px',
               width: '99%',
               overflowY: 'auto',
-              border: '2px solid black',
+              boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
               marginTop: '20px',
               padding: '5px',
               borderRadius: '5px',

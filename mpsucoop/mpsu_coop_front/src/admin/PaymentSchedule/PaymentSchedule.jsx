@@ -308,7 +308,7 @@ const generateReceipt = (schedule) => {
         <>
           <h2
             style={{
-              width: '98%', marginTop: '-25px',  padding: '20px', textAlign: 'center', borderBottom: '2px solid #000000', color: 'black'
+              width: '98%', marginTop: '-25px',  padding: '20px', textAlign: 'center', color: 'black', fontSize: '30px'
             }}
           >
             Ongoing Payment Schedules
@@ -379,10 +379,10 @@ const generateReceipt = (schedule) => {
           {filteredSummaries.length > 0 ? (
             <div
               style={{
-                maxHeight: '430px',
+                maxHeight: '410px',
                 overflowY: 'auto',
-                border: '2px solid black',
-                marginTop: '10px',
+                boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
+                marginTop: '-30px',
                 padding: '5px',
                 borderRadius: '5px',
                 scrollbarWidth: 'none',
@@ -400,7 +400,6 @@ const generateReceipt = (schedule) => {
                 <thead>
                   <tr
                     style={{
-                      borderBottom: '2px solid black',
                       position: 'sticky',
                       top: '-5px',
                       backgroundColor: '#fff',
@@ -422,7 +421,7 @@ const generateReceipt = (schedule) => {
                       onClick={() => fetchPaymentSchedules(summary.account_number, loanType)} // Pass loanType here
                       style={{ cursor: 'pointer' }}
                     >
-                      <td style={{ color: 'white' }}>{summary.account_number || 'N/A'}</td>
+                      <td style={{ color: 'blue' }}>{summary.account_number || 'N/A'}</td>
                       <td>{summary.account_holder || 'N/A'}</td>
                       <td>{summary.next_due_date ? new Date(summary.next_due_date).toLocaleDateString() : 'No Due Date'}</td>
                       <td>₱ {summary.total_balance?.toFixed(2)}</td>
@@ -440,33 +439,33 @@ const generateReceipt = (schedule) => {
           {accountDetails && (
             <>
               <div style={{ width: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <h3 style={{ color: 'black' }}>Payment History For:</h3>
+                <h3 style={{ color: 'black', fontSize: '20px', marginTop: '-50px' }}>Payment History For:</h3>
                 <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                   <tbody>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Name:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' }}>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px'  }}>Name:</td>
+                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px' }}>
                         {accountDetails.first_name} {accountDetails.last_name}
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Account Number:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' }}>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' , fontSize: '18px' }}>Account Number:</td>
+                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px' }}>
                         {selectedAccount}
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' }}>Remaining Balance:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' }}>
+                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' , fontSize: '18px' }}>Remaining Balance:</td>
+                      <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px', fontWeight: 'bold'  }}>
                         ₱ {calculateRemainingBalance()}
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              <button onClick={() => handleLoanTypeChange('Regular')} style={{ backgroundColor: loanType === 'Regular' ? 'green' : 'gray', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px' }}>Regular Loan</button>
-              <button onClick={() => handleLoanTypeChange('Emergency')} style={{ backgroundColor: loanType === 'Emergency' ? 'green' : 'gray', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px' }}>Emergency Loan</button>
-              <button style={{ color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px', }} onClick={() => setSelectedAccount(null)}><IoArrowBackCircle />Back to List</button>
+              <button style={{ color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }} onClick={() => setSelectedAccount(null)}><IoArrowBackCircle />Back to List</button>
+              <button onClick={() => handleLoanTypeChange('Regular')} style={{ backgroundColor: loanType === 'Regular' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }}>Regular Loan</button>
+              <button onClick={() => handleLoanTypeChange('Emergency')} style={{ backgroundColor: loanType === 'Emergency' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }}>Emergency Loan</button>
             </>
           )}
 
@@ -475,7 +474,7 @@ const generateReceipt = (schedule) => {
             style={{
               maxHeight: '385px',
               overflowY: 'auto',
-              border: '2px solid black',
+              boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
               marginTop: '20px',
               padding: '5px',
               borderRadius: '5px',
@@ -535,7 +534,7 @@ const generateReceipt = (schedule) => {
                     <td>₱ {(parseFloat(schedule.payment_amount) || 0).toFixed(2)}</td>
                     <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
                     <td>₱ {(parseFloat(schedule.balance) || 0).toFixed(2)}</td>
-                    <td style={{ color: schedule.is_paid ? 'goldenrod' : 'red' }}>
+                    <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
                       {schedule.is_paid ? 'Paid!' : 'Ongoing'}
                     </td>
                     <td>
@@ -573,7 +572,7 @@ const generateReceipt = (schedule) => {
                       <button
                         onClick={() => generateReceipt(schedule)}
                         style={{
-                          backgroundColor: 'goldenrod',
+                          backgroundColor: 'rgb(0, 199, 90)',
                           color: 'black',
                           cursor: 'pointer',
                           border: '2px solid black',

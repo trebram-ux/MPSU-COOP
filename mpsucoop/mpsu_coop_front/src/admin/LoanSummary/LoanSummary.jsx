@@ -49,10 +49,10 @@ const LoanSummary = () => {
         <p className="loan-amount">
           {loanSummary.netTotalLoan.returned + loanSummary.netTotalLoan.profit}
         </p>
-        <div className="loan-details">
+        {/* <div className="loan-details">
           <span className="loan-label">Returned: {loanSummary.netTotalLoan.returned}</span>
           {/* <span className="loan-label">Profit: {loanSummary.netTotalLoan.profit}</span> */}
-        </div>
+        {/* </div> */}
       </div>
 
       <div className="loan-card">

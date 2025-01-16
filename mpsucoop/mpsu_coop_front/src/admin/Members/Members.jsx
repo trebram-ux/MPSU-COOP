@@ -157,19 +157,20 @@ function Members() {
     <div className={styles.membersSection}>
       {showAddForm ? (
         <div className={styles.addMemberForm}>
-          <h3>{editingMember ? 'Edit Member' : 'Add Member'}</h3>
+          <h3 style={{fontSize: '26px', marginTop: '-10px', marginBottom: '50px'}}>{editingMember ? 'Edit Member' : 'Add Member'}</h3>
           {formError && <p className={styles.errorText}>{formError}</p>}
 
           <div style={{
             fontFamily: 'Arial, sans-serif',
             color: '#000',
             padding: '20px',
-            width: '100%',
-            border: '1px solid #000',
+            width: '103%',
+            boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
             borderRadius: '5px',
             marginRight: '50px',
+            marginLeft: '-15px',
             boxSizing: 'border-box',
-            height: '100%'
+            height: '450px'
           }}>
             <div style={{ display: 'grid', gap: '20px' }}>
               <div style={{ display: 'flex', gap: '10px' }}>
@@ -257,7 +258,7 @@ function Members() {
                 />
               </div>
 
-              <div style={{ flex: '2', minWidth: '300px' }}>
+              <div style={{ flex: '1', minWidth: '300px' }}>
                 <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Birth Place:</label>
                 <input
                   type="text"
@@ -316,8 +317,8 @@ function Members() {
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Gender:</label>
-                  <select style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  <label style={{ display: 'block', fontWeight: 'bold', marginTop: '15px' }}>Gender:</label>
+                  <select style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px'}}
                   name="gender"
                   value={editingMember?.gender || newMember.gender || ''}
                   onChange={(e) =>
@@ -332,7 +333,7 @@ function Members() {
                   </div>
 
                 <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Civil Status:</label>
+                  <label style={{ display: 'block', fontWeight: 'bold', marginTop: '15px' }}>Civil Status:</label>
                   <select style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
                   name="pstatus"
                   value={editingMember?.pstatus || newMember.pstatus || ''}
@@ -354,7 +355,7 @@ function Members() {
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Religion:</label>
+                  <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Religion:</label>
                   <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
                   placeholder="Religion"
                   name="religion"
@@ -365,7 +366,7 @@ function Members() {
                   />
                 </div>
                 <div style={{ flex: '2' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Address:</label>
+                  <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Address:</label>
                   <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
                   placeholder="Address"
                   name="address"
@@ -376,7 +377,7 @@ function Members() {
                   />
                 </div>
                 <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Phone Number:</label>
+                  <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Phone Number:</label>
                   <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
                   placeholder="Phone Number"
                   name="phone_number"
@@ -390,7 +391,7 @@ function Members() {
 
               <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
               <div style={{ flex: '1 1 200px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold' }}>Height (cm)</label>
+                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Height (cm)</label>
                 <input 
                   type="number" 
                   style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
@@ -402,7 +403,7 @@ function Members() {
               </div>
 
               <div style={{ flex: '1 1 200px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold' }}>Weight (kg)</label>
+                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Weight (kg)</label>
                 <input 
                   type="number" 
                   style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
@@ -414,7 +415,7 @@ function Members() {
               </div>
 
               <div style={{ flex: '1 1 200px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold' }}>Annual Income</label>
+                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Annual Income</label>
                 <input 
                   type="number" 
                   style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
@@ -426,9 +427,9 @@ function Members() {
               </div>
 
               <div style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'block', fontWeight: 'bold' }}>Issued Government ID</label>
+              <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Issued Government ID</label>
               <select 
-                style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px', marginTop: '10px' }}
                 name="valid_id"
                 value={editingMember?.valid_id || newMember.valid_id || ''}
                 onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
@@ -447,7 +448,7 @@ function Members() {
             </div>
 
               <div style={{ flex: '1 1 200px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold' }}>ID Number</label>
+                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>ID Number</label>
                 <input 
                   type="text" 
                   style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
@@ -471,7 +472,7 @@ function Members() {
   
         <>
         <div className={styles.tableHeader}>
-            <h2 style={{ width: '97%', marginTop: '-10px',  padding: '20px', textAlign: 'center', borderBottom: '2px solid #000000', color: 'black'}}>MEMBERS</h2>
+            <h2 style={{marginTop: '-10px',  padding: '20px', textAlign: 'center', color: 'black', fontSize: '30px'}}>MEMBERS</h2>
             {/* <a
             href="#"
             onClick={(e) => {
@@ -526,7 +527,7 @@ function Members() {
               border: '2px solid #000000',
               borderRadius: '4px',
               padding: '10px',
-              marginLeft: '1255px',
+              marginLeft: '1220px',
           }}
           >
             <FaSearch />
@@ -544,8 +545,9 @@ function Members() {
                   borderRadius: '5px',
                   cursor: 'pointer',
                   position: 'relative', 
-                  marginLeft: '1140px', 
-                  marginBottom: '0px'
+                  marginRight: '1100px', 
+                  marginTop: '-65px',
+                  position: 'fixed'
               }}
             >
                 <AiOutlineUsergroupAdd />Add Member
@@ -555,9 +557,9 @@ function Members() {
         <div
           style={{
             maxHeight: '425px',
-            width: '99%',
+            width: '100%',
             overflowY: 'auto',
-            border: '2px solid black',
+            boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
             marginTop: '20px',
             padding: '5px',
             borderRadius: '5px',
@@ -619,7 +621,6 @@ function Members() {
                     <button
                       onClick={() => handleViewMember(member)}
                       style={{
-                        border: '2px solid #000',
                         padding: '5px 10px',
                         cursor: 'pointer',
                         color: 'black',
@@ -632,11 +633,10 @@ function Members() {
                     <button
                       onClick={() => handleStartEdit(member)}
                       style={{
-                        border: '2px solid #000',
                         padding: '5px 10px',
                         cursor: 'pointer',
                         color: 'black',
-                        backgroundColor: '#ffc107',
+                        backgroundColor: 'DodgerBlue',
                         borderRadius: '5px',
                       }}
                     >
@@ -645,7 +645,6 @@ function Members() {
                     <button
                       onClick={() => handleDeleteMember(member.memId)}
                       style={{
-                        border: '2px solid #000',
                         padding: '5px 10px',
                         cursor: 'pointer',
                         color: 'black',
@@ -662,7 +661,6 @@ function Members() {
           </table>
         </div>
 
-
         {/* Member Details Table */}
         {selectedMember && (
             <div
@@ -672,7 +670,7 @@ function Members() {
               left: '55%',
               transform: 'translate(-50%, -50%)',
               animation: 'popupAnimation 0.6s ease forwards',
-              backgroundColor: '#76ab87',
+              backgroundColor: 'white',
               border: '2px solid black',
               borderRadius: '8px',
               padding: '20px',

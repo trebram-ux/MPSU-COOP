@@ -642,6 +642,7 @@ class PaymentSchedule(models.Model):
 class Payment(models.Model):
     OR = models.CharField(max_length=50, primary_key=True, unique=True)
     payment_schedule = models.ForeignKey(PaymentSchedule, on_delete=models.CASCADE, related_name='payments')
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, related_name='loans',default=0)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default = 0)
     date = models.DateField(default=now)
     method = models.CharField(max_length=50, choices=[('Cash', 'Cash'), ('Bank Transfer', 'Bank Transfer')])

@@ -6,15 +6,12 @@
 /* Loan Manager Header */
 .loan-manager-header {
     width: 97%;
-    margin-top: -10px;
+    margin-top: -50px;
     padding: 20px;
     text-align: center;
-    border-bottom: 2px solid #000000;
     color: black;
+    font-size: 30px;
 }
-
-
-/* Search Container */
 
 .search-wrapper {
     position: relative;
@@ -53,12 +50,14 @@
 
 /* Loan Form */
 .loan-form {
-    border: 2px solid black;
-    padding: 8px;
+    box-shadow: 0px 0px 15px 0px rgb(154, 154, 154);
+    padding: 10px;
     border-radius: 5px;
-    margin-top: 10px;
-    margin-left: 100px;
-    width: 500px;
+    margin-top: -20px;
+    margin-right: -110px;
+    width: 100%;
+    height: auto;
+    position: relative;
 }
 
 .form-header {
@@ -100,16 +99,16 @@
 
 /* Loan Table */
 .loan-table-container {
-    max-height: 420px;
+    max-height: 450px;
     overflow-y: auto;
-    border: 2px solid black;
+    box-shadow: 0px 0px 15px 0px rgb(154, 154, 154);
     margin-top: 5px;
     padding: 5px;
     border-radius: 5px;
     scrollbar-width: none; 
-    width: 102%;
-    margin-left: -20px;
-    font-size: 16px;
+    width: 100%;
+    margin-left: -10px;
+    font-size: 17px;
 }
 
 .loan-table-container::-webkit-scrollbar {

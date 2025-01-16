@@ -14,9 +14,9 @@ const ArchivedRecords = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedMember, setSelectedMember] = useState(null); // Selected member for transactions
-  const [showRestoreConfirmation, setShowRestoreConfirmation] = useState(false); // Flag for confirmation
   const [deleting, setDeleting] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState([]);
+  const [selectedAccounts, setSelectedAccounts] = useState([]);
 
   useEffect(() => {
     fetchArchivedData();
@@ -87,24 +87,6 @@ const ArchivedRecords = () => {
       alert('Failed to log action.');
     }
   };
-
-  const restoreMember = async (memberId) => {
-    try {
-      const token = localStorage.getItem('authToken');
-      await axios.post(
-        `http://localhost:8000/restore-member/${memberId}/`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert('Member restored successfully!');
-      setShowRestoreConfirmation(false); // Close confirmation dialog
-      fetchArchivedData(); // Refresh data after restoring
-    } catch (err) {
-      console.error('Error restoring member:', err);
-      alert('Failed to restore member.');
-    }
-  };
-
   // Update handleDeleteMember function to use archivedUsers and setArchivedUsers
   const handleDeleteMember = async (id) => {
     const memberToDelete = archivedUsers.find((member) => member.memId === id);
@@ -198,17 +180,6 @@ const ArchivedRecords = () => {
     }
   };
 
-  const handleRestoreClick = (memId) => {
-    // Show confirmation dialog
-    setShowRestoreConfirmation(true);
-    setSelectedMember(archivedUsers.find((user) => user.id === memId)); // Find the member for confirmation
-  };
-  
-  const handleCancelRestore = () => {
-    // Close confirmation dialog without restoring
-    setShowRestoreConfirmation(false);
-  };
-
   const viewTransactions = async (member) => {
     setSelectedMember(member);
     setLoading(true); // Show a loading indicator while fetching data
@@ -225,7 +196,6 @@ const ArchivedRecords = () => {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
-  
       // Attach the fetched details to the selected member
       setSelectedMember({
         ...member,
@@ -241,38 +211,103 @@ const ArchivedRecords = () => {
       setLoading(false);
     }
   };  
-
-  const deleteAccount = async (account_number) => {
-    try {
-      const token = localStorage.getItem('authToken');
-      console.log(`Deleting account with number: ${account_number}`); // Debugging log
-      const response = await axios.delete(`http://localhost:8000/delete-account/${account_number}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log('Delete response:', response.data); // Log the response data
-      alert('Account deleted successfully!');
-      fetchArchivedData(); // Refresh data after deletion
-    } catch (err) {
-      console.error('Error deleting account:', err.response || err);
-      if (err.response) {
-        alert(`Failed to delete account: ${err.response.data.message || err.response.statusText}`);
-      } else {
-        alert('Failed to delete account. Please try again later.');
-      }
+  const handleDeleteAccount = async (accountNumber) => {
+    const accountToDelete = archivedAccounts.find(
+      (account) => account.archived_data.account_number === accountNumber
+    );
+    if (!accountToDelete) {
+      console.log(`Account with number ${accountNumber} not found.`);
+      return;
     }
+  
+    try {
+      console.log(`Deleting account with number: ${accountNumber}`);
+      const response = await axios.delete(
+        `http://localhost:8000/accounts/${accountToDelete.archived_data.account_number}/`
+      );
+      console.log('Delete response:', response.data);
+  
+      // Update UI after deletion
+      setArchivedAccounts(
+        archivedAccounts.filter(
+          (account) => account.archived_data.account_number !== accountNumber
+        )
+      );
+      alert('Account deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting account:', err.response || err.message || err);
+      alert('Error deleting account. Please try again later.');
+    }
+  };  
+  
+  const handleAccountDeleteClick = async (accountNumber) => {
+    const account = archivedAccounts.find(
+      (acc) => acc.archived_data.account_number === accountNumber
+    );
+    if (!account) {
+      alert(`Account with number ${accountNumber} not found.`);
+      return;
+    }
+  
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete account number ${account.archived_data.account_number}?`
+    );
+    if (!confirmDelete) return;
+  
+    await handleDeleteAccount(accountNumber); // Use account_number for deletion
+  };  
+  
+  const handleMultipleAccountDeleteClick = async () => {
+    if (selectedAccounts.length === 0) {
+      alert('No accounts selected for deletion.');
+      return;
+    }
+  
+    const confirmDelete = window.confirm('Are you sure you want to delete the selected accounts?');
+    if (!confirmDelete) return;
+  
+    try {
+      setDeleting(true);
+      await Promise.all(
+        selectedAccounts.map(async (accountNumber) => {
+          await handleDeleteAccount(accountNumber);
+        })
+      );
+  
+      setArchivedAccounts(
+        archivedAccounts.filter(
+          (account) => !selectedAccounts.includes(account.archived_data.account_number)
+        )
+      );
+      setSelectedAccounts([]);
+      alert('Selected accounts deleted successfully!');
+    } catch (error) {
+      alert('Failed to delete selected accounts. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };  
+  
+  const toggleAccountSelection = (accountNumber) => {
+    setSelectedAccounts((prevSelectedAccounts) => {
+      if (prevSelectedAccounts.includes(accountNumber)) {
+        return prevSelectedAccounts.filter((num) => num !== accountNumber);
+      } else {
+        return [...prevSelectedAccounts, accountNumber];
+      }
+    });
   };
   
-  const handleAccountDeleteClick = (accountId) => {
-    const account = archivedAccounts.find((account) => account.id === accountId);
-    if (
-      window.confirm(
-        `Are you sure you want to delete the account with number ${account.archived_data.account_number}?`
-      )
-    ) {
-      deleteAccount(account.archived_data.account_number); // Use account_number here
+  const toggleSelectAllAccounts = () => {
+    if (selectedAccounts.length === filteredArchivedAccounts.length) {
+      setSelectedAccounts([]);
+    } else {
+      setSelectedAccounts(
+        filteredArchivedAccounts.map((account) => account.archived_data.account_number)
+      );
     }
-  };
-
+  };  
+    
   // Filter logic for search term
   const filterData = (data, keys) => {
     return data.filter((item) =>
@@ -305,8 +340,6 @@ const ArchivedRecords = () => {
   return (
     <div className="archived-records">
       <h1 className="title">Archived Records</h1>
-
-      {/* Search Bar */}
       <input
         type="text"
         placeholder="Search Records"
@@ -314,8 +347,6 @@ const ArchivedRecords = () => {
         onChange={(e) => setSearchTerm(e.target.value)}
         className="search-bar"
       />
-
-      {/* Dropdown to Switch Tabs */}
       <div className="dropdown">
         <select
           value={activeTab}
@@ -330,11 +361,10 @@ const ArchivedRecords = () => {
         </select>
       </div>
 
-      {/* Display based on activeTab */}
       {activeTab === 'members' && (
         <div className="records-box">
           <h2 style={{ textAlign: 'center'}}>Archived Members</h2>
-          <div style={{ marginBottom: '-15px' }}>
+          <div style={{ marginBottom: '-15px',  marginTop: '-50px' }}>
           <button
             onClick={handleMultipleDeleteClick}
             disabled={selectedMembers.length === 0}
@@ -351,7 +381,6 @@ const ArchivedRecords = () => {
             Delete All Selected
           </button>
         </div>
-          {/* Table */}
         <table
           className="records-table"
           style={{
@@ -406,7 +435,7 @@ const ArchivedRecords = () => {
                     {new Date(user.archived_at).toLocaleString()}
                   </td>
                   <td style={{ padding: '12px', border: '1px solid black', textAlign: 'center' }}>
-                    <button
+                    {/* <button
                       onClick={() => viewTransactions(user)}
                       style={{
                         backgroundColor: '#007bff',
@@ -419,21 +448,7 @@ const ArchivedRecords = () => {
                       }}
                     >
                       View
-                    </button>
-                    <button
-                      onClick={() => handleRestoreClick(user.id)}
-                      style={{
-                        backgroundColor: '#28a745',
-                        color: 'black',
-                        border: 'none',
-                        padding: '5px 10px',
-                        marginRight: '5px',
-                        borderRadius: '3px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Restore
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => handleDeleteClick(user.id)}
                       style={{
@@ -494,7 +509,6 @@ const ArchivedRecords = () => {
           </table>
         </div>
       )}
-
       {activeTab === 'loans' && (
         <div className="records-box">
           <h2>Archived Loans</h2>
@@ -524,49 +538,110 @@ const ArchivedRecords = () => {
           </table>
         </div>
       )}
-
       {activeTab === 'accounts' && (
         <div className="records-box">
-          <h2>Archived Accounts</h2>
-          <table className="records-table">
-            <thead>
-              <tr>
-                <th>Account Number</th>
-                <th>Account Holder</th>
-                <th>Status</th>
-                <th>Archived At</th>
-                <th>Actions</th> {/* Added a column for actions */}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredArchivedAccounts.length > 0 ? (
-                filteredArchivedAccounts.map((account) => (
-                  <tr key={account.id}>
-                    <td>{account.archived_data.account_number}</td>
-                    {/* Account Holder will display full name */}
-                    <td>
-                      {account.archived_data.account_holder.first_name} {account.archived_data.account_holder.middle_name} {account.archived_data.account_holder.last_name}
-                    </td>
-                    <td>{account.archived_data.status}</td>
-                    <td>{new Date(account.archived_at).toLocaleString()}</td>
-                    <td>
-                      {/* Add buttons for Restore and Delete */}
-                      <button onClick={() => handleRestoreClick(account.id)}>Restore</button>
-                      <button onClick={() => handleAccountDeleteClick(account.id)}>Delete</button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5">No archived accounts found.</td> {/* Updated colspan to 5 */}
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <h2 style={{ textAlign: 'center' }}>Archived Accounts</h2>
+        <div style={{ marginBottom: '-15px' }}>
+          <button
+            onClick={handleMultipleAccountDeleteClick}
+            disabled={selectedAccounts.length === 0}
+            style={{
+              backgroundColor: '#ed3a3a',
+              color: 'black',
+              border: 'none',
+              padding: '7px 3px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              width: '150px',
+            }}
+          >
+            Delete All Selected
+          </button>
         </div>
-      )}
-
-
+        <table
+          className="records-table"
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            margin: '20px 0',
+            fontSize: '16px',
+            textAlign: 'left',
+          }}
+        >
+          <thead>
+            <tr style={{ backgroundColor: '#f2f2f2' }}>
+              <th style={{ padding: '12px', border: '1px solid black', textAlign: 'left', width: '50px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <input
+                    id="selectAllAccountsCheckbox"
+                    type="checkbox"
+                    onChange={toggleSelectAllAccounts}
+                    checked={
+                      selectedAccounts.length === filteredArchivedAccounts.length &&
+                      filteredArchivedAccounts.length > 0
+                    }
+                  />
+                  <label htmlFor="selectAllAccountsCheckbox">All</label>
+                </div>
+              </th>
+              <th style={{ padding: '12px', border: '1px solid black' }}>Account Number</th>
+              <th style={{ padding: '12px', border: '1px solid black' }}>Account Holder</th>
+              <th style={{ padding: '12px', border: '1px solid black' }}>Status</th>
+              <th style={{ padding: '12px', border: '1px solid black' }}>Archived At</th>
+              <th style={{ padding: '12px', border: '1px solid black' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredArchivedAccounts.length > 0 ? (
+              filteredArchivedAccounts.map((account) => (
+                <tr key={account.id}>
+                  <td style={{ padding: '12px', border: '1px solid black', textAlign: 'left', width: '50px' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedAccounts.includes(account.id)}
+                      onChange={() => toggleAccountSelection(account.id)}
+                    />
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                    {account.archived_data.account_number}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                    {`${account.archived_data.account_holder.first_name} ${account.archived_data.account_holder.last_name}`}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                    {account.archived_data.status}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                    {new Date(account.archived_at).toLocaleString()}
+                  </td>
+                  <td style={{ padding: '12px', border: '1px solid black', textAlign: 'center' }}>
+                    <button
+                      onClick={() => handleAccountDeleteClick(account.id)}
+                      style={{
+                        backgroundColor: '#dc3545',
+                        color: 'black',
+                        border: 'none',
+                        padding: '5px 10px',
+                        borderRadius: '3px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '12px', border: '1px solid black' }}>
+                  No archived accounts found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    )}
       {activeTab === 'auditTrail' && (
         <div className="records-box">
           <h2>Audit Trail</h2>
@@ -612,14 +687,6 @@ const ArchivedRecords = () => {
               )}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {showRestoreConfirmation && (
-        <div className="confirmation-dialog">
-          <p>Are you sure you want to restore this member?</p>
-          <button onClick={() => restoreMember(selectedMember.id)} className="confirm-button">Yes</button>
-          <button onClick={handleCancelRestore} className="cancel-button">No</button>
         </div>
       )}
     </div>

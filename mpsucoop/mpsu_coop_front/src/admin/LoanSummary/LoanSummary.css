@@ -8,13 +8,13 @@
 }
 
 .loan-card {
-  background-color: #686868;
+  background-color: #686868 important;
   color: black;
   border-radius: 10px;
-  border: 2px solid #000000;
   padding: 10px;
   width: 300px;
   text-align: center;
+  box-shadow: 0px 4px 20px rgba(182, 179, 172, 0.992);  
 }
 
 .loan-type {

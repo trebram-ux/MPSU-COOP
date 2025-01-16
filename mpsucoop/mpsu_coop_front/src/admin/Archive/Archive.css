@@ -7,9 +7,9 @@
 /* Title Styling */
 .title {
   font-size: 2rem;
-  margin-bottom: 20px;
+  margin-bottom: 50px;
   text-align: center;
-  border-bottom: 2px solid #000000;
+  margin-top: -50px;
 }
 
 /* Dropdown styling */
@@ -33,7 +33,16 @@
 
 /* Box styling for each section (members and loans) */
 .records-box {
-  margin-bottom: 50px;
+  max-height: 470px;
+  overflow-y: auto;
+  box-shadow: 0px 0px 15px 0px rgb(154, 154, 154);
+  margin-top: 40px;
+  padding: 5px;
+  border-radius: 5px;
+  scrollbar-width: none;
+  width: 99%;
+  margin-left: -5px;
+  font-size: 20px;
 }
 
 /* Table Styling */
@@ -46,28 +55,30 @@
 
 /* Table header style */
 .records-table thead th {
-  background-color: #757575;
+  background-color: #969696;
   padding: 10px;
   text-align: left;
   font-weight: bold;
-  border: 2px solid #000000;
-  
+  position: relative;
+  font-size: 20px;
 }
 
-/* Table row styling */
-.records-table tbody td {
-  padding: 10px;
-  border: 2px solid #000000;
-}
-
-/* Make the table body scrollable */
 .records-table tbody {
   display: block;
   height: 420px;
-  overflow-y: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: none;
+  overflow-y: scroll; /* Ensures the scrollbar is present */
+  scrollbar-width: none; /* Hides the scrollbar in Firefox */
+  -ms-overflow-style: none; /* Hides the scrollbar in Internet Explorer and Edge */
+  -webkit-overflow-scrolling: touch; /* Enables smooth scrolling on mobile devices */
+  font-size: 18px;
 }
+
+/* For Webkit browsers (Chrome, Safari) */
+.records-table tbody::-webkit-scrollbar {
+  width: 0px; /* Hides the scrollbar */
+  margin-top: 20px;
+}
+
 
 /* Keep the table header fixed */
 .records-table thead, .records-table tbody tr {

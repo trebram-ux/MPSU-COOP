@@ -95,7 +95,7 @@ const AdminMemberManagement = () => {
 
     return (
         <div className="member-management-container">
-            <h2>Member Management</h2>
+            <h2 style={{marginTop: '-10px',  padding: '20px', textAlign: 'center', color: 'black', fontSize: '30px'}}>Member Management</h2>
             <div className="table-container">
                 <table className="member-table">
                     <thead>
@@ -146,7 +146,7 @@ const AdminMemberManagement = () => {
                                 <label>Email:</label>
                                 <input
                                     type="email"
-                                    name="email"
+                                    name="email"    
                                     value={formData.email}
                                     onChange={handleInputChange}
                                     required
