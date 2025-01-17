@@ -126,13 +126,14 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = ['account_number', 'account_holder', 'shareCapital', 'status', 'created_at', 'updated_at']
 
 class PaymentScheduleSerializer(serializers.ModelSerializer):
-    loan_type = serializers.CharField(source='loan.loan_type', read_only=True)   # Ibigay ang loan_type mula sa annotated field
+    loan_type = serializers.CharField(source='loan.loan_type', read_only=True)
     loan_amount = serializers.DecimalField(source='loan.loan_amount', max_digits=10, decimal_places=2)
+    loan_date = serializers.DateField(source='loan.loan_date', read_only=True)
 
     class Meta:
         model = PaymentSchedule
         fields = ['id', 'loan', 'principal_amount', 'interest_amount', 'payment_amount', 
-                  'due_date', 'balance', 'is_paid',  'loan_type', 'loan_amount','installment_order']
+                  'due_date', 'balance', 'is_paid',  'loan_type', 'loan_amount', 'loan_date', 'installment_order']
 
 class LoanSerializer(serializers.ModelSerializer):
     payment_schedules = PaymentSchedule.objects.select_related('loan').all()

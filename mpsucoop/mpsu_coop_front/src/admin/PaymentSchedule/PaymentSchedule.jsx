@@ -463,16 +463,28 @@ const generateReceipt = (schedule) => {
                   </tbody>
                 </table>
               </div>
-              <button style={{ color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }} onClick={() => setSelectedAccount(null)}><IoArrowBackCircle />Back to List</button>
-              <button onClick={() => handleLoanTypeChange('Regular')} style={{ backgroundColor: loanType === 'Regular' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }}>Regular Loan</button>
-              <button onClick={() => handleLoanTypeChange('Emergency')} style={{ backgroundColor: loanType === 'Emergency' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }}>Emergency Loan</button>
-            </>
+              </>
           )}
+          
+          <div
+          className = "button"
+          style = {{
+          display: 'inline-flex',
+          marginTop: '-5px'
+          }}
+          >
+          <div
+          > 
+            <button style={{ color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }} onClick={() => setSelectedAccount(null)}><IoArrowBackCircle />Back to List</button>
+            <button onClick={() => handleLoanTypeChange('Regular')} style={{ backgroundColor: loanType === 'Regular' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }}>Regular Loan</button>
+            <button onClick={() => handleLoanTypeChange('Emergency')} style={{ backgroundColor: loanType === 'Emergency' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }}>Emergency Loan</button>
+          </div>
+          </div>
 
           {schedules.length > 0 ? (
             <div
             style={{
-              maxHeight: '385px',
+              maxHeight: '365px',
               overflowY: 'auto',
               boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
               marginTop: '20px',
@@ -480,7 +492,7 @@ const generateReceipt = (schedule) => {
               borderRadius: '5px',
               scrollbarWidth: 'none', // For Firefox
               msOverflowStyle: 'none', // For IE and Edge
-              width: '100%',
+              width: '99%',
               marginRight: '400px',
             }}
           >

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { IoArrowBackCircle } from "react-icons/io5";
 import { FaSearch } from 'react-icons/fa';
+import { BsFillPrinterFill } from "react-icons/bs";
+
 
 axios.defaults.withCredentials = false;
 
@@ -13,8 +15,7 @@ const Payments = () => {
   const [error, setError] = useState('');
   const [accountDetails, setAccountDetails] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [loanTypeFilter, setLoanTypeFilter] = useState('All'); // Options: 'All', 'Regular', 'Emergency'
-
+  const [loanTypeFilter, setLoanTypeFilter] = useState('All');
 
     // State to hold the generated OR number for each schedule
     const [generatedOrNumbers, setGeneratedOrNumbers] = useState({});
@@ -166,41 +167,8 @@ const Payments = () => {
         <>
           <h2 style={{ width: '98%', marginTop: '-25px',  padding: '20px', textAlign: 'center', color: 'black', fontSize: '30px'}}>Paid Payments Overview</h2>
             <div style={{ position: 'relative', display: 'inline-block', width: '30%' }}>
-              <input
-                type="text"
-                placeholder="Search Payments"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  padding: '7px 40px 10px 10px',
-                  fontSize: '16px',
-                  border: '2px solid #000',
-                  borderRadius: '4px',
-                  width: '250px',
-                  marginLeft: '950px',
-                  marginBottom: '30px',
-                  marginTop: '-10px',
-                }}
-              />
-              <button
-                onClick={() => console.log('Search triggered')}
-                style={{
-                  position: 'absolute',
-                  top: '-14px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  backgroundColor: '#007bff',
-                  color: 'black',
-                  border: '2px solid #000000',
-                  borderRadius: '4px',
-                  padding: '10px',
-                  marginLeft: '1190px',
-                }}
-              >
-                <FaSearch />
-              </button>
-            </div>
-
+              <input type="text"placeholder="Search Payments"value={searchQuery}onChange={(e) => setSearchQuery(e.target.value)}style={{padding: '7px 40px 10px 10px',fontSize: '16px',border: '2px solid #000',borderRadius: '4px',width: '250px',marginLeft: '950px',marginBottom: '30px',marginTop: '-10px',}}/>
+              <button onClick={() => console.log('Search triggered')}style={{position: 'absolute',top: '-14px',fontSize: '12px',cursor: 'pointer',backgroundColor: '#007bff',color: 'black',border: '2px solid #000000',borderRadius: '4px',padding: '10px',marginLeft: '1190px',}}><FaSearch /></button></div>
           {filteredSummaries.length > 0 ? (
             <div
               style={{
@@ -213,28 +181,10 @@ const Payments = () => {
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
                 width: '103.5%',
-                marginLeft: '-30px',
-                fontSize: '20px'
-              }}
-            >
-              <table
-                className="account-summary-table"
-                style={{
-                  borderCollapse: 'collapse',
-                  width: '100%',
-                }}
-              >
+                marginLeft: '-30px',fontSize: '20px'}}>
+              <table className="account-summary-table"style={{borderCollapse: 'collapse',width: '100%',}}>
                 <thead>
-                  <tr
-                    style={{
-                      borderBottom: '1px solid black',
-                      position: 'sticky',
-                      top: '-5px',
-                      backgroundColor: 'black',
-                      zIndex: 1,
-                      fontSize: '20px'
-                    }}
-                  >
+                  <tr style={{borderBottom: '1px solid black',position: 'sticky',top: '-5px',backgroundColor: 'black',zIndex: 1,fontSize: '20px'}}>
                     <th>Account Number</th>
                     <th>Account Holder</th>
                     <th>Date</th>
@@ -265,33 +215,69 @@ const Payments = () => {
         <>
           <div id="print-section">
             {accountDetails && (
-              <div style={{ width: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <h3 style={{ color: 'black', fontSize: '20px', marginTop: '-50px'}}>Payment History For:</h3>
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-                  <tbody>
-                    <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Name:</td>
-                      <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px'  }}>
-                        {accountDetails.first_name} {accountDetails.last_name}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Account Number:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px' }}>
-                        {selectedAccount}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Paid Balance:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px', fontWeight: 'bold' }}>
-                        ₱ {calculatePaidBalance()}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <div style={{ width: '35%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <h3 style={{ color: 'black', fontSize: '20px', marginTop: '-50px'}}>Payment History For:</h3>
+              <table style={{borderCollapse: 'collapse', marginTop: '10px' }}>
+              <tbody>
+                <tr>
+                  <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Name:</td>
+                  <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px' }}>
+                    {accountDetails.first_name} {accountDetails.last_name}
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Account Number:</td>
+                  <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px' }}>
+                    {selectedAccount}
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Paid Balance:</td>
+                  <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px', fontWeight: 'bold' }}>
+                    ₱ {calculatePaidBalance()}
+                  </td>
+                </tr>
+
+                {/* Regular Loan Details */}
+                {filterSchedulesByLoanType().some(schedule => schedule.loan_type === 'Regular') && (
+                  <tr>
+                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px', width: '100%' }}>Regular Loan - Approval Date:</td>
+                    <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px' }}>
+                      {new Date(
+                        filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Regular')?.loan_date
+                      ).toLocaleDateString() || 'No Date Available'}
+                    </td>
+                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px'}}>Loan Amount:</td>
+                    <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px', fontWeight: 'bold' }}>
+                      ₱ {parseFloat(
+                        filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Regular')?.loan_amount || 0
+                      ).toFixed(2)}
+                    </td>
+                  </tr>
+                )}
+
+                {/* Emergency Loan Details */}
+                {filterSchedulesByLoanType().some(schedule => schedule.loan_type === 'Emergency') && (
+                  <tr>
+                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px', width: '100%'}}>Emergency Loan - Approval Date:</td>
+                    <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px' }}>
+                      {new Date(
+                        filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Emergency')?.loan_date
+                      ).toLocaleDateString() || 'No Date Available'}
+                    </td>
+                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Loan Amount:</td>
+                    <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px', fontWeight: 'bold'}}>
+                      ₱ {parseFloat(
+                        filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Emergency')?.loan_amount || 0
+                      ).toFixed(2)}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            </div>
             )}
-            
+          
             <div
             className = "button"
             style = {{
@@ -305,17 +291,45 @@ const Payments = () => {
               <button onClick={() => handleLoanTypeChange('All')}style={{ backgroundColor: loanTypeFilter === 'All' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', cursor: 'pointer'}}>All Loans</button>
               <button onClick={() => handleLoanTypeChange('Regular')}style={{ backgroundColor: loanTypeFilter === 'Regular' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', cursor: 'pointer'}}>Regular Loans</button>
               <button onClick={() => handleLoanTypeChange('Emergency')}style={{ backgroundColor: loanTypeFilter === 'Emergency' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', cursor: 'pointer'}}>Emergency Loans</button>
-              <button onClick={handlePrint}>Print Payment History</button>
+              <button 
+              onClick={handlePrint} 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'black',
+                fontSize: '24px',
+                cursor: 'pointer',
+                backgroundColor: '#ede9c7',
+                border: 'none',
+                position: 'fixed',
+                marginLeft: '1230px',
+                marginTop: '-30px'
+              }}
+              className="print-button"
+            >
+              <span style={{ marginRight: '8px' }}><BsFillPrinterFill /></span>
+            </button>
+
+            <style>
+            {`
+              @media print {
+                .print-button {
+                  display: none;
+                }
+              }
+            `}
+            </style>
             </div>
             </div>
             
             {filterSchedulesByLoanType().length > 0 ? (
               <div
               style={{
-                maxHeight: '370px',
+                maxHeight: '320px',
                 overflowY: 'auto',
                 boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
-                marginTop: '40px',
+                marginTop: '30px',
                 padding: '5px',
                 borderRadius: '5px',
                 scrollbarWidth: 'none', // For Firefox
@@ -357,35 +371,29 @@ const Payments = () => {
                       zIndex: '1',
                     }}
                   >
-                      <th>Approval Date</th>
                       <th>Loan Type</th>
-                      <th>Loan Amount</th>
                       <th>Principal Amount</th>
                       <th>Paid Amount</th>
                       <th>Date Paid</th>
                       <th>Status</th>
-                      <th>OR Number</th> {/* Add OR Number to table */}
+                      <th>OR Number</th>
                     </tr>
                   </thead>
                   
                   <tbody>
-  {filterSchedulesByLoanType().map((schedule, index) => (
-    <tr key={`${schedule.id}-${schedule.loan}-${index}`}>
-      <td>
-        {schedule.loan?.loan_date
-          ? new Date(schedule.loan.loan_date).toLocaleDateString()
-          : 'No Date Available'}
-      </td>
-      <td>{schedule.loan_type || 'N/A'}</td>
-      <td>₱ {parseFloat(schedule.loan_amount).toFixed(2)}</td>
-      <td>₱ {parseFloat(schedule.principal_amount).toFixed(2)}</td>
-      <td>₱ {parseFloat(schedule.payment_amount).toFixed(2)}</td>
-      <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
-      <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
-      <td>{schedule.or_number}</td>
-    </tr>
-  ))}
-</tbody>
+                    {filterSchedulesByLoanType().map((schedule, index) => (
+                      <tr key={`${schedule.id}-${index}`}>
+                        {/* <td>{schedule.loan_date? new Date(schedule.loan_date).toLocaleDateString(): 'No Date Available'}</td>
+                        <td>₱ {parseFloat(schedule.loan_amount).toFixed(2)}</td> */}
+                        <td>{schedule.loan_type || 'N/A'}</td>
+                        <td>₱ {parseFloat(schedule.principal_amount).toFixed(2)}</td>
+                        <td>₱ {parseFloat(schedule.payment_amount).toFixed(2)}</td>
+                        <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
+                        <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
+                        <td>{schedule.or_number}</td>
+                      </tr>
+                    ))}
+                  </tbody>
 
                 </table>
               </div>

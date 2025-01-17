@@ -8,7 +8,7 @@ const navItems = [
   { icon: faUsers, label: 'Members', key: 'members' },
   { icon: faLandmark, label: 'Accounts', key: 'accounts' },
   { icon: faFileInvoiceDollar, label: 'Loans', key: 'loans' },
-  { icon: faDollarSign, label: 'Payments', key: 'payments' },
+  { icon: faDollarSign, label: 'Payments Overview', key: 'payments' },
   { icon: faCalendarAlt, label: 'Payment Schedules', key: 'payment-schedules' },
   { icon: faArchive, label: 'Archive', key: 'archived-records' },
   { icon: faGear, label: 'Settings', key: 'system-settings' },
