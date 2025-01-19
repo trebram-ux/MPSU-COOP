@@ -132,7 +132,7 @@ class PaymentScheduleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PaymentSchedule
-        fields = ['id', 'loan', 'principal_amount', 'interest_amount', 'payment_amount', 
+        fields = ['id', 'loan', 'principal_amount', 'interest_amount', 'payment_amount','service_fee',
                   'due_date', 'balance', 'is_paid',  'loan_type', 'loan_amount', 'loan_date', 'installment_order']
 
 class LoanSerializer(serializers.ModelSerializer):

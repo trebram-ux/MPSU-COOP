@@ -78,9 +78,10 @@ const Home = () => {
     .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))[0]; // Sort by due date and get the nearest one
 
   // Calculate total amount paid for the loan (sum of payment_amount for this loan)
-  const totalAmountPaid = payments
-    .filter(payment => payment.loan_id === loanForMember?.id) // Filter payments for the same loan
-    .reduce((acc, payment) => acc + parseFloat(payment.payment_amount || 0), 0);
+  const totalAmountPaid = paymentSchedules
+    .filter(schedule => schedule.loan_id === loanForMember?.id && schedule.status === 'Paid') // Filter payments for the same loan
+    .reduce((acc, schedule) => acc + parseFloat(schedule.payment_amount || 0), 0);
+    console.log(`Total Amount Paid: ${totalAmountPaid}`);
 
   // Calculate total payment amount for the loan (sum of payment_amount for this loan)
   const totalPaymentAmount = paymentSchedules

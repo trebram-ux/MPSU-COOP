@@ -19,6 +19,10 @@ const PaymentSchedule = () => {
   const [loanType, setLoanType] = useState('Regular'); 
   const [searchQuery, setSearchQuery] = useState('');
   const [receiptPrinted, setReceiptPrinted] = useState(false);
+  const formatNumber = (number) => {
+    if (number == null || isNaN(number)) return "N/A";
+    return new Intl.NumberFormat('en-US').format(number);
+  };
 
   // Fetch account summaries
   const fetchAccountSummaries = async () => {
@@ -407,7 +411,7 @@ const generateReceipt = (schedule) => {
                       <td style={{ color: 'blue' }}>{summary.account_number || 'N/A'}</td>
                       <td>{summary.account_holder || 'N/A'}</td>
                       <td>{summary.next_due_date ? new Date(summary.next_due_date).toLocaleDateString() : 'No Due Date'}</td>
-                      <td>₱ {summary.total_balance?.toFixed(2)}</td>
+                      <td>₱ {formatNumber(summary.total_balance?.toFixed(2))}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -440,7 +444,7 @@ const generateReceipt = (schedule) => {
                     <tr>
                       <td style={{ padding: '5px', border: '0px', fontWeight: 'bold' , fontSize: '18px' }}>Remaining Balance:</td>
                       <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold'  }}>
-                        ₱ {calculateRemainingBalance()}
+                        ₱ {formatNumber(calculateRemainingBalance())}
                       </td>
                     </tr>
                   </tbody>
@@ -550,7 +554,7 @@ const generateReceipt = (schedule) => {
                     <td>₱ {(parseFloat(schedule.principal_amount) || 0).toFixed(2)}</td>
                     <td>₱ {(parseFloat(schedule.interest_amount) || 0).toFixed(2)}</td>
                     {loanType === 'Regular' && (
-                      <td>₱ {(parseFloat(schedule.service_fee_component) || 0).toFixed(2)}</td>
+                      <td>₱ {(parseFloat(schedule.service_fee) || 0).toFixed(2)}</td>
                     )}
                     <td>₱ {(parseFloat(schedule.payment_amount) || 0).toFixed(2)}</td>
                     <td>{new Date(schedule.due_date).toLocaleDateString()}</td>

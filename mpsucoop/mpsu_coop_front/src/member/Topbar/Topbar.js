@@ -108,6 +108,12 @@ const Topbar = () => {
           </Link>
         </li>
         <li style={navItemStyle}>
+          <Link to="/payments" style={navLinkStyle}>
+            <FontAwesomeIcon icon={faUser} style={navIconStyle} />
+            <p>Payment</p>
+          </Link>
+        </li>
+        <li style={navItemStyle}>
           <Link to="/Loans" style={navLinkStyle}>
             <FontAwesomeIcon icon={faMoneyBill} style={navIconStyle} />
             <p>Loan</p>
