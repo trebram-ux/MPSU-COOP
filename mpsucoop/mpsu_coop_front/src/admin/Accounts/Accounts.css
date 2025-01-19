@@ -27,7 +27,6 @@ form select {
   width: 100%;
   padding: 10px;
   margin-bottom: 20px;
-  border: 2px solid #000000;
   border-radius: 5px;
   font-size: 14px;
   box-sizing: border-box;
@@ -78,6 +77,7 @@ button:hover {
 button[type="button"]:hover {
   background-color: #ff0000;
 }
+
 
 @media (max-width: 600px) {
   .buttonContainer {

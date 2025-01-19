@@ -19,6 +19,8 @@ function Members() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');  // State for search query
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState(null);
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -50,7 +52,7 @@ function Members() {
       setFormError('First and last names are required.');
       return;
     }
-
+  
     try {
       const response = await axios.post('http://localhost:8000/members/', newMember);
       setMembers([...members, response.data]);
@@ -58,32 +60,34 @@ function Members() {
       setShowAddForm(false);  
       setFormError(null);
     } catch (err) {
-      setFormError('Error adding member. Please try again.');
+      // Check for error response and provide a more detailed error message
+      if (err.response && err.response.data) {
+        setFormError(err.response.data.detail || 'Error adding member. Please try again.');
+      } else {
+        setFormError('An unexpected error occurred. Please try again.');
+      }
+      console.error(err);  // For debugging purposes
     }
-  };
+  };  
 
-  const handleDeleteMember = async (id) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this member?');
-    if (!confirmDelete) return; // Exit the function if the user cancels the deletion
-    
-    const memberToDelete = members.find((member) => member.memId === id);
-    if (!memberToDelete) {
-      console.log(`Member with ID ${id} not found.`);
-      return; // If the member doesn't exist, exit the function
-    }
-  
-    try {
-      console.log(`Deleting member with ID: ${id}`);
-      // Delete the member directly from the backend
-      await axios.delete(`http://localhost:8000/members/${id}/`);
-  
-      // Update the state to remove the member from the list
-      setMembers(members.filter((member) => member.memId !== id));
-    } catch (err) {
-      console.error('Error deleting member:', err.response || err.message || err); // More detailed error info
-      setError('Error deleting member.');
-    }
-  };
+  // Function to open the modal
+const openDeleteModal = (member) => {
+  setMemberToDelete(member);
+  setShowDeleteModal(true);
+};
+
+// Function to confirm deletion
+const confirmDeleteMember = async () => {
+  try {
+    await axios.delete(`http://localhost:8000/members/${memberToDelete.memId}/`);
+    setMembers(members.filter(member => member.memId !== memberToDelete.memId));
+    setShowDeleteModal(false);
+    setMemberToDelete(null);
+  } catch (err) {
+    setError('Error deleting member.');
+    console.error(err);
+  }
+};
 
   const handleEditMember = async () => {
     if (!editingMember.first_name || !editingMember.last_name) {
@@ -119,37 +123,6 @@ function Members() {
     setSelectedMember(member);
   };
 
-  // const handlePrintMemberForm = (member) => {
-  //   // Create a new window for printing
-  //   const printWindow = window.open('', '_blank', 'width=800,height=600', 'position=center');
-
-  //   // Render the MembershipForm component in the new window
-  //   printWindow.document.write(`
-  //     <!DOCTYPE html>
-  //     <html>
-  //       <head>
-  //         <title>Print Membership Form</title>
-  //       </head>
-  //       <body>
-  //         <div id="print-content"></div>
-  //         <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js"></script>
-  //         <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"></script>
-  //       </body>
-  //     </html>
-  //   `);
-
-  //   // Set up the MembershipForm with prefilled data from the `member`
-  //   ReactDOM.render(
-  //     <MembershipForm prefilledData={member} />,
-  //     printWindow.document.getElementById('print-content')
-  //   );
-
-  //   // Trigger print after rendering
-  //   printWindow.document.close();
-  //   printWindow.focus();
-  //   printWindow.print();
-  // };
-
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
@@ -170,27 +143,29 @@ function Members() {
             marginRight: '50px',
             marginLeft: '-15px',
             boxSizing: 'border-box',
-            height: '450px'
+            height: '480px'
           }}>
             <div style={{ display: 'grid', gap: '20px' }}>
               <div style={{ display: 'flex', gap: '10px' }}>
                 
-                <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>First Name:</label>
-                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
-                  id="first_name"
-                  placeholder="First Name"
-                  name="first_name"
-                  value={editingMember?.first_name || newMember.first_name || ''}
-                  onChange={(e) =>
-                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-                  }
-                  />
-                </div>
-                
+              <div style={{ flex: '1' }}>
+              <label style={{ display: 'block', fontWeight: 'bold' }}>First Name:</label>
+              <input
+                type="text"
+                className="form-control"
+                id="first_name"
+                placeholder="First Name"
+                name="first_name"
+                value={editingMember?.first_name || newMember.first_name || ''}
+                onChange={(e) =>
+                  handleInputChange(e, editingMember ? setEditingMember : setNewMember)
+                }
+              />
+            </div>
                 <div style={{ flex: '1' }}>
                   <label style={{ display: 'block', fontWeight: 'bold' }}>Middle Name:</label>
-                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  <input type="text"
+                  className="form-control"
                   placeholder="Middle Name"
                   name="middle_name"
                   value={editingMember?.middle_name || newMember.middle_name || ''}
@@ -201,7 +176,8 @@ function Members() {
                 </div>
                 <div style={{ flex: '1' }}>
                   <label style={{ display: 'block', fontWeight: 'bold' }}>Last Name:</label>
-                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  <input type="text" 
+                  className="form-control"
                   placeholder="last Name"
                   name="last_name"
                   value={editingMember?.last_name || newMember.last_name || ''}
@@ -213,7 +189,8 @@ function Members() {
 
                 <div style={{ flex: '1' }}>
                   <label style={{ display: 'block', fontWeight: 'bold' }}>Email Address:</label>
-                  <input type="email" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  <input type="email"
+                  className="form-control"
                   placeholder="Email"
                   name="email"
                   value={editingMember?.email || newMember.email || ''}
@@ -229,12 +206,7 @@ function Members() {
                 <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Date of Birth:</label>
                 <input
                   type="date"
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #000',
-                    borderRadius: '3px',
-                  }}
+                  className="form-control"
                   placeholder="Birth Date"
                   name="birth_date"
                   min="1980-01-01"
@@ -262,12 +234,7 @@ function Members() {
                 <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Birth Place:</label>
                 <input
                   type="text"
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #000',
-                    borderRadius: '3px',
-                  }}
+                  className="form-control"
                   placeholder="Birth Place"
                   name="birth_place"
                   value={editingMember?.birth_place || newMember.birth_place || ''}
@@ -281,12 +248,7 @@ function Members() {
                 <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Age:</label>
                 <input
                   type="text"
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #000',
-                    borderRadius: '3px',
-                  }}
+                  className="form-control"
                   placeholder="Age"
                   name="age"
                   value={editingMember?.age || newMember.age || ''}
@@ -298,12 +260,7 @@ function Members() {
                 <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Zip Code:</label>
                 <input
                   type="text"
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #000',
-                    borderRadius: '3px',
-                  }}
+                  className="form-control"
                   placeholder="Zip Code"
                   name="zip_code"
                   value={editingMember?.zip_code || newMember.zip_code || ''}
@@ -318,7 +275,8 @@ function Members() {
               <div style={{ display: 'flex', gap: '10px' }}>
                 <div style={{ flex: '1' }}>
                   <label style={{ display: 'block', fontWeight: 'bold', marginTop: '15px' }}>Gender:</label>
-                  <select style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px'}}
+                  <select 
+                  className="form-control"
                   name="gender"
                   value={editingMember?.gender || newMember.gender || ''}
                   onChange={(e) =>
@@ -334,7 +292,8 @@ function Members() {
 
                 <div style={{ flex: '1' }}>
                   <label style={{ display: 'block', fontWeight: 'bold', marginTop: '15px' }}>Civil Status:</label>
-                  <select style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  <select 
+                  className="form-control"
                   name="pstatus"
                   value={editingMember?.pstatus || newMember.pstatus || ''}
                   onChange={(e) =>
@@ -356,7 +315,8 @@ function Members() {
               <div style={{ display: 'flex', gap: '10px' }}>
                 <div style={{ flex: '1' }}>
                   <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Religion:</label>
-                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  <input type="text" 
+                  className="form-control"
                   placeholder="Religion"
                   name="religion"
                   value={editingMember?.religion || newMember.religion || ''}
@@ -367,7 +327,8 @@ function Members() {
                 </div>
                 <div style={{ flex: '2' }}>
                   <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Address:</label>
-                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  <input type="text" 
+                  className="form-control"
                   placeholder="Address"
                   name="address"
                   value={editingMember?.address || newMember.address || ''}
@@ -378,7 +339,8 @@ function Members() {
                 </div>
                 <div style={{ flex: '1' }}>
                   <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Phone Number:</label>
-                  <input type="text" style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  <input type="text" 
+                  className="form-control"
                   placeholder="Phone Number"
                   name="phone_number"
                   value={editingMember?.phone_number || newMember.phone_number || ''}
@@ -394,7 +356,7 @@ function Members() {
                 <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Height (cm)</label>
                 <input 
                   type="number" 
-                  style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  className="form-control"
                   placeholder="Height"
                   name="height"
                   value={editingMember?.height || newMember.height || ''}
@@ -406,7 +368,7 @@ function Members() {
                 <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Weight (kg)</label>
                 <input 
                   type="number" 
-                  style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  className="form-control"
                   placeholder="Weight"
                   name="weight"
                   value={editingMember?.weight || newMember.weight || ''}
@@ -418,7 +380,7 @@ function Members() {
                 <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Annual Income</label>
                 <input 
                   type="number" 
-                  style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
+                  className="form-control"
                   placeholder="Annual Income"
                   name="ann_com"
                   value={editingMember?.ann_com || newMember.ann_com || ''}
@@ -427,34 +389,25 @@ function Members() {
               </div>
 
               <div style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Issued Government ID</label>
-              <select 
-                style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px', marginTop: '10px' }}
-                name="valid_id"
-                value={editingMember?.valid_id || newMember.valid_id || ''}
+              <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Name of Co-Maker</label>
+              <input 
+                className="form-control"
+                name="co_maker"
+                placeholder="Comaker"
+                value={editingMember?.co_maker || newMember.co_maker || ''}
                 onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
               >
-                <option value="" disabled>Select Valid ID</option>
-                <option value="Philippine Passport">Philippine Passport</option>
-                <option value="Driver's License">Driver's License</option>
-                <option value="SSS ID">SSS ID</option>
-                <option value="GSIS ID">GSIS ID</option>
-                <option value="TIN ID">TIN ID</option>
-                <option value="Postal ID">Postal ID</option>
-                <option value="Voter's ID">Voter's ID</option>
-                <option value="PhilHealth ID">PhilHealth ID</option>
-                <option value="National ID">National ID</option>
-              </select>
+              </input>
             </div>
 
               <div style={{ flex: '1 1 200px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>ID Number</label>
+                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Rel: with the Co-Maker</label>
                 <input 
                   type="text" 
-                  style={{ width: '100%', padding: '8px', border: '1px solid #000', borderRadius: '3px' }}
-                  placeholder="ID Number"
-                  name="id_no"
-                  value={editingMember?.id_no || newMember.id_no || ''}
+                  className="form-control"
+                  name="relationship"
+                  placeholder="Relationship"
+                  value={editingMember?.relationship || newMember.relationship || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
@@ -507,33 +460,15 @@ function Members() {
             style={{
               padding: '7px 40px 10px 10px',
               fontSize: '16px',
-              border: '2px solid #000',
               borderRadius: '4px',
               width: '250px',
               marginLeft: '1005px',
               marginBottom: '30px',
               marginTop: '-10px',
+              border: 'none'
             }}
-        />
-        <button
-            onClick={() => console.log('Search triggered')}
-            style={{
-              position: 'absolute',
-              top: '-14px',
-              fontSize: '12px',
-              cursor: 'pointer',
-              backgroundColor: '#007bff',
-              color: 'black',
-              border: '2px solid #000000',
-              borderRadius: '4px',
-              padding: '10px',
-              marginLeft: '1220px',
-          }}
-          >
-            <FaSearch />
-        </button>                           
+        />                           
             </div>
-            
             <button
                 className={styles.addButton}
                 onClick={() => setShowAddForm(true)}
@@ -541,7 +476,6 @@ function Members() {
                   backgroundColor: '#28a745',
                   color: 'black',
                   padding: '10px 20px',
-                  border: '2px solid #000000',
                   borderRadius: '5px',
                   cursor: 'pointer',
                   position: 'relative', 
@@ -553,7 +487,6 @@ function Members() {
                 <AiOutlineUsergroupAdd />Add Member
             </button>
         </div>
-
         <div
           style={{
             maxHeight: '425px',
@@ -561,7 +494,7 @@ function Members() {
             overflowY: 'auto',
             boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
             marginTop: '20px',
-            padding: '5px',
+            padding: '0px',
             borderRadius: '5px',
             scrollbarWidth: 'none', // For Firefox
             msOverflowStyle: 'none', // For IE and Edge
@@ -581,6 +514,7 @@ function Members() {
               borderCollapse: 'collapse',
               textAlign: 'center',
               fontSize: '20px',
+              marginTop: '0px',
             }}
           >
             <thead>
@@ -593,11 +527,11 @@ function Members() {
                   zIndex: '1',
                 }}
               >
-                <th style={{ padding: '10px', border: '2px solid black' }}>Account No.</th>
-                <th style={{ padding: '10px', border: '2px solid black' }}>Full Name</th>
-                <th style={{ padding: '10px', border: '2px solid black' }}>Email</th>
-                <th style={{ padding: '10px', border: '2px solid black' }}>Phone Number</th>
-                <th style={{ padding: '10px', border: '2px solid black' }}>Action</th>
+                <th style={{ padding: '10px' }}>Account No.</th>
+                <th style={{ padding: '10px'}}>Full Name</th>
+                <th style={{ padding: '10px'}}>Email</th>
+                <th style={{ padding: '10px'}}>Phone Number</th>
+                <th style={{ padding: '10px'}}>Action</th>
               </tr>
             </thead>
 
@@ -609,15 +543,15 @@ function Members() {
                     textAlign: 'center',
                   }}
                 >
-                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '20px'}}>
+                  <td style={{ padding: '10px',fontSize: '20px'}}>
                     {member.accountN || 'No Account'}
                   </td>
-                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '20px' }}>
+                  <td style={{ padding: '10px',  fontSize: '20px' }}>
                     {`${member.first_name} ${member.middle_name || ''} ${member.last_name}`.trim()}
                   </td>
-                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '20px' }}>{member.email}</td>
-                  <td style={{ padding: '10px', border: '2px solid black', fontSize: '20px' }}>{member.phone_number}</td>
-                  <td style={{ padding: '10px', border: '1px solid black', display: 'flex', justifyContent: 'center', gap: '5px' }}>
+                  <td style={{ padding: '10px'}}>{member.email}</td>
+                  <td style={{ padding: '10px' }}>{member.phone_number}</td>
+                  <td style={{ padding: '10px', display: 'flex', justifyContent: 'center', gap: '5px' }}>
                     <button
                       onClick={() => handleViewMember(member)}
                       style={{
@@ -643,17 +577,17 @@ function Members() {
                       <FaEdit /> Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteMember(member.memId)}
-                      style={{
-                        padding: '5px 10px',
-                        cursor: 'pointer',
-                        color: 'black',
-                        backgroundColor: '#f44336',
-                        borderRadius: '5px',
-                      }}
-                    >
-                      <FaTrash /> Delete
-                    </button>
+                    onClick={() => openDeleteModal(member)}
+                    style={{
+                      padding: '5px 10px',
+                      cursor: 'pointer',
+                      color: 'black',
+                      backgroundColor: '#f44336',
+                      borderRadius: '5px',
+                    }}
+                  >
+                    <FaTrash /> Delete
+                  </button>
                   </td>
                 </tr>
               ))}
@@ -661,6 +595,40 @@ function Members() {
           </table>
         </div>
 
+        {showDeleteModal && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <p>
+                Are you sure you want to delete the member{' '}
+                <strong>{memberToDelete?.first_name} {memberToDelete?.last_name}</strong>?
+              </p>
+              <div className="modal-actions">
+                <button
+                  onClick={confirmDeleteMember}
+                  style={{
+                    padding: '5px 10px',
+                    color: 'black',
+                    backgroundColor: '#f44336',
+                    borderRadius: '5px',
+                  }}
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  style={{
+                    padding: '5px 10px',
+                    color: 'black',
+                    backgroundColor: '#ccc',
+                    borderRadius: '5px',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Member Details Table */}
         {selectedMember && (
             <div
@@ -671,7 +639,6 @@ function Members() {
               transform: 'translate(-50%, -50%)',
               animation: 'popupAnimation 0.6s ease forwards',
               backgroundColor: 'white',
-              border: '2px solid black',
               borderRadius: '8px',
               padding: '20px',
               zIndex: 1000,
@@ -681,7 +648,7 @@ function Members() {
             }}
             
             >
-              <h3 style={{ marginBottom: '10px', textAlign: 'center' }}>Member Details</h3>
+              <h3 style={{ marginBottom: '10px', textAlign: 'center', color: 'black' }}>Member Details</h3>
               <button
                 onClick={() => setSelectedMember(null)}
                 style={{
@@ -707,10 +674,9 @@ function Members() {
                     <th
                       style={{
                         padding: '10px',
-                        textAlign: 'center',
-                        backgroundColor: '#007bff',
+                        textAlign: 'left',
+                        backgroundColor: 'gray',
                         color: 'black',
-                        border: '2px solid black',
                       }}
                     >
                       Field
@@ -718,10 +684,9 @@ function Members() {
                     <th
                       style={{
                         padding: '10px',
-                        textAlign: 'center',
-                        backgroundColor: '#007bff',
+                        textAlign: 'left',
+                        backgroundColor: 'gray',
                         color: 'black',
-                        border: '2px solid black',
                       }}
                     >
                       Details
@@ -730,140 +695,140 @@ function Members() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Account No.</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.accountN}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Full Name</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px' }}>
                     {`${selectedMember.first_name} ${selectedMember.middle_name || ''} ${selectedMember.last_name}`.trim()}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Email</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.email}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Phone Number</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.phone_number}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Religion</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.religion}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Address</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.address}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Birth Date</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.birth_date}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Gender.</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.gender}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong> Civil Status.</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.pstatus}
                     </td>
                   </tr>
 
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Birth Place.</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.birth_place}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Age.</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.age}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Zip Code.</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.zip_code}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Height(cm)</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.height}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Weight(kg)</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.weight}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       <strong>Annual Income</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
+                    <td style={{ padding: '10px'}}>
                       {selectedMember.ann_com}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
-                      <strong>Valid ID</strong>
+                    <td style={{ padding: '10px'}}>
+                      <strong>Co-Maker</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
-                      {selectedMember.valid_id}
+                    <td style={{ padding: '10px'}}>
+                      {selectedMember.co_maker}
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
-                      <strong>ID Number</strong>
+                    <td style={{ padding: '10px'}}>
+                      <strong>Relationship with the Co-Maker</strong>
                     </td>
-                    <td style={{ padding: '10px', border: '2px solid black' }}>
-                      {selectedMember.id_no}
+                    <td style={{ padding: '10px'}}>
+                      {selectedMember.relationship}
                     </td>
                   </tr>
 

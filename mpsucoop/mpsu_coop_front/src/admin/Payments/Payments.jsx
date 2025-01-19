@@ -166,9 +166,8 @@ const Payments = () => {
       {!selectedAccount ? (
         <>
           <h2 style={{ width: '98%', marginTop: '-25px',  padding: '20px', textAlign: 'center', color: 'black', fontSize: '30px'}}>Paid Payments Overview</h2>
-            <div style={{ position: 'relative', display: 'inline-block', width: '30%' }}>
-              <input type="text"placeholder="Search Payments"value={searchQuery}onChange={(e) => setSearchQuery(e.target.value)}style={{padding: '7px 40px 10px 10px',fontSize: '16px',border: '2px solid #000',borderRadius: '4px',width: '250px',marginLeft: '950px',marginBottom: '30px',marginTop: '-10px',}}/>
-              <button onClick={() => console.log('Search triggered')}style={{position: 'absolute',top: '-14px',fontSize: '12px',cursor: 'pointer',backgroundColor: '#007bff',color: 'black',border: '2px solid #000000',borderRadius: '4px',padding: '10px',marginLeft: '1190px',}}><FaSearch /></button></div>
+            <d style={{ position: 'relative', display: 'inline-block', width: '30%' }}>
+              <input type="text"placeholder="Search Payments"value={searchQuery}onChange={(e) => setSearchQuery(e.target.value)}style={{padding: '7px 40px 10px 10px',fontSize: '16px',border: '0px',borderRadius: '4px',width: '250px',marginLeft: '950px',marginBottom: '30px',marginTop: '-10px',}}/></d>
           {filteredSummaries.length > 0 ? (
             <div
               style={{
@@ -215,41 +214,41 @@ const Payments = () => {
         <>
           <div id="print-section">
             {accountDetails && (
-              <div style={{ width: '35%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ width: '48%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <h3 style={{ color: 'black', fontSize: '20px', marginTop: '-50px'}}>Payment History For:</h3>
               <table style={{borderCollapse: 'collapse', marginTop: '10px' }}>
               <tbody>
                 <tr>
-                  <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Name:</td>
-                  <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px' }}>
-                    {accountDetails.first_name} {accountDetails.last_name}
+                  <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>Name:</td>
+                  <td style={{ padding: '5px', border: '0px', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)', width: '100px'}}>
+                    {accountDetails.first_name} {accountDetails.middle_name}  {accountDetails.last_name}
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Account Number:</td>
-                  <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px' }}>
+                  <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>Account Number:</td>
+                  <td style={{ padding: '5px', border: '0px', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>
                     {selectedAccount}
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Paid Balance:</td>
-                  <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px', fontWeight: 'bold' }}>
-                    ₱ {calculatePaidBalance()}
+                  <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>Paid Balance:</td>
+                  <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold', borderBottom: '1px solid rgba(218, 218, 218, 0.68)', width: '100px'}}>
+                  ₱{calculatePaidBalance()}
                   </td>
                 </tr>
 
                 {/* Regular Loan Details */}
                 {filterSchedulesByLoanType().some(schedule => schedule.loan_type === 'Regular') && (
                   <tr>
-                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px', width: '100%' }}>Regular Loan - Approval Date:</td>
-                    <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px' }}>
+                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>Regular Loan - Approval Date:</td>
+                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold',fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>
                       {new Date(
                         filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Regular')?.loan_date
                       ).toLocaleDateString() || 'No Date Available'}
                     </td>
-                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px'}}>Loan Amount:</td>
-                    <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px', fontWeight: 'bold' }}>
-                      ₱ {parseFloat(
+                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solidrgba(218, 218, 218, 0.68)'}}>Amount:</td>
+                    <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold' , borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>
+                      ₱{parseFloat(
                         filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Regular')?.loan_amount || 0
                       ).toFixed(2)}
                     </td>
@@ -259,15 +258,15 @@ const Payments = () => {
                 {/* Emergency Loan Details */}
                 {filterSchedulesByLoanType().some(schedule => schedule.loan_type === 'Emergency') && (
                   <tr>
-                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px', width: '100%'}}>Emergency Loan - Approval Date:</td>
-                    <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px' }}>
+                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>Emergency Loan - Approval Date:</td>
+                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold',fontSize: '18px' , borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>
                       {new Date(
                         filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Emergency')?.loan_date
                       ).toLocaleDateString() || 'No Date Available'}
                     </td>
-                    <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px' }}>Loan Amount:</td>
-                    <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px', fontWeight: 'bold'}}>
-                      ₱ {parseFloat(
+                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px' , borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>Amount:</td>
+                    <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold', borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>
+                      ₱{parseFloat(
                         filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Emergency')?.loan_amount || 0
                       ).toFixed(2)}
                     </td>
@@ -287,10 +286,50 @@ const Payments = () => {
             >
             <div
             >
-              <button onClick={() => setSelectedAccount(null)}><IoArrowBackCircle /> Back to List</button>
-              <button onClick={() => handleLoanTypeChange('All')}style={{ backgroundColor: loanTypeFilter === 'All' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', cursor: 'pointer'}}>All Loans</button>
-              <button onClick={() => handleLoanTypeChange('Regular')}style={{ backgroundColor: loanTypeFilter === 'Regular' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', cursor: 'pointer'}}>Regular Loans</button>
-              <button onClick={() => handleLoanTypeChange('Emergency')}style={{ backgroundColor: loanTypeFilter === 'Emergency' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', cursor: 'pointer'}}>Emergency Loans</button>
+              <button onClick={() => setSelectedAccount(null)}><IoArrowBackCircle /> Back </button>
+              <button 
+              onClick={() => handleLoanTypeChange('All')} 
+              style={{
+                backgroundColor: 'transparent', 
+                color: loanTypeFilter === 'All' ? 'rgb(4, 202, 93)' : 'black', 
+                cursor: 'pointer', 
+                border: 'none', 
+                padding: '5px 10px',
+                textDecoration: loanTypeFilter === 'All' ? 'underline' : 'none',
+                marginLeft: '50px'
+              }}
+            >
+              All Loans
+            </button>
+
+            <button 
+              onClick={() => handleLoanTypeChange('Regular')} 
+              style={{
+                backgroundColor: 'transparent', 
+                color: loanTypeFilter === 'Regular' ? 'rgb(4, 202, 93)' : 'black', 
+                cursor: 'pointer', 
+                border: 'none', 
+                padding: '5px 10px',
+                textDecoration: loanTypeFilter === 'Regular' ? 'underline' : 'none'
+              }}
+            >
+              Regular Loans
+            </button>
+
+            <button 
+              onClick={() => handleLoanTypeChange('Emergency')} 
+              style={{
+                backgroundColor: 'transparent', 
+                color: loanTypeFilter === 'Emergency' ? 'rgb(4, 202, 93)' : 'black', 
+                cursor: 'pointer', 
+                border: 'none', 
+                padding: '5px 10px',
+                textDecoration: loanTypeFilter === 'Emergency' ? 'underline' : 'none'
+              }}
+            >
+              Emergency Loans
+            </button>
+            
               <button 
               onClick={handlePrint} 
               style={{

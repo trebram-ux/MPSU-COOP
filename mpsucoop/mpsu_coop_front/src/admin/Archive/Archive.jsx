@@ -393,7 +393,7 @@ const ArchivedRecords = () => {
         >
           <thead>
             <tr style={{ backgroundColor: '#f2f2f2' }}>
-              <th style={{ padding: '12px', border: '1px solid black', textAlign: 'left', width: '50px' }}>
+              <th style={{ padding: '12px', border: '0px', textAlign: 'left', width: '50px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               <input
                 id="selectAllCheckbox"
@@ -407,10 +407,10 @@ const ArchivedRecords = () => {
               <label htmlFor="selectAllCheckbox">All</label>
             </div>
               </th>
-              <th style={{ padding: '12px', border: '1px solid black' }}>Full Name</th>
-              <th style={{ padding: '12px', border: '1px solid black' }}>Email</th>
-              <th style={{ padding: '12px', border: '1px solid black' }}>Archived At</th>
-              <th style={{ padding: '12px', border: '1px solid black' }}>Actions</th>
+              <th style={{ padding: '12px', border: '0px' }}>Full Name</th>
+              <th style={{ padding: '12px', border: '0px' }}>Email</th>
+              <th style={{ padding: '12px', border: '0px' }}>Archived At</th>
+              <th style={{ padding: '12px', border: '0px' }}>Actions</th>
             </tr>
           </thead>
           
@@ -418,23 +418,23 @@ const ArchivedRecords = () => {
             {filteredArchivedUsers.length > 0 ? (
               filteredArchivedUsers.map((user) => (
                 <tr key={user.id}>
-                  <td style={{ padding: '12px', border: '1px solid black', textAlign: 'left', width: '50px' }}>
+                  <td style={{ padding: '12px', border: '0px', textAlign: 'left', width: '50px' }}>
                     <input
                       type="checkbox"
                       checked={selectedMembers.includes(user.id)}
                       onChange={() => toggleMemberSelection(user.id)}
                     />
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                  <td style={{ padding: '12px', border: '0px' }}>
                     {`${user.archived_data.first_name} ${user.archived_data.last_name}`}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                  <td style={{ padding: '12px', border: '0px' }}>
                     {user.archived_data.email}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                  <td style={{ padding: '12px', border: '0px' }}>
                     {new Date(user.archived_at).toLocaleString()}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid black', textAlign: 'center' }}>
+                  <td style={{ padding: '12px', border: '0px', textAlign: 'center' }}>
                     {/* <button
                       onClick={() => viewTransactions(user)}
                       style={{
@@ -467,7 +467,7 @@ const ArchivedRecords = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" style={{ textAlign: 'center', padding: '12px', border: '1px solid black' }}>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '12px', border: '0px' }}>
                   No archived members found.
                 </td>
               </tr>
@@ -570,7 +570,7 @@ const ArchivedRecords = () => {
         >
           <thead>
             <tr style={{ backgroundColor: '#f2f2f2' }}>
-              <th style={{ padding: '12px', border: '1px solid black', textAlign: 'left', width: '50px' }}>
+              <th style={{ padding: '12px', border: '0px', textAlign: 'left', width: '50px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <input
                     id="selectAllAccountsCheckbox"
@@ -584,37 +584,37 @@ const ArchivedRecords = () => {
                   <label htmlFor="selectAllAccountsCheckbox">All</label>
                 </div>
               </th>
-              <th style={{ padding: '12px', border: '1px solid black' }}>Account Number</th>
-              <th style={{ padding: '12px', border: '1px solid black' }}>Account Holder</th>
-              <th style={{ padding: '12px', border: '1px solid black' }}>Status</th>
-              <th style={{ padding: '12px', border: '1px solid black' }}>Archived At</th>
-              <th style={{ padding: '12px', border: '1px solid black' }}>Actions</th>
+              <th style={{ padding: '12px', border: '0px' }}>Account Number</th>
+              <th style={{ padding: '12px', border: '0px' }}>Account Holder</th>
+              <th style={{ padding: '12px', border: '0px' }}>Status</th>
+              <th style={{ padding: '12px', border: '0px' }}>Archived At</th>
+              <th style={{ padding: '12px', border: '0px' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredArchivedAccounts.length > 0 ? (
               filteredArchivedAccounts.map((account) => (
                 <tr key={account.id}>
-                  <td style={{ padding: '12px', border: '1px solid black', textAlign: 'left', width: '50px' }}>
+                  <td style={{ padding: '12px', border: '0px', textAlign: 'left', width: '50px' }}>
                     <input
                       type="checkbox"
                       checked={selectedAccounts.includes(account.id)}
                       onChange={() => toggleAccountSelection(account.id)}
                     />
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                  <td style={{ padding: '12px', border: '0px' }}>
                     {account.archived_data.account_number}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                  <td style={{ padding: '12px', border: '0px' }}>
                     {`${account.archived_data.account_holder.first_name} ${account.archived_data.account_holder.last_name}`}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                  <td style={{ padding: '12px', border: '0px' }}>
                     {account.archived_data.status}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid black' }}>
+                  <td style={{ padding: '12px', border: '0px' }}>
                     {new Date(account.archived_at).toLocaleString()}
                   </td>
-                  <td style={{ padding: '12px', border: '1px solid black', textAlign: 'center' }}>
+                  <td style={{ padding: '12px', border: '0px', textAlign: 'center' }}>
                     <button
                       onClick={() => handleAccountDeleteClick(account.id)}
                       style={{
@@ -633,7 +633,7 @@ const ArchivedRecords = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" style={{ textAlign: 'center', padding: '12px', border: '1px solid black' }}>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '12px', border: '0px' }}>
                   No archived accounts found.
                 </td>
               </tr>

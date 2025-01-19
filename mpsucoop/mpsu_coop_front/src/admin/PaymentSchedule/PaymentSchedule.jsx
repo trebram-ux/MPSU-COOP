@@ -348,7 +348,7 @@ const generateReceipt = (schedule) => {
                 style={{
                   padding: '7px 40px 10px 10px',
                   fontSize: '16px',
-                  border: '2px solid #000',
+                  border: '0px',
                   borderRadius: '4px',
                   width: '270px',
                   marginLeft: '980px',
@@ -356,23 +356,6 @@ const generateReceipt = (schedule) => {
                   marginTop: '-10px',
                 }}
               />
-              <button
-                onClick={() => console.log('Search triggered')}
-                style={{
-                  position: 'absolute',
-                  top: '-13px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  backgroundColor: '#007bff',
-                  color: 'black',
-                  border: '2px solid #000000',
-                  borderRadius: '4px',
-                  padding: '10px',
-                  marginLeft: '1215px',
-                }}
-              >
-                <FaSearch />
-              </button>
             </div>
           </div>
 
@@ -443,20 +426,20 @@ const generateReceipt = (schedule) => {
                 <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                   <tbody>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold', fontSize: '18px'  }}>Name:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px' }}>
+                      <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px'  }}>Name:</td>
+                      <td style={{ padding: '5px', border: '0px' , fontSize: '18px' }}>
                         {accountDetails.first_name} {accountDetails.last_name}
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' , fontSize: '18px' }}>Account Number:</td>
-                      <td style={{ padding: '5px', border: '2px solid black' , fontSize: '18px' }}>
+                      <td style={{ padding: '5px', border: '0px', fontWeight: 'bold' , fontSize: '18px' }}>Account Number:</td>
+                      <td style={{ padding: '5px', border: '0px' , fontSize: '18px' }}>
                         {selectedAccount}
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ padding: '5px', border: '2px solid black', fontWeight: 'bold' , fontSize: '18px' }}>Remaining Balance:</td>
-                      <td style={{ padding: '5px', border: '2px solid black', fontSize: '18px', fontWeight: 'bold'  }}>
+                      <td style={{ padding: '5px', border: '0px', fontWeight: 'bold' , fontSize: '18px' }}>Remaining Balance:</td>
+                      <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold'  }}>
                         ₱ {calculateRemainingBalance()}
                       </td>
                     </tr>
@@ -470,14 +453,40 @@ const generateReceipt = (schedule) => {
           className = "button"
           style = {{
           display: 'inline-flex',
-          marginTop: '-5px'
+          marginTop: '20px'
           }}
           >
           <div
           > 
-            <button style={{ color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }} onClick={() => setSelectedAccount(null)}><IoArrowBackCircle />Back to List</button>
-            <button onClick={() => handleLoanTypeChange('Regular')} style={{ backgroundColor: loanType === 'Regular' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }}>Regular Loan</button>
-            <button onClick={() => handleLoanTypeChange('Emergency')} style={{ backgroundColor: loanType === 'Emergency' ? 'rgb(4, 202, 93)' : 'rgb(170, 170, 170)', color: 'black', padding: '5px 5px', border: 'none', cursor: 'pointer', borderRadius: '5px', marginLeft: '5px',marginTop: '20px' }}>Emergency Loan</button>
+            <button onClick={() => setSelectedAccount(null)}><IoArrowBackCircle /> Back </button>
+            <button 
+              onClick={() => handleLoanTypeChange('Regular')} 
+              style={{
+                backgroundColor: 'transparent', 
+                color: loanType === 'Regular' ? 'rgb(4, 202, 93)' : 'black', 
+                cursor: 'pointer', 
+                border: 'none', 
+                padding: '5px 10px',
+                textDecoration: loanType === 'Regular' ? 'underline' : 'none',
+                marginLeft: '50px'
+              }}
+            >
+              Regular Loans
+            </button>
+
+            <button 
+              onClick={() => handleLoanTypeChange('Emergency')} 
+              style={{
+                backgroundColor: 'transparent', 
+                color: loanType === 'Emergency' ? 'rgb(4, 202, 93)' : 'black', 
+                cursor: 'pointer', 
+                border: 'none', 
+                padding: '5px 10px',
+                textDecoration: loanType === 'Emergency' ? 'underline' : 'none'
+              }}
+            >
+              Emergency Loans
+            </button>
           </div>
           </div>
 
@@ -520,7 +529,7 @@ const generateReceipt = (schedule) => {
                     backgroundColor: 'red',
                     color: 'black',
                     position: 'sticky',
-                    top: '-5px',
+                    top: '-10px',
                     zIndex: '1',
                   }}
                 >
@@ -563,7 +572,7 @@ const generateReceipt = (schedule) => {
                         style={{
                           backgroundColor: 'goldenrod',
                           color: 'black',
-                          border: '2px solid black',
+                          border: '0px',
                           padding: '5px 10px',
                           borderRadius: '5px',
                           cursor: arePreviousPaymentsPaid(schedule.id) ? 'pointer' : 'not-allowed',
@@ -587,7 +596,7 @@ const generateReceipt = (schedule) => {
                           backgroundColor: 'rgb(0, 199, 90)',
                           color: 'black',
                           cursor: 'pointer',
-                          border: '2px solid black',
+                          border: '0px',
                           padding: '5px 10px',
                           borderRadius: '5px',
                           fontSize: '14px',

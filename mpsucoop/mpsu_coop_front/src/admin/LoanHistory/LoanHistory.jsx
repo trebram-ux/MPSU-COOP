@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
-import { FaTrash, FaDollarSign, FaEdit, FaSearch } from 'react-icons/fa';
+import { FaTrash } from 'react-icons/fa';
+import { TbFilterEdit } from "react-icons/tb";
 import './LoanHistory.css';
-
 
 const LoanManager = () => {
     const [members, setMembers] = useState([]);
@@ -21,14 +21,22 @@ const LoanManager = () => {
     });
     const [formVisible, setFormVisible] = useState(false);
     const [editingLoan, setEditingLoan] = useState(null);
-    const [error, setError] = useState(null);
+    const [errors, setErrors] = useState(null);
     const [paymentFormVisible, setPaymentFormVisible] = useState(false);
     const [selectedLoanForPayment, setSelectedLoanForPayment] = useState(null);
     const [showPrintButton, setShowPrintButton] = useState(false);
     const [newLoan, setNewLoan] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [showOtherPurpose, setShowOtherPurpose] = useState(false);
-
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState('');
+    const [showFilterOptions, setShowFilterOptions] = useState(false);
+    const [filter, setFilter] = useState(''); // Tracks selected filter type
+    const [filteredLoans, setFilteredLoans] = useState(loans); // Assuming loans is the array you're filtering
+    const [selectedDate, setSelectedDate] = useState(''); // State for selected single day date
+    const [startDate, setStartDate] = useState(''); // State for start date in date range
+    const [endDate, setEndDate] = useState(''); // State for end date in date range // Add this line for the filter state
+    const [showNoLoanPopup, setShowNoLoanPopup] = useState(false); 
 
     const BASE_URL = 'http://localhost:8000';
     const navigate = useNavigate();
@@ -38,31 +46,60 @@ const LoanManager = () => {
         try {
             const response = await axios.get(`${BASE_URL}/loans/`);
             setLoans(response.data);
+            setFilteredLoans(response.data); // Set filtered loans when the fetch is successful
         } catch (err) {
             console.error('Error fetching loans:', err.response || err);
-            setError('Error fetching loans');
+            setErrors('Error fetching loans');
+            setFilteredLoans([]); // Reset filtered loans to an empty array on error
         }
     };
-
+    
     useEffect(() => {
         fetchLoans();
     }, []);
+    
+    const validateLoanData = () => {
+        const errors = {};
+        const { loan_type, loan_amount, loan_period } = loanData;
 
-    const filteredLoans = loans.filter((loan) => {
+        if (!loan_amount || loan_amount <= 0) {
+            errors.loan_amount = 'Loan amount must be greater than 0.';
+        } else if (loan_type === 'Emergency' && loan_amount > 50000) {
+            errors.loan_amount = 'Emergency loans cannot exceed 50,000.';
+        } else if (loan_type === 'Regular' && loan_amount > 1500000) {
+            errors.loan_amount = 'Regular loans cannot exceed 1.5 million.';
+        }
+
+        if (!loan_period || loan_period <= 0) {
+            errors.loan_period = 'Loan period must be greater than 0.';
+        } else if (loan_type === 'Emergency' && loan_period > 6) {
+            errors.loan_period = 'Emergency loans cannot exceed 6 months.';
+        }
+
+        return errors;
+    };
+
+// Replace computed `filteredLoans` variable
+
+    useEffect(() => {
+        // Filter loans based on search query
         const search = searchQuery.toLowerCase();
-        const matches = {
-            control_number: loan.control_number?.toString().includes(search),
-            account: loan.account?.toString().toLowerCase().includes(search),
-            account_holder: loan.account_holder?.toLowerCase().includes(search),
-            loan_type: loan.loan_type?.toLowerCase().includes(search),
-            purpose: loan.purpose?.toLowerCase().includes(search),
-            status: loan.status?.toLowerCase().includes(search),
-        };
-        console.log("Search Matches:", matches);
-        return Object.values(matches).some(match => match);
-    });
-    
-    
+
+        const filtered = loans.filter((loan) => {
+            const matches = {
+                control_number: loan.control_number?.toString().includes(search),
+                account: loan.account?.toString().toLowerCase().includes(search),
+                account_holder: loan.account_holder?.toLowerCase().includes(search),
+                loan_type: loan.loan_type?.toLowerCase().includes(search),
+                purpose: loan.purpose?.toLowerCase().includes(search),
+                status: loan.status?.toLowerCase().includes(search),
+            };
+            return Object.values(matches).some((match) => match);
+        });
+
+        setFilteredLoans(filtered);
+    }, [searchQuery, loans]);
+
     // Fetch members from API
     useEffect(() => {
         const fetchMembers = async () => {
@@ -86,8 +123,6 @@ const LoanManager = () => {
         member.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setLoanData((prev) => ({
@@ -99,24 +134,17 @@ const LoanManager = () => {
     // Handle loan form submit (create or edit loan)
     const handleLoanSubmit = async (e) => {
         e.preventDefault();
-    
-        // Check if the loan type is "Emergency" and the loan period exceeds 6 months
-        if (loanData.loan_type === 'Emergency' && loanData.loan_period > 6) {
-            alert("Emergency loans cannot exceed 6 months.");
-            return; // Stop the form submission
-        }
-    
-        // Check if the loan type is "Regular" and the loan amount exceeds 1.5 million
-        if (loanData.loan_type === 'Regular' && loanData.loan_amount > 1500000) {
-            alert("Regular loans cannot exceed 1.5 million.");
-            return; // Stop the form submission
-        }
-    
-        // Check if the loan type is "Emergency" and the loan amount exceeds 50 thousand
-        if (loanData.loan_type === 'Emergency' && loanData.loan_amount > 50000) {
-            alert("Emergency loans cannot exceed 50,000.");
-            return; // Stop the form submission
-        }
+
+        // Validate the form data
+    const validationErrors = validateLoanData();
+    if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors);
+        setShowPopup(true);
+        setPopupMessage('There are errors in the form. Please correct them.');
+        return; // Stop if validation errors exist
+    }
+
+    setErrors({}); // Reset errors
     
         try {
             if (editingLoan) {
@@ -125,52 +153,82 @@ const LoanManager = () => {
                 const response = await axios.post(`${BASE_URL}/loans/`, loanData);
                 setNewLoan(response.data);
                 setShowPrintButton(true);
+                setPopupMessage('Loan successfully created!');
+                setShowPopup(true);
             }
             fetchLoans();
         } catch (err) {
             console.error('Error saving loan:', err);
-            setError('Error saving loan');
+            setErrors('Error saving loan');
+            setPopupMessage('Failed to create loan. Please try again.');
+            setShowPopup(true);
         }
     };
-    
-    
+    const closePopup = () => {
+        setShowPopup(false);
+    };
     
     const handleDeleteLoan = async (loan) => {
-        if (loan.status !== "Fully Paid") {
+        // Log the raw loan object to check its status
+        console.log("Loan Object Before Check:", loan);
+        console.log("Loan Status (raw):", loan.status);
+    
+        // Sanitize status to remove extra spaces or case issues
+        const loanStatus = loan.status.trim().toLowerCase();
+        console.log("Loan Status (sanitized):", loanStatus);  // log the sanitized value
+    
+        // Check if loan status is 'fully paid'
+        if (loanStatus !== "fully paid") {
             alert("This loan cannot be deleted as it is not fully paid.");
             return;
         }
-
+    
         const confirmDelete = window.confirm(
             `Are you sure you want to delete the loan with Control Number: ${loan.control_number}? This action cannot be undone.`
         );
-
+    
         if (!confirmDelete) return;
-
+    
         try {
             await axios.delete(`${BASE_URL}/loans/${loan.control_number}/`);
             alert("Loan deleted successfully.");
-            fetchLoans();
+            fetchLoans(); // Refresh the loan list
         } catch (err) {
-            console.error('Error deleting loan:', err);
-            alert(
-                `Failed to delete the loan. ${
-                    err.response?.data?.message || "Please try again later."
-                }`
-            );
+            console.error("Error deleting loan:", err);
+            const serverMessage = err.response?.data?.message || "Failed to delete the loan. Please try again later.";
+            alert(serverMessage); // Provide error feedback
         }
-    }; 
+    };
 
-    // Handle loan payment and redirect to payment schedule
-    // const handlePayLoan = (loan) => {
-    //     setSelectedLoanForPayment(loan);
-    //     setPaymentFormVisible(true);
-
-    //     // Redirect to payment-schedules page
-    //     navigate('/payment-schedules'); // Use navigate here
-    // };
+    const handleDateFilter = () => {
+        let filtered = loans;
     
-
+        if (filter === "today") {
+            const today = new Date().toISOString().split('T')[0];
+            filtered = loans.filter((loan) => loan.loan_date === today);
+        } else if (filter === "single-day") {
+            if (selectedDate) {
+                filtered = loans.filter((loan) => loan.loan_date === selectedDate);
+            }
+        } else if (filter === "date-range") {
+            if (startDate && endDate) {
+                filtered = loans.filter(
+                    (loan) => loan.loan_date >= startDate && loan.loan_date <= endDate
+                );
+            }
+        }
+    
+        // If no loans are found, show the pop-up message
+        if (filtered.length === 0) {
+            setShowNoLoanPopup(true); // Show pop-up message
+        } else {
+            setShowNoLoanPopup(false); // Hide pop-up message
+        }
+    
+        // Set the filtered loans for display
+        setFilteredLoans(filtered);
+    };
+    
     const resetForm = () => {
         setLoanData({
             control_number: '',
@@ -195,45 +253,279 @@ return (
         <h2 className="loan-manager-header">LOAN MANAGEMENT</h2>
 
         {!formVisible && !paymentFormVisible && (
-            <div className="search-container">
-                <div className="search-wrapper">
-                    <input
-                        type="text"
-                        placeholder="Search Loans"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="search-input"
-                        style={{
-                            padding: '7px 40px 10px 10px',
-                            fontSize: '16px',
-                            border: '2px solid #000',
-                            borderRadius: '4px',
-                            width: '250px',
-                            marginLeft: '995px',
-                            marginBottom: '30px',
-                            marginTop: '-10px',
-                          }}
-                    />
+    <div className="search-container">
+        <div className="search-wrapper" style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            {/* Search Input */}
+            <input
+                type="text"
+                placeholder="Search Loans"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+                style={{
+                    padding: '7px 40px 10px 10px',
+                    fontSize: '16px',
+                    border: '0px',
+                    borderRadius: '4px',
+                    width: '250px',
+                    marginBottom: '30px',
+                    marginTop: '-10px',
+                    marginLeft: '900px',
+                }}
+            />
+        
+            {/* Filter Icon */}
+            <div
+                onClick={() => setShowFilterOptions(!showFilterOptions)} // Toggle the filter options
+                className="date-filter-icon"
+                style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    fontSize: '20px',
+                    marginBottom: '30px',
+                    marginTop: '-10px',
+                    marginLeft: '10px',
+                }}
+            >
+                <span style={{ marginRight: '5px' }}>Range</span>
+                <TbFilterEdit />
+            </div>
+
+            {/* Filter Options Dropdown */}
+            {showFilterOptions && (
+                <div
+                    className="filter-options"
+                    style={{
+                        position: 'absolute',
+                        top: '40px',
+                        left: '1085px',
+                        backgroundColor: 'white',
+                        boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
+                        borderRadius: '4px',
+                        padding: '10px',
+                        zIndex: 100,
+                        width: '150px',
+                    }}
+                >
                     <button
-                        onClick={() => console.log('Search triggered')}
+                        onClick={() => {
+                            setFilter('today');
+                            handleDateFilter();
+                            setShowFilterOptions(false); // Close dropdown when "Today" is selected
+                        }}
+                        className={`filter-button ${filter === 'today' ? 'selected-filter' : ''}`}
                         style={{
-                            position: 'absolute',
-                            top: '-13px',
-                            fontSize: '12px',
+                            color: filter === 'today' ? 'green' : 'inherit',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            padding: '5px 10px',
                             cursor: 'pointer',
-                            backgroundColor: '#007bff',
-                            color: 'black',
-                            border: '2px solid #000000',
-                            borderRadius: '4px',
-                            padding: '10px',
-                            marginLeft: '1225px',
                         }}
                     >
-                        <FaSearch />
+                        Today
+                    </button>
+                    <button
+                        onClick={() => {
+                            setFilter('single-day');
+                            setShowFilterOptions(true); // Keep dropdown open for "Single Day"
+                        }}
+                        className={`filter-button ${filter === 'single-day' ? 'selected-filter' : ''}`}
+                        style={{
+                            color: filter === 'single-day' ? 'green' : 'inherit',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            padding: '5px 10px',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        Single Day
+                    </button>
+                    <button
+                        onClick={() => {
+                            setFilter('date-range');
+                            setShowFilterOptions(true); // Keep dropdown open for "Date Range"
+                        }}
+                        className={`filter-button ${filter === 'date-range' ? 'selected-filter' : ''}`}
+                        style={{
+                            color: filter === 'date-range' ? 'green' : 'inherit',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            padding: '5px 10px',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        Date Range
+                    </button>
+
+                    {/* Automatically show All Date */}
+                    <button 
+                        onClick={() => {
+                            setFilter('all-date');
+                            handleDateFilter(); // Display all data without needing to click again
+                            setShowFilterOptions(false); // Close dropdown
+                        }} 
+                        className={`filter-button ${filter === 'all-date' ? 'selected-filter' : ''}`}
+                        style={{
+                            color: filter === 'all-date' ? 'green' : 'inherit',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            padding: '5px 10px',
+                            cursor: 'pointer',
+                            marginTop: '10px',
+                        }}
+                    >
+                        All Date
+                    </button>
+
+                    {/* Date Picker for Single Day */}
+                    {filter === "single-day" && (
+                        <>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                className="date-input"
+                                placeholder="Select a Date"
+                            />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                                <button 
+                                    onClick={() => { 
+                                        if (selectedDate) {
+                                            handleDateFilter(); 
+                                        } else {
+                                            setFilter('all-date'); // Automatically reset to "All Date"
+                                            handleDateFilter(); // Display all data
+                                        }
+                                        setShowFilterOptions(false); // Close dropdown after applying filter
+                                    }} 
+                                    className="apply-filter-button"
+                                >
+                                    Apply
+                                </button>
+                                <button 
+                                    onClick={() => { 
+                                        setFilter('all-date'); // Automatically reset to "All Date"
+                                        setSelectedDate(""); // Reset selected date
+                                        handleDateFilter(); // Display all data
+                                        setShowFilterOptions(false); // Close dropdown on cancel
+                                    }} 
+                                    className="cancel-filter-button"
+                                    style={{
+                                        color: 'red',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </>
+                    )}
+
+                    {/* Date Range Inputs */}
+                    {filter === "date-range" && (
+                        <>
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="date-input"
+                                placeholder="Start Date"
+                            />
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="date-input"
+                                placeholder="End Date"
+                            />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
+                                <button 
+                                    onClick={() => { 
+                                        if (startDate && endDate) {
+                                            handleDateFilter(); 
+                                        } else {
+                                            setFilter('all-date'); // Automatically reset to "All Date"
+                                            handleDateFilter(); // Display all data
+                                        }
+                                        setShowFilterOptions(false); // Close dropdown after applying filter
+                                    }} 
+                                    className="apply-filter-button"
+                                >
+                                    Apply
+                                </button>
+                                <button 
+                                    onClick={() => { 
+                                        setFilter('all-date'); // Automatically reset to "All Date"
+                                        setStartDate(""); 
+                                        setEndDate(""); 
+                                        handleDateFilter(); // Display all data
+                                        setShowFilterOptions(false); // Close dropdown on cancel
+                                    }} 
+                                    className="cancel-filter-button"
+                                    style={{
+                                        color: 'red',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
+
+            {/* Pop-up message when no loan is found */}
+            {showNoLoanPopup && (
+                <div className="popup" style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    padding: '20px',
+                    background:' rgba(0, 0, 0, 0.5)',
+                    borderRadius: '5px',
+                    boxShadow: '0px 0px 20px 0px rgb(154, 154, 154)',
+                    background:' #bbbbbb',
+                    zIndex: 2000,
+                }}>
+                    <p>There's no loan made on this date.</p>
+                    <button 
+                        onClick={() => { 
+                            setShowNoLoanPopup(false); // Close the pop-up
+                            setFilter('all-date'); // Reset to "All Date"
+                            handleDateFilter(); // Automatically show all data
+                        }} 
+                        style={{
+                            backgroundColor: 'green',
+                            color: 'black',
+                            border: 'none',
+                            padding: '10px 20px',
+                            cursor: 'pointer',
+                            justifyContentContent: 'center'
+                        }}
+                    >
+                        Ok
                     </button>
                 </div>
+            )}
+
+            {/* Display the filtered loans */}
+            <div>
+                {filteredLoans.map(loan => (
+                    <div key={loan.id}>
+                        {/* Render loan details */}
+                    </div>
+                ))}
             </div>
-        )}
+        </div>
+    </div>
+)}
         <div style={{ position: 'relative', marginBottom: '10px' }}>
             {!formVisible && (
                 <button
@@ -242,12 +534,12 @@ return (
                         backgroundColor: '#28a745',
                         color: 'black',
                         padding: '10px 20px',
-                        border: '2px solid #000000',
+                        border: '0px',
                         borderRadius: '5px',
                         cursor: 'pointer',
                         position: 'relative', 
-                        marginRight: '1150px', 
-                        marginTop: '-65px',
+                        marginLeft: '-5px', 
+                        marginTop: '-55px',
                         position: 'fixed'
                     }}
                 >
@@ -285,6 +577,7 @@ return (
 
                 <input
                     type="text"
+                    className="form-control"
                     placeholder="Account Number"
                     value={loanData.account}
                     onChange={(e) => setLoanData({ ...loanData, account: e.target.value })}
@@ -293,11 +586,11 @@ return (
                 <label>Loan Type:</label>
                 <select
                     name="loan_type"
+                    className="form-control"
                     value={loanData.loan_type}
                     onChange={(e) =>
                         setLoanData({ ...loanData, loan_type: e.target.value })
                     }
-                    className="form-input"
                 >
                     <option value="Regular">Regular</option>
                     <option value="Emergency">Emergency</option>
@@ -309,10 +602,10 @@ return (
                     name="loan_amount"
                     value={loanData.loan_amount}
                     onChange={(e) =>
-                        setLoanData({ ...loanData, loan_amount: e.target.value })
-                    }
+                        setLoanData({ ...loanData, loan_amount: e.target.value})
+                    } 
                     required
-                    className="form-input"
+                    className="form-control"
                 />
 
                 <label>Loan Term:</label>
@@ -321,10 +614,10 @@ return (
                     name="loan_period"
                     value={loanData.loan_period}
                     onChange={(e) =>
-                        setLoanData({ ...loanData, loan_period: e.target.value })
+                        setLoanData({ ...loanData, loan_period: e.target.value})
                     }
                     required
-                    className="form-input"
+                    className="form-control"
                 />
 
                 <label>Loan Term Unit:</label>
@@ -335,14 +628,11 @@ return (
                         setLoanData({ ...loanData, loan_period_unit: e.target.value })
                     }
                     required
-                    className="form-input"
+                    className="form-control"
                 >
                     <option value="months">Month</option>
                     <option value="years">Years</option>
                </select>
-
-
-
                 <label>Purpose:</label>
                 <select
                     name="purpose"
@@ -352,7 +642,7 @@ return (
                         setLoanData({ ...loanData, purpose: selectedValue });
                         setShowOtherPurpose(selectedValue === "Others");
                     }}
-                    className="form-input"
+                    className="form-control"
                 >
                     <option value="Education">Education</option>
                     <option value="Medical/Emergency">Medical/Emergency</option>
@@ -370,7 +660,7 @@ return (
                         onChange={(e) =>
                             setLoanData({ ...loanData, otherPurpose: e.target.value })
                         }
-                        className="form-input"
+                        className="form-control"
                     />
                 )}
 
@@ -389,7 +679,24 @@ return (
                 </button>
             </form>
         )}
-
+        {/* Popup Modal */}
+        {showPopup && (
+            <div className="popup-overlay">
+            <div className="popup-box">
+            <div className="popup">
+                <p>{popupMessage}</p>
+            </div>
+        <ul>
+        {Object.values(errors).map((error, index) => (
+            <li key={index} className="error-text">
+        {error}
+            </li>
+        ))}
+        </ul>
+            <button onClick={closePopup} className="close-btn">Close</button>
+            </div>
+        </div>
+        )}
         {!formVisible && !paymentFormVisible && (
             <div className="loan-table-container">
                 <table className="loan-table">
@@ -453,7 +760,7 @@ return (
                     style={{
                         backgroundColor: "#4CAF50", 
                         color: "black",
-                        border: '2px solid #000000',
+                        border: '0px',
                         textAlign: "center",
                         textDecoration: "none",
                         display: "inline-block",
@@ -535,7 +842,7 @@ return (
                     style={{
                         backgroundColor: "#f44336", 
                         color: "black",
-                        border: '2px solid #000000',
+                        border: '0px',
                         textAlign: "center",
                         textDecoration: "none",
                         display: "inline-block",

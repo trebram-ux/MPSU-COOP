@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDollarSign, faFileInvoiceDollar, faLandmark, faUsers, faSignOutAlt, faCalendarAlt, faGear, faArchive} from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
@@ -17,14 +17,20 @@ const navItems = [
 
 function AdminNavbar({ onLinkClick }) {
   const navigate = useNavigate(); // Initialize useNavigate hook
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false); // State for controlling popup visibility
 
-  const handleLogout = () => {
-    const confirmLogout = window.confirm('Are you sure you want to log out?'); // Show confirmation dialog
-    if (confirmLogout) {
-      
-      console.log('Log out confirmed');
-      navigate('/'); 
-    }
+  const handleLogoutClick = () => {
+    setShowLogoutPopup(true); // Show the popup when logout button is clicked
+  };
+
+  const handleLogoutConfirm = () => {
+    console.log('Log out confirmed');
+    navigate('/'); // Perform logout action here (e.g., clearing session, redirecting)
+    setShowLogoutPopup(false); // Close the popup after confirmation
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutPopup(false); // Close the popup if the user cancels
   };
 
   return (
@@ -52,10 +58,21 @@ function AdminNavbar({ onLinkClick }) {
           </li>
         ))}
       </ul>
-      <div className={styles.logOut} onClick={handleLogout}>
+      <div className={styles.logOut} onClick={handleLogoutClick}>
         <FontAwesomeIcon icon={faSignOutAlt} className={styles.logOutIcon} />
         <span className={styles.logOutText}>Log out</span>
       </div>
+
+      {/* Popup Overlay for Logout Confirmation */}
+      {showLogoutPopup && (
+        <div className={styles.popupOverlay}>
+          <div className={styles.popup}>
+            <p>Are you sure you want to log out?</p>
+            <button className={styles.popupButton} onClick={handleLogoutConfirm}>Yes</button>
+            <button className={styles.popupButton} onClick={handleLogoutCancel}>Cancel</button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

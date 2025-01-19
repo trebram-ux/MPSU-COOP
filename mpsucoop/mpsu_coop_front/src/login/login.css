@@ -1,6 +1,6 @@
 body {
-  font-family: Arial, sans-serif;
-  color: #333;
+  font-family: 'Roboto', Arial, sans-serif;
+  color: #000000;
   margin: 0;
   display: flex;
   justify-content: center;
@@ -8,7 +8,7 @@ body {
   height: 100vh;
   overflow: hidden;
   background-color: #f0f0f0; 
-}
+}   
 
 .background {
   position: absolute;
@@ -39,8 +39,30 @@ body {
   font-size: 19px;
   margin-bottom: 40px; 
   color: black;
-  border-bottom: 2px solid black;
+  border-bottom: 2px solid rgba(75, 75, 75, 0.545);
   padding-bottom: 10px;
+}
+/* Form Container */
+.form {
+  width: 100%;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #000000;
+  background-color: #f9f9f9;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #04f624;
+  box-shadow: 0 0 15px rgba(0, 255, 195, 0.5);
 }
 
 .input-group {
@@ -53,7 +75,6 @@ body {
 
 .input-group .form-control {
   border-radius: 12px;
-  /* border: 2px solid black; */
   padding: 10px; 
   width: 80%; 
 }
@@ -62,7 +83,6 @@ body {
   background: white;
   color: black;
   border-radius: 12px;
-  /* border: 2px solid black; */
 }
 
 .btn {
@@ -78,7 +98,6 @@ body {
 
 .btn-primary {
   background: #0d5d24;
-  /* border: 2px solid black; */
   color: white;
 }
 
@@ -106,8 +125,7 @@ a:hover {
 .card-body {
   background-color: #fce4ec;
   width: 100%;
-  display: flex;
-  /* flex-direction: column; */
+  display: flex;  
   box-shadow: none;
   justify-content: center;
   align-items: center;

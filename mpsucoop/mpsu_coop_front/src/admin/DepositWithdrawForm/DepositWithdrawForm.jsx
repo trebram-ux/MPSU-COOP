@@ -97,7 +97,7 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
     maxWidth: '400px',
     margin: '0 auto',
     padding: '20px',
-    border: '2px solid black',
+    border: '0px',
     borderRadius: '8px',
     fontSize: '20px',
   };
@@ -160,7 +160,7 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
                 style={{
                   padding: '10px',
                   margin: '10px 0',
-                  border: '2px solid black',
+                  border: '0px',
                   borderRadius: '4px',
                   fontSize: '16px',
                 }}

@@ -161,6 +161,8 @@ class Member(models.Model):
     height = models.CharField(max_length=100, blank=True, default='Not Provided')
     weight = models.CharField(max_length=100, blank=True, default='Not Provided')
     ann_com = models.CharField(max_length=100, blank=True, default='0')
+    co_maker = models.CharField(max_length=255, null=True, blank=True)
+    relationship = models.CharField(max_length=100, default='Not Provided')
     valid_id = models.CharField(
         max_length=50, 
         choices=[
@@ -176,7 +178,7 @@ class Member(models.Model):
         ], 
         default='TIN ID'
     )
-    id_no = models.CharField(max_length=100, blank=True, default='Not Provided')  # Default for ID numbers
+    id_no = models.CharField(max_length=100, blank=True, default='Not Provided') 
 
     def delete(self, *args, **kwargs):
         try:
@@ -207,6 +209,23 @@ class Member(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.middle_name} {self.last_name}"
+
+    def clean(self):
+        # Validate unique full name (first, middle, last name)
+        if Member.objects.filter(first_name=self.first_name, middle_name=self.middle_name, last_name=self.last_name).exclude(pk=self.pk).exists():
+            raise ValidationError(f'A member with the name {self.first_name} {self.middle_name} {self.last_name} already exists.')
+
+        # Validate unique email
+        if Member.objects.filter(email=self.email).exclude(pk=self.pk).exists():
+            raise ValidationError(f'This email {self.email} is already in use.')
+
+        # Validate unique phone number
+        if Member.objects.filter(phone_number=self.phone_number).exclude(pk=self.pk).exists():
+            raise ValidationError(f'This phone number {self.phone_number} is already in use.')
+
+    def save(self, *args, **kwargs):
+        self.clean()  # Validate before saving
+        super(Member, self).save(*args, **kwargs)
 
 class Account(models.Model):
     account_number = models.CharField(max_length=20, primary_key=True)
