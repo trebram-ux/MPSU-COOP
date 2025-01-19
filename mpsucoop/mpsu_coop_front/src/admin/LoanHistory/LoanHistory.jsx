@@ -38,6 +38,11 @@ const LoanManager = () => {
     const [endDate, setEndDate] = useState(''); // State for end date in date range // Add this line for the filter state
     const [showNoLoanPopup, setShowNoLoanPopup] = useState(false); 
 
+    const formatNumber = (number) => {
+        if (number == null || isNaN(number)) return "N/A";
+        return new Intl.NumberFormat('en-US').format(number);
+      };
+
     const BASE_URL = 'http://localhost:8000';
     const navigate = useNavigate();
 
@@ -596,17 +601,25 @@ return (
                     <option value="Emergency">Emergency</option>
                 </select>
 
-                <label>Loan Amount:</label>
-                <input
-                    type="number"
-                    name="loan_amount"
-                    value={loanData.loan_amount}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, loan_amount: e.target.value})
-                    } 
-                    required
-                    className="form-control"
-                />
+<label>Loan Amount:</label>
+<input
+    type="text" // Change to "text" to allow formatted input display
+    name="loan_amount"
+    value={formatNumber(loanData.loan_amount)} // Display the formatted value
+    onChange={(e) => {
+        const rawValue = e.target.value.replace(/,/g, ""); // Remove commas for raw numeric value
+        if (!isNaN(rawValue)) {
+            setLoanData({ ...loanData, loan_amount: rawValue });
+        }
+    }}
+    onBlur={(e) => {
+        // Optionally, format on blur for enhanced user experience
+        const formattedValue = formatNumber(loanData.loan_amount);
+        e.target.value = formattedValue;
+    }}
+    required
+    className="form-control"
+/>
 
                 <label>Loan Term:</label>
                 <input
@@ -707,6 +720,7 @@ return (
                             <th>Account Holder</th>
                             <th>Loan Type</th>
                             <th>Loan Amount</th>
+                            {/* <th>Service Fee</th> */}
                             <th>Purpose</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -719,7 +733,8 @@ return (
                                 <td>{loan.account}</td>
                                 <td>{loan.account_holder || 'N/A'}</td>
                                 <td>{loan.loan_type}</td>
-                                <td>{loan.loan_amount}</td>
+                                <td>{formatNumber(loan.loan_amount)}</td>
+                                {/* <td>{loan.service_fee}</td> */}
                                 <td>{loan.purpose}</td>
                                 <td>{loan.status}</td>
                                 <td>

@@ -9,6 +9,11 @@ const PaymentSchedule = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();  
 
+  const formatNumber = (number) => {
+    if (number == null || isNaN(number)) return "N/A";
+    return new Intl.NumberFormat('en-US').format(number);
+  };
+
   useEffect(() => {
     const fetchPaymentSchedules = async () => {
       try {
@@ -92,10 +97,10 @@ const PaymentSchedule = () => {
               {paymentSchedules.map((schedule) => (
                 <tr key={schedule.id} style={{ color: 'black' }}>
                   <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.due_date}</td>
-                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.principal_amount}</td>
-                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.interest_amount}</td>
-                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.service_fee_component}</td>
-                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{schedule.payment_amount || "N/A"}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{formatNumber(schedule.principal_amount)}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{formatNumber (schedule.interest_amount)}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{formatNumber (schedule.service_fee)}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ddd' }}>{formatNumber (schedule.payment_amount || "N/A")}</td>
                   <td 
                     style={{
                       padding: '10px', 

@@ -17,6 +17,10 @@ function Accounts() {
   const [refreshArchives, setRefreshArchives] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState(null);
+  const formatNumber = (number) => {
+    if (number == null || isNaN(number)) return "N/A";
+    return new Intl.NumberFormat('en-US').format(number);
+  };
 
   useEffect(() => {
     fetchAccounts();

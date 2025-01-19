@@ -49,7 +49,7 @@ import Home from './member/Home/Home';
 import Login from './login/Login';
 import Loans from './member/Loans/Loans';
 import PaymentSchedule from './member/PaymentSchedule';
-import Payments from './member/Payments';
+import Payments from './member/Payments/Payments';
 import Accounts from './member/Account/Account';
 import Ledger from './member/Ledger/Ledger';
 import Archive from './admin/Archive/Archive';
@@ -108,7 +108,7 @@ function App() {
             }
           />
           <Route
-            path="/payments/:control_number"
+            path="/payments/"
             element={
               <ProtectedRoute>
                 <Payments />

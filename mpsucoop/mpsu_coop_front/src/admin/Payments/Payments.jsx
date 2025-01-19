@@ -17,6 +17,11 @@ const Payments = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loanTypeFilter, setLoanTypeFilter] = useState('All');
 
+  const formatNumber = (number) => {
+    if (number == null || isNaN(number)) return "N/A";
+    return new Intl.NumberFormat('en-US').format(number);
+  };
+
     // State to hold the generated OR number for each schedule
     const [generatedOrNumbers, setGeneratedOrNumbers] = useState({});
 
@@ -200,7 +205,7 @@ const Payments = () => {
                       <td style={{ color: 'blue' }}>{summary.account_number || 'N/A'}</td>
                       <td>{summary.account_holder}</td>
                       <td>{summary.next_due_date ? new Date(summary.next_due_date).toLocaleDateString() : 'No Due Date'}</td>
-                      <td>₱ {summary.total_balance?.toFixed(2)}</td>
+                      <td>₱ {formatNumber(summary.total_balance?.toFixed(2))}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -233,7 +238,7 @@ const Payments = () => {
                 <tr>
                   <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>Paid Balance:</td>
                   <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold', borderBottom: '1px solid rgba(218, 218, 218, 0.68)', width: '100px'}}>
-                  ₱{calculatePaidBalance()}
+                  ₱{formatNumber(calculatePaidBalance())}
                   </td>
                 </tr>
 
@@ -248,9 +253,9 @@ const Payments = () => {
                     </td>
                     <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solidrgba(218, 218, 218, 0.68)'}}>Amount:</td>
                     <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold' , borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>
-                      ₱{parseFloat(
+                      ₱{formatNumber(parseFloat(
                         filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Regular')?.loan_amount || 0
-                      ).toFixed(2)}
+                      ).toFixed(2))}
                     </td>
                   </tr>
                 )}
@@ -266,9 +271,9 @@ const Payments = () => {
                     </td>
                     <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px' , borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>Amount:</td>
                     <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold', borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>
-                      ₱{parseFloat(
+                      ₱{formatNumber(parseFloat(
                         filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Emergency')?.loan_amount || 0
-                      ).toFixed(2)}
+                      ).toFixed(2))}
                     </td>
                   </tr>
                 )}
@@ -425,8 +430,8 @@ const Payments = () => {
                         {/* <td>{schedule.loan_date? new Date(schedule.loan_date).toLocaleDateString(): 'No Date Available'}</td>
                         <td>₱ {parseFloat(schedule.loan_amount).toFixed(2)}</td> */}
                         <td>{schedule.loan_type || 'N/A'}</td>
-                        <td>₱ {parseFloat(schedule.principal_amount).toFixed(2)}</td>
-                        <td>₱ {parseFloat(schedule.payment_amount).toFixed(2)}</td>
+                        <td>₱ {formatNumber(parseFloat(schedule.principal_amount).toFixed(2))}</td>
+                        <td>₱ {formatNumber(parseFloat(schedule.payment_amount).toFixed(2))}</td>
                         <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
                         <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
                         <td>{schedule.or_number}</td>
