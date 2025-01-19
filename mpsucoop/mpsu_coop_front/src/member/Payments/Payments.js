@@ -12,6 +12,11 @@ const MemberPayments = () => {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const formatNumber = (number) => {
+    if (!number) return "0.00"; // Handle empty or undefined values
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
   const fetchPaymentSchedules = async () => {
     setLoading(true);
     setError('');
@@ -150,13 +155,13 @@ const MemberPayments = () => {
                   {schedule.loan_type || 'N/A'}
                 </td>
                 <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  ₱ {parseFloat(schedule.loan_amount || 0).toFixed(2)}
+                  ₱ {formatNumber(parseFloat(schedule.loan_amount || 0).toFixed(2))}
                 </td>
                 <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  ₱ {parseFloat(schedule.principal_amount || 0).toFixed(2)}
+                  ₱ {formatNumber(parseFloat(schedule.principal_amount || 0).toFixed(2))}
                 </td>
                 <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  ₱ {parseFloat(schedule.payment_amount || 0).toFixed(2)}
+                  ₱ {formatNumber(parseFloat(schedule.payment_amount || 0).toFixed(2))}
                 </td>
                 <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
                   {schedule.payment_date

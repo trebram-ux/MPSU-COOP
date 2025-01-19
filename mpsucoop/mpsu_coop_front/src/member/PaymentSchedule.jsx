@@ -3,11 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import Topbar from './Topbar/Topbar';
 
 const PaymentSchedule = () => {
-  const { control_number } = useParams(); 
+  const { control_number } = useParams();
   const [paymentSchedules, setPaymentSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
   const formatNumber = (number) => {
     if (number == null || isNaN(number)) return "N/A";
@@ -31,7 +31,9 @@ const PaymentSchedule = () => {
         }
 
         const data = await response.json();
-        setPaymentSchedules(data);
+        // Filter out paid schedules
+        const unpaidSchedules = data.filter(schedule => !schedule.is_paid);
+        setPaymentSchedules(unpaidSchedules);
         setLoading(false);
       } catch (err) {
         setError("Unable to load payment schedules.");
@@ -80,8 +82,7 @@ const PaymentSchedule = () => {
             marginTop: '10px',
             width: '150%',
             marginLeft: '-25%',
-          }}
-        >
+          }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ backgroundColor: 'red' }}>
@@ -107,8 +108,7 @@ const PaymentSchedule = () => {
                       border: '1px solid #ddd', 
                       color: schedule.is_paid ? 'green' : 'red',
                       fontWeight: 'bold'
-                    }}
-                  >
+                    }}>
                     {schedule.is_paid ? "Paid" : "Pending"}
                   </td>
                 </tr>

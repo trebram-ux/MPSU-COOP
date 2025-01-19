@@ -436,25 +436,52 @@ class Loan(models.Model):
     def generate_payment_schedule(self):
         if PaymentSchedule.objects.filter(loan=self).exists():
             return
+        
         total_months = self.loan_period * (12 if self.loan_period_unit == 'years' else 1)
-        total_periods = total_months * 2
-        bi_monthly_rate = (self.interest_rate / Decimal('100')) / 24
+        total_periods = total_months * 2  # Bi-monthly (payments every 15 days)
+        
+        bi_monthly_rate = (self.interest_rate / Decimal('100')) / 24  # Bi-monthly interest rate
         loan_principal = self.loan_amount
         total_interest = loan_principal * bi_monthly_rate * total_periods
         total_amount_due = loan_principal + total_interest
         bi_monthly_payment = total_amount_due / Decimal(total_periods)
+        
+        remaining_balance = loan_principal  # Start with the full loan amount
+
         for period in range(total_periods):
-            due_date = self.loan_date + timedelta(days=(period * 15))
+            due_date = self.loan_date + timedelta(days=(period +1) * 15)
+            
+            # Initialize service fee to 0
             service_fee = Decimal('0.00')
-            if (period + 1) % 24 == 0:
-                service_fee = (self.service_fee / (self.loan_period // 1)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+            # Apply service fee calculation based on remaining balance at specific intervals (e.g., yearly)
+            if (period + 1) % 24 == 0:  # For example, every 12 months
+                # For Year 1: 1% of remaining balance
+                # For Year 2: 1.5% of remaining balance, etc.
+                if period < 24:
+                    service_fee = remaining_balance * Decimal('0.01')  # 1% for the first year
+                elif period < 48:
+                    service_fee = remaining_balance * Decimal('0.015')  # 1.5% for the second year
+                elif period < 72:
+                    service_fee = remaining_balance * Decimal('0.02')  # 1.5% for the second year
+                else:
+                    service_fee = remaining_balance * Decimal('0.025') # 1.5% for the second year
+                # Add more logic for further years
+
+            # Deduct the bi-monthly payment from the remaining balance
+            remaining_balance -= bi_monthly_payment
+
+            # Create the payment schedule for this period
             PaymentSchedule.objects.create(
                 loan=self,
                 principal_amount=(loan_principal / total_periods).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                 interest_amount=(total_interest / total_periods).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                 due_date=due_date,
-                balance=(total_amount_due - bi_monthly_payment * (period + 1)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                service_fee=service_fee,  # Assign calculated service fee for this period
+                balance=remaining_balance.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                loan_type=self.loan_type  # Keep loan type consistent across schedules
             )
+
 
 
             
@@ -483,17 +510,33 @@ class PaymentSchedule(models.Model):
             self.is_paid = True
             self.save()
     def calculate_service_fee(self):
-        """Recalculate service fee based on remaining balance."""
-        remaining_balance_ratio = self.balance / self.loan.loan_amount
-        self.service_fee = (self.loan.service_fee * remaining_balance_ratio).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        """Recalculate service fee based on the remaining balance and year."""
+        total_years = self.loan.loan_period if self.loan.loan_period_unit == 'years' else self.loan.loan_period / 12
+
+        # Check if we are at the end of each year (24th, 48th, 72nd, or 96th payment)
+        if self.installment_order in [24, 48, 72, 96]:
+            # Apply service fee based on the loan type (Regular/Emergency)
+            if self.loan.loan_type == 'Emergency':
+                # Emergency loan service fee rate
+                self.service_fee = self.loan.loan_amount * self.loan.system_settings.service_fee_rate_emergency
+            else:
+                # Regular loan service fee rate based on the year
+                if total_years <= 1:
+                    rate = self.loan.system_settings.service_fee_rate_regular_1yr
+                elif total_years <= 2:
+                    rate = self.loan.system_settings.service_fee_rate_regular_2yr
+                elif total_years <= 3:
+                    rate = self.loan.system_settings.service_fee_rate_regular_3yr
+                else:
+                    rate = self.loan.system_settings.service_fee_rate_regular_4yr
+                
+                # Calculate the service fee based on the applicable rate
+                self.service_fee = self.loan.loan_amount * rate
+            # Ensure the service fee is calculated correctly
+            self.service_fee = self.service_fee.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     def calculate_payment_amount(self):
-        """Calculates the total amount due, including service fees for specific installment orders."""
-        self.calculate_service_fee()
-        if self.installment_order in [24, 48, 72, 96]:
-            self.payment_amount = self.principal_amount + self.interest_amount + self.service_fee
-        else:
-            self.payment_amount = self.principal_amount + self.interest_amount
+        self.payment_amount = self.principal_amount + self.interest_amount + self.service_fee
 
     def save(self, *args, **kwargs):
         self.calculate_payment_amount()

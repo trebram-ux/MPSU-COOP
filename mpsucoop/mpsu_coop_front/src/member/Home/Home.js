@@ -13,6 +13,11 @@ const Home = () => {
   const [buttonClicked, setButtonClicked] = useState(false); // Track if the button was clicked
   const navigate = useNavigate();
 
+  const formatNumber = (number) => {
+    if (!number) return "0.00"; // Handle empty or undefined values
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
   // Fetch member details and loan data
   useEffect(() => {
     const fetchMemberDetails = async () => {
@@ -74,7 +79,7 @@ const Home = () => {
 
   // Find the payment schedule with the nearest due date for the identified loan
   const nearestPaymentSchedule = paymentSchedules
-    .filter(schedule => schedule.loan_id === loanForMember?.id) // Ensure payment schedules belong to the current loan
+    .filter(schedule => schedule.loan_id === loanForMember?.id ) // Ensure payment schedules belong to the current loan
     .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))[0]; // Sort by due date and get the nearest one
 
   // Calculate total amount paid for the loan (sum of payment_amount for this loan)
@@ -136,7 +141,11 @@ const Home = () => {
                 <strong>ACCOUNT NUMBER:</strong> {memberData.accountN || 'N/A'}
               </p>
               <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '30px' }}>
+<<<<<<< HEAD
                 SHARE CAPITAL: <span style={{ fontSize: '30px', fontWeight: '900' }}>₱{memberData.share_capital || 'N/A'}</span>
+=======
+                SHARE CAPITAL: <span style={{ fontSize: '30px', fontWeight: '900' }}>{formatNumber(memberData.share_capital || 'N/A')}</span>
+>>>>>>> 8670a220a0663d42fc8f19b882c5bfcf494312a8
               </p>
 
               <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '50px' }}>
@@ -177,11 +186,11 @@ const Home = () => {
                 </h3>
                 <div style={{ textAlign: 'left', margin: '20px 0', fontSize: '30px'}}>
                   <p style={{ fontSize: '30px', fontWeight: 'bold', color: 'blue' }}>
-                    {nearestPaymentSchedule?.payment_amount || 0}
+                    {formatNumber(nearestPaymentSchedule?.payment_amount || 0)}
                   </p>
 
                   <p>Amount Paid:</p>
-                  <p>{totalAmountPaid} out of {totalPaymentAmount}</p>
+                  <p>{formatNumber(totalAmountPaid.toFixed(2))} out of {formatNumber(totalPaymentAmount.toFixed(2))}</p>
                   <div style={{ backgroundColor: 'red', borderRadius: '20px', height: '8px', width: '100%', fontSize: '30px' }}>
                     <div
                       style={{

@@ -551,14 +551,14 @@ const generateReceipt = (schedule) => {
               <tbody>
                 {schedules.map((schedule) => (
                   <tr key={schedule.id}>
-                    <td>₱ {(parseFloat(schedule.principal_amount) || 0).toFixed(2)}</td>
-                    <td>₱ {(parseFloat(schedule.interest_amount) || 0).toFixed(2)}</td>
+                    <td>₱ {formatNumber((parseFloat(schedule.principal_amount) || 0).toFixed(2))}</td>
+                    <td>₱ {formatNumber((parseFloat(schedule.interest_amount) || 0).toFixed(2))}</td>
                     {loanType === 'Regular' && (
-                      <td>₱ {(parseFloat(schedule.service_fee) || 0).toFixed(2)}</td>
+                      <td>₱ {formatNumber((parseFloat(schedule.service_fee) || 0).toFixed(2))}</td>
                     )}
-                    <td>₱ {(parseFloat(schedule.payment_amount) || 0).toFixed(2)}</td>
+                    <td>₱ {formatNumber((parseFloat(schedule.payment_amount) || 0).toFixed(2))}</td>
                     <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
-                    <td>₱ {(parseFloat(schedule.balance) || 0).toFixed(2)}</td>
+                    <td>₱ {formatNumber((parseFloat(schedule.balance) || 0).toFixed(2))}</td>
                     <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
                       {schedule.is_paid ? 'Paid!' : 'Ongoing'}
                     </td>
