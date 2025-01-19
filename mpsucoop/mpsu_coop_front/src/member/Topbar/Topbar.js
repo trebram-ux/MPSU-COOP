@@ -1,24 +1,30 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate
+import React, { useState } from 'react'; // Import useState
+import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTachometerAlt, faUser, faMoneyBill, faCreditCard, faPowerOff } from '@fortawesome/free-solid-svg-icons';
+import { faTachometerAlt, faUser, faMoneyBill, faPowerOff, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import './Topbar.css';
 
 const Topbar = () => {
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate();
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false); // State for logout confirmation
 
   const handleLogout = () => {
-    const confirmLogout = window.confirm('Are you sure you want to log out?'); // Show confirmation dialog
-    if (confirmLogout) {
-      // Perform any necessary logout logic (e.g., clearing session, tokens)
-      console.log('Log out confirmed');
-      localStorage.clear(); // Clear local storage or any authentication tokens
-      navigate('/'); // Redirect to the login page
-    }
+    setShowLogoutPopup(true); // Show logout confirmation popup
+  };
+
+  const handleLogoutConfirm = () => {
+    // Perform logout actions like clearing session, tokens, etc.
+    localStorage.clear();
+    navigate('/'); // Redirect to login page
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutPopup(false); // Close the popup without logging out
   };
 
   const topbarStyle = {
-    height: '150px',
-    backgroundColor: 'green',
+    height: '80px',
+    backgroundColor: 'rgb(29, 100, 50)',
     color: 'goldenrod',
     padding: '10px 20px',
     display: 'flex',
@@ -26,10 +32,9 @@ const Topbar = () => {
     justifyContent: 'space-between',
     borderRadius: '0 30px 30px 0',
     position: 'fixed',
-    top: 0,
+    top: '0px',
     left: 0,
-    width: '100%',
-
+    width: '99%',
   };
 
   const logoContainerStyle = {
@@ -38,7 +43,7 @@ const Topbar = () => {
   };
 
   const navHeaderStyle = {
-    fontSize: '40px',
+    fontSize: '28px',
     fontWeight: 'bold',
     textTransform: 'uppercase',
     margin: 0,
@@ -53,25 +58,25 @@ const Topbar = () => {
   };
 
   const navItemStyle = {
-    margin: '0 15px',
+    margin: '0 20px',
   };
 
   const navLinkStyle = {
     textDecoration: 'none',
-    color: 'black',
+    color: 'white',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    fontSize: '24px',
+    fontSize: '18px',
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    marginTop: '10px',
-    gap: '10px'
+    marginTop: '20px',
+    gap: 0,
   };
 
   const navIconStyle = {
-    fontSize: '24px',
-    marginBottom: '5px',
+    fontSize: '18px',
+    marginBottom: '-5px',
   };
 
   return (
@@ -84,13 +89,12 @@ const Topbar = () => {
             width: '60px',
             height: '60px',
             marginRight: '10px',
-            borderRadius: '50%', 
+            borderRadius: '50%',
           }}
         />
-        <div style={navHeaderStyle}>MPSU EMPLOYEES COOP</div>
+        <div style={navHeaderStyle}>MPSU EMPLOYEES CREDIT COOP</div>
       </div>
       <ul style={navTopbarStyle}>
-        
         <li style={navItemStyle}>
           <Link to="/Home" style={navLinkStyle}>
             <FontAwesomeIcon icon={faTachometerAlt} style={navIconStyle} />
@@ -109,39 +113,25 @@ const Topbar = () => {
             <p>Loan</p>
           </Link>
         </li>
-        {/* <li style={navItemStyle}>
-          <Link to="/Ledger" style={navLinkStyle}>
-            <FontAwesomeIcon icon={faMoneyBill} style={navIconStyle} />
-            <p>Ledger</p>
-          </Link>
-        </li> */}
-
-        {/* <li style={navItemStyle}>
-          <Link to="/payment-schedules" style={navLinkStyle}>
-            <FontAwesomeIcon icon={faCreditCard} style={navIconStyle} />
-            <p>Schedules</p>
-          </Link>
-        </li>
+        {/* Log out button */}
         <li style={navItemStyle}>
-          <Link
-            to={`/home/payments/${localStorage.getItem('account_number')}`}
-            style={navLinkStyle}
-          >
-            <FontAwesomeIcon icon={faCreditCard} style={navIconStyle} />
-            <p>Payment</p>
-          </Link>
-        </li> */}
-
-        <li style={navItemStyle}>
-          <button
-            onClick={handleLogout}
-            style={{ ...navLinkStyle, background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            <FontAwesomeIcon icon={faPowerOff} style={navIconStyle} />
-            <p>Logout</p>
-          </button>
+          <div onClick={handleLogout} style={navLinkStyle}>
+            <FontAwesomeIcon icon={faSignOutAlt} style={navIconStyle} />
+            <p>Log Out</p>
+          </div>
         </li>
       </ul>
+
+      {/* Popup Overlay for Logout Confirmation */}
+      {showLogoutPopup && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
+            <p>Are you sure you want to log out?</p>
+            <button onClick={handleLogoutConfirm} style={{ marginRight: '10px' }}>Yes</button>
+            <button onClick={handleLogoutCancel}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

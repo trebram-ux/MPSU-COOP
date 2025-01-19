@@ -855,18 +855,6 @@ return (
                 >
                     Cancel
                 </button>
-                <p
-                    style={{
-                        fontSize: "18px",
-                        color: "black",
-                        fontWeight: "bold",
-                        marginLeft: "300px",
-
-                    }}
-                >
-                    Loan created successfully!
-                </p>
-
             </div>
         )}
         </div>

@@ -1,116 +1,130 @@
-
-.container {
-  font-family: 'Arial, sans-serif';
-  margin: 0;
-  padding: 0;
-  background-color: #d7f2b8;
-  width: 100vw; 
-  height: 90vh; 
-  
-}
-
-.home-background {
-  /* background-image: url('/img/mpspc.jpg'); */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+/* Main Container */
+.home-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
   min-height: 100vh;
-  min-width: 210vh;
 }
 
-
-.wrapper {
-  max-width: 100%;
-  margin: 20px auto;
-  padding: 20px;
+/* Welcome Section */
+.welcome-section h2 {
+  text-align: center;
+  color: black;
+  font-size: 50px;
+  margin-bottom: 60px;
+  border-bottom: 3px solid black;
+  font-weight: bolder;
 }
 
-#welcome {
-  margin-bottom: 20px;
-}
-
-#welcome h1 {
-  font-size: 2.5rem;
-  color: #000000;
-  text-align: left;
-  margin-bottom: 80px;
-}
-
-.flex-container {
+/* Cards Container */
+.cards-container {
   display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
+  justify-content: space-around;
+  gap: 20px;
+  margin-top: 60px;
 }
 
-.card {
-  background-color: #fce4ec;
+/* Left Card (Member Info) */
+.left-card {
   border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  width: 100vw;
-}
-
-.card-header {
-  background-color: #1a5130;;
-  color: #fff;
-  padding: 15px;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.card-content {
+  width: 45%;
   padding: 20px;
-  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.card-content p {
-  margin: 5px 0;
+.left-card h3 {
+  text-align: center;
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
-.card-footer {
+.left-card p {
+  text-align: center;
+  font-size: 20px;
+}
+
+/* Loan Summary */
+.loan-summary {
   display: flex;
   justify-content: space-between;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 30px;
 }
 
-.card-footer .item {
-  background-color: #00000028;
-  color: #605656;
-  padding: 8px;
-  border-radius: 5px;
+.loan-card {
+  background-color: green;
+  border-radius: 20px;
+  padding: 15px;
   text-align: center;
-}
-
-.loan-status p {
-  font-size: 1.5rem;
   font-weight: bold;
-  color: #000000;
-  margin-bottom: 10px;
-}
-
-.progress-bar {
-  height: 10px;
-  background-color: #e9ecef;
-  border-radius: 5px;
-  margin-bottom: 20px;
-}
-
-.progress-bar .progress {
-  height: 100%;
-  border-radius: 5px;
-  background-color: #f8f9f804;
-  width: 20%;
-}
-
-.button {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #0d5d24;
   color: white;
-  font-size: 1rem;
-  text-align: center;
+  width: 45%;
+}
+
+.loan-card.red {
+  background-color: red;
+}
+
+/* Right Card (Payment Info) */
+.right-card {
+  background-color: #c8f7ce;
+  border-radius: 8px;
+  width: 45%;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.payment-summary {
+  text-align: left;
+  font-size: 20px;
+}
+
+.payment-progress-bar {
+  background-color: red;
+  height: 8px;
+  width: 100%;
+  border-radius: 20px;
+  position: relative;
+  margin: 10px 0;
+}
+
+.payment-progress-bar .paid {
+  background-color: green;
+  height: 100%;
+  border-radius: 20px;
+}
+
+.payment-progress-bar .remaining {
+  background-color: #ddd;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 20px;
+}
+
+.dropdown {
+  margin-top: 15px;
+}
+
+.dropdown button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
   border-radius: 5px;
-  text-decoration: none;
-  transition: background-color 0.3s;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.dropdown-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dropdown-menu button {
+  background-color: #28a745;
+  margin: 5px 0;
 }

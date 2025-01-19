@@ -106,31 +106,24 @@ const Home = () => {
   return (
     <div>
       <Topbar />
-      <div style={{ backgroundColor: '#D5ED9F', height: '100%', width: '100%', fontFamily: 'Arial, sans-serif', color: 'black' }}>
-        <div style={{ padding: '20px' }}>
-          <section id="welcome">
-            <h2 style={{ fontWeight: 'bolder', color: 'black', marginLeft: '10px', borderBottom: '3px solid black', fontSize: '50px', width: '100%' }}>
-              WELCOME!!
-            </h2>
-          </section>
+      <div style={{ backgroundColor:' #f0f0f0', height: '100%', width: '100%', fontFamily: 'Arial, sans-serif', color: 'black' }}>
+        <div style={{ padding: '20px' }}> 
 
-          <div style={{ display: 'flex', gap: '60px', marginTop: '60px', justifyContent: 'center' }}>
-            {/* Left Card */}
+          <div style={{ display: 'flex', gap: '60px', marginTop: '100px', justifyContent: 'center' }}>
             <div
               style={{
-                backgroundColor: 'rgb(213, 242, 145)',
                 borderRadius: '8px',
-                width: '800px',
+                width: '700px',
                 padding: '20px',
                 height: '400px',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                boxShadow: '0px 4px 20px rgba(187, 186, 186, 0.99)',
               }}
             >
               <h3
                 style={{
                   fontWeight: 'bold',
                   color: 'black',
-                  borderBottom: '3px solid rgb(0, 0, 0)',
+                  borderBottom: '2px solid rgb(133, 133, 132)',
                   paddingBottom: '10px',
                   textAlign: 'center',
                   fontSize: '30px',
@@ -142,7 +135,7 @@ const Home = () => {
                 <strong>ACCOUNT NUMBER:</strong> {memberData.accountN || 'N/A'}
               </p>
               <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '30px' }}>
-                SHARE CAPITAL: <span style={{ fontSize: '30px', fontWeight: '900' }}>{memberData.share_capital || 'N/A'}</span>
+                SHARE CAPITAL: <span style={{ fontSize: '30px', fontWeight: '900' }}>₱{memberData.share_capital || 'N/A'}</span>
               </p>
 
               <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '50px' }}>
