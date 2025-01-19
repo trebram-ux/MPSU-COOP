@@ -53,6 +53,7 @@ import Payments from './member/Payments/Payments';
 import Accounts from './member/Account/Account';
 import Ledger from './member/Ledger/Ledger';
 import Archive from './admin/Archive/Archive';
+import Usermgmt from './admin/Usermgmt/Usermgmt';
 import ProtectedRoute from './ProtectedRoute';  // Import ProtectedRoute
 
 function App() {
@@ -78,6 +79,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Archive />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/user-mgmt"
+            element={
+              <ProtectedRoute>
+                <Usermgmt />
               </ProtectedRoute>
             }
           />

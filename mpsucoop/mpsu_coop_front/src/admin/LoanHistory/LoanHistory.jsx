@@ -723,7 +723,7 @@ return (
                             {/* <th>Service Fee</th> */}
                             <th>Purpose</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            {/* <th>Actions</th> */}
                         </tr>
                     </thead>
                     <tbody>
@@ -753,12 +753,12 @@ return (
                                     >
                                         <FaDollarSign />
                                     </button> */}
-                                    <button
+                                    {/* <button
                                         onClick={() => handleDeleteLoan(loan)}
                                         className="action-button delete-button"
                                     >
                                         <FaTrash />
-                                    </button>
+                                    </button> */}
                                 </td>
                             </tr>
                         ))}

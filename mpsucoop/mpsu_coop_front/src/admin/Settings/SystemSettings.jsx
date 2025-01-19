@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FaCog, FaUsers} from 'react-icons/fa';
-import './SystemSettings.css';
-
+import { FaCog, FaArchive, FaUsers } from 'react-icons/fa';
 
 const SystemSettings = () => {
     const [settings, setSettings] = useState({
@@ -18,7 +16,7 @@ const SystemSettings = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [error, setError] = useState(null);
-    const [isSettingsActive, setIsSettingsActive] = useState(false); // Tracks whether settings are active
+    const [isSettingsActive, setIsSettingsActive] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,7 +28,7 @@ const SystemSettings = () => {
                 })
                 .catch(err => {
                     setError('Error fetching system settings.');
-                    console.error(err);
+                    console.error('System Settings API Error:', err.response || err);
                 });
         }
     }, [isSettingsActive]);
@@ -52,7 +50,7 @@ const SystemSettings = () => {
             })
             .catch(err => {
                 setError('Error updating system settings.');
-                console.error(err);
+                console.error('Update Settings Error:', err.response || err);
             });
     };
 
@@ -61,166 +59,162 @@ const SystemSettings = () => {
             case 'Settings':
                 setIsSettingsActive(true);
                 break;
+            case 'Archive':
+                navigate('/archived-records');
+                setIsSettingsActive(true);
+                break;
+            case 'Usermgmt':
+                navigate('/user-mgmt'); 
+                break;
             default:
                 break;
         }
     };
 
-
     return (
         <div>
             {/* Navbar */}
-            <nav className="navbar">
-                <a className="nav-item" onClick={() => handleMenuItemClick('Settings')}>
+            <nav className="navbar" style={{ display: 'flex', justifyContent: 'center', padding: '10px', gap: '300px' }}>
+                <a
+                    className="nav-item"
+                    onClick={() => handleMenuItemClick('Settings')}
+                    style={{
+                        color: 'black',
+                        fontSize: '20px',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                    }}
+                >
                     <FaCog /> System Settings
+                </a>
+
+                <a
+                    className="nav-item"
+                    onClick={() => handleMenuItemClick('Archive')}
+                    style={{
+                        color: 'black',
+                        fontSize: '20px',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                    }}
+                >
+                    <FaArchive /> Archive Records
+                </a>
+
+                <a
+                    className="nav-item"
+                    onClick={() => handleMenuItemClick('Usermgmt')}
+                    style={{
+                        color: 'black',
+                        fontSize: '20px',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                    }}
+                >
+                    <FaUsers /> User Management
                 </a>
             </nav>
 
-            {/* Show content only when "Settings" is clicked */}
+            {/* Show content for "Settings" */}
             {isSettingsActive && (
-                <div className="system-settings">
-                    <h2 style={{ color: 'black' }}>System Settings</h2>
+                <div className="system-settings" style={{ padding: '5px' }}>
+                    <h2 style={{ color: 'black', textAlign: 'center', marginTop: '20px' }}>System Settings</h2>
+                    {error && <div className="error" style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
 
-                    {error && <div className="error">{error}</div>}
-
-                    <table className="settings-table">
+                    <table className="settings-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
                         <thead>
-                            <tr>
-                                <th className="table-cell">Setting</th>
-                                <th className="table-cell">Value</th>
+                            <tr style={{ borderBottom: '2px solid black' }}>
+                                <th className="table-cell" style={{ padding: '10px', textAlign: 'left' }}>Setting</th>
+                                <th className="table-cell" style={{ padding: '10px', textAlign: 'left' }}>Value</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td className="table-cell">Interest Rate:</td>
-                                <td className="table-cell">
-                                    {isEditing ? (
-                                        <input
-                                            type="number"
-                                            name="interest_rate"
-                                            value={settings.interest_rate}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <span>{settings.interest_rate}%</span>
-                                    )}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td className="table-cell">Emergency Loan Service Fee Rate:</td>
-                                <td className="table-cell">
-                                    {isEditing ? (
-                                        <input
-                                            type="number"
-                                            name="service_fee_rate_emergency"
-                                            value={settings.service_fee_rate_emergency}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <span>{settings.service_fee_rate_emergency}%</span>
-                                    )}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td className="table-cell">Penalty Rate:</td>
-                                <td className="table-cell">
-                                    {isEditing ? (
-                                        <input
-                                            type="number"
-                                            name="penalty_rate"
-                                            value={settings.penalty_rate}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <span>{settings.penalty_rate}%</span>
-                                    )}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td className="table-cell">Regular Loan Service Fee (1 year):</td>
-                                <td className="table-cell">
-                                    {isEditing ? (
-                                        <input
-                                            type="number"
-                                            name="service_fee_rate_regular_1yr"
-                                            value={settings.service_fee_rate_regular_1yr}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <span>{settings.service_fee_rate_regular_1yr}%</span>
-                                    )}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td className="table-cell">Regular Loan Service Fee (2 years):</td>
-                                <td className="table-cell">
-                                    {isEditing ? (
-                                        <input
-                                            type="number"
-                                            name="service_fee_rate_regular_2yr"
-                                            value={settings.service_fee_rate_regular_2yr}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <span>{settings.service_fee_rate_regular_2yr}%</span>
-                                    )}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td className="table-cell">Regular Loan Service Fee (3 years):</td>
-                                <td className="table-cell">
-                                    {isEditing ? (
-                                        <input
-                                            type="number"
-                                            name="service_fee_rate_regular_3yr"
-                                            value={settings.service_fee_rate_regular_3yr}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <span>{settings.service_fee_rate_regular_3yr}%</span>
-                                    )}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td className="table-cell">Regular Loan Service Fee (4 years):</td>
-                                <td className="table-cell">
-                                    {isEditing ? (
-                                        <input
-                                            type="number"
-                                            name="service_fee_rate_regular_4yr"
-                                            value={settings.service_fee_rate_regular_4yr}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <span>{settings.service_fee_rate_regular_4yr}%</span>
-                                    )}
-                                </td>
-                            </tr>
+                            {Object.keys(settings).map((key) => (
+                                <tr key={key}>
+                                    <td className="table-cell" style={{ padding: '5px' }}>{key.replace(/_/g, ' ').toUpperCase()}:</td>
+                                    <td className="table-cell" style={{ padding: '5px' }}>
+                                        {isEditing ? (
+                                            <input
+                                                type="number"
+                                                name={key}
+                                                value={settings[key]}
+                                                onChange={handleChange}
+                                                style={{
+                                                    width: '80px',
+                                                    padding: '5px',
+                                                    borderRadius: '5px',
+                                                    border: '1px solid black',
+                                                    height: '20px'
+                                                }}
+                                            />
+                                        ) : (
+                                            <span>{settings[key]}%</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
 
-                    <div className="actions">
+                    <div className="actions" style={{ marginTop: '20px', textAlign: 'center' }}>
                         {isEditing ? (
                             <>
-                                <button onClick={handleUpdate}>
+                                <button
+                                    onClick={handleUpdate}
+                                    style={{
+                                        padding: '10px 20px',
+                                        backgroundColor: '#4CAF50',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
                                     Save Changes
                                 </button>
-                                <button onClick={() => setIsSettingsActive(false)}>
+                                <button
+                                    onClick={() => setIsSettingsActive(false)}
+                                    style={{
+                                        padding: '10px 20px',
+                                        margin: '0 10px',
+                                        backgroundColor: '#f44336',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
                                     Cancel
                                 </button>
                             </>
                         ) : (
                             <>
-                                <button onClick={() => setIsEditing(true)}>
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    style={{
+                                        padding: '10px 20px',
+                                        margin: '0 10px',
+                                        backgroundColor: '#FF9800',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
                                     Edit Settings
                                 </button>
-                                <button onClick={() => setIsSettingsActive(false)}>
+                                <button
+                                    onClick={() => setIsSettingsActive(false)}
+                                    style={{
+                                        padding: '10px 20px',
+                                        margin: '0 10px',
+                                        backgroundColor: '#2196F3',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '5px',
+                                        cursor: 'pointer',
+                                    }}
+                                >
                                     Back
                                 </button>
                             </>
@@ -233,5 +227,3 @@ const SystemSettings = () => {
 };
 
 export default SystemSettings;
-
-

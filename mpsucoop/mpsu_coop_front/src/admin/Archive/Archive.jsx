@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Archive.css'; // Assuming you'll use a separate CSS file for better styling management
+import AdminNavbar from '../AdminNavbar/AdminNavbar';
 
 const ArchivedRecords = () => {
   const [archivedUsers, setArchivedUsers] = useState([]);
@@ -339,6 +340,7 @@ const ArchivedRecords = () => {
 
   return (
     <div className="archived-records">
+      {/* <AdminNavbar/> */}
       <h1 className="title">Archived Records</h1>
       <input
         type="text"
@@ -355,7 +357,7 @@ const ArchivedRecords = () => {
         >
           <option value="members">Archived Members</option>
           <option value="accounts">Archived Accounts</option>
-          <option value="loans">Archived Loans</option>
+          {/* <option value="loans">Archived Loans</option> */}
           <option value="auditTrail">Audit Trail</option>
           {selectedMember && <option value="transactions">Member Transactions</option>}
         </select>

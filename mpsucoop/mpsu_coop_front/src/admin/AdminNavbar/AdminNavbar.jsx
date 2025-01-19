@@ -10,9 +10,10 @@ const navItems = [
   { icon: faFileInvoiceDollar, label: 'Loans', key: 'loans' },
   { icon: faDollarSign, label: 'Payments Overview', key: 'payments' },
   { icon: faCalendarAlt, label: 'Payment Schedules', key: 'payment-schedules' },
-  { icon: faArchive, label: 'Archive', key: 'archived-records' },
+  // { icon: faArchive, label: 'Archive', key: 'archived-records' },
+  // { icon: faGear, label: 'Usermgmt', key: 'user-mgmt' },
   { icon: faGear, label: 'Settings', key: 'system-settings' },
-  { icon: faGear, label: 'Usermgmt', key: 'user-mgmt' },
+  
 ];
 
 function AdminNavbar({ onLinkClick }) {
