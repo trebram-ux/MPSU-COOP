@@ -449,7 +449,7 @@ class Loan(models.Model):
         remaining_balance = loan_principal  # Start with the full loan amount
 
         for period in range(total_periods):
-            due_date = self.loan_date + timedelta(days=(period * 15))
+            due_date = self.loan_date + timedelta(days=(period +1) * 15)
             
             # Initialize service fee to 0
             service_fee = Decimal('0.00')
@@ -464,8 +464,8 @@ class Loan(models.Model):
                     service_fee = remaining_balance * Decimal('0.015')  # 1.5% for the second year
                 elif period < 72:
                     service_fee = remaining_balance * Decimal('0.02')  # 1.5% for the second year
-                elif period < 96:
-                    service_fee = remaining_balance * Decimal('0.025')  # 1.5% for the second year
+                else:
+                    service_fee = remaining_balance * Decimal('0.025') # 1.5% for the second year
                 # Add more logic for further years
 
             # Deduct the bi-monthly payment from the remaining balance
