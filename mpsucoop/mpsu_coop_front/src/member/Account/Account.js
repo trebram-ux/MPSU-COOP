@@ -8,6 +8,11 @@ const Ledger = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const formatNumber = (number) => {
+    if (!number) return "0.00"; // Handle empty or undefined values
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
 
   const accountNumber = localStorage.getItem('account_number'); 
   const userRole = localStorage.getItem('userRole'); 
@@ -74,9 +79,9 @@ const Ledger = () => {
           {transactions.map((transaction, index) => (
             <tr key={index}>
               <td>{transaction.transaction_type}</td>
-              <td>{transaction.amount}</td>
+              <td>{formatNumber(transaction.amount)}</td>
               <td>{transaction.description}</td>
-              <td>{transaction.balance_after_transaction}</td>
+              <td>{formatNumber(transaction.balance_after_transaction)}</td>
               <td>{new Date(transaction.timestamp).toLocaleString()}</td>
             </tr>
           ))}
