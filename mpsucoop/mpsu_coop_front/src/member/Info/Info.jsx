@@ -168,7 +168,7 @@ const Home = () => {
             <p style={{ textAlign: 'center', fontSize: '30px' }}>
               <strong>ACCOUNT NUMBER:</strong> {memberData.accountN || 'N/A'}
             </p>
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            {/* <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <label
                 htmlFor="profileInput"
                 style={{
@@ -190,7 +190,7 @@ const Home = () => {
                 onChange={handleFileChange}
                 style={{ display: 'none' }} // Hide the input element
               />
-            </div>
+            </div> */}
             {profilePreview && (
               <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '18px' }}>
                 <img

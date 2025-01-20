@@ -38,6 +38,7 @@ const LoanManager = () => {
     const [endDate, setEndDate] = useState(''); // State for end date in date range // Add this line for the filter state
     const [showNoLoanPopup, setShowNoLoanPopup] = useState(false); 
     const [shareCapital, setShareCapital] = useState(null);
+    const [searchOption, setSearchOption] = useState('');
 
     const formatNumber = (number) => {
         if (number == null || isNaN(number)) return "N/A";
@@ -593,38 +594,40 @@ return (
         {formVisible && (
             <form onSubmit={handleLoanSubmit} className="loan-form">
                 <h3 className="form-header">Create Loan</h3>
+                <div>
+                <select
+    name="search_option"
+    value={searchOption}
+    onChange={(e) => setSearchOption(e.target.value)}  // Update state based on selection
+    className="form-control"
+>
+    <option value="accountNumber">Account Number</option>
+    <option value="accountHolder">Account Holder</option>
+</select>
 
-                {/* Member Name Input */}
-                {/* <label>Member Name:</label>
-                <input
-                    type="text"
-                    name="name"
-                    value={loanData.name}
-                    onChange={handleInputChange}
-                    placeholder="Enter Member Name"
-                    required
-                    className="form-input"
-                /> */}
+{/* Conditionally render input field */}
+{searchOption === 'accountNumber' ? (
+    <input
+        type="text"
+        className="form-control"
+        placeholder="Account Number"
+        value={loanData.account}
+        onChange={(e) => setLoanData({ ...loanData, account: e.target.value })}
+        required
+    />
+) : (
+    <input
+        type="text"
+        className="form-control"
+        placeholder="Account Holder"
+        value={loanData.account_holder}
+        onChange={(e) => setLoanData({ ...loanData, account_holder: e.target.value })}
+        required
+    />
+)}
 
-                {/* Account Number (Auto-Populated) */}
-                {/* <label>Account Number:</label>
-                <input
-                    type="text"
-                    name="account"
-                    value={loanData.account}
-                    readOnly
-                    placeholder="Account Number will auto-populate"
-                    className="form-input form-input-readonly"
-                /> */}
 
-                <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Account Number"
-                    value={loanData.account}
-                    onChange={(e) => setLoanData({ ...loanData, account: e.target.value })}
-                    required
-                />
+                </div>
                 <label>Loan Type:</label>
                 <select
                     name="loan_type"

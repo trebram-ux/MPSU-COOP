@@ -130,7 +130,6 @@ class Member(models.Model):
     gender = models.CharField(
         max_length=20, 
         choices=[('Male', 'Male'), ('Female', 'Female'), ('Others', 'Others')], 
-        default='Male'
     )
     religion = models.CharField(max_length=100, default='Catholic')
     pstatus = models.CharField(
@@ -162,7 +161,10 @@ class Member(models.Model):
     weight = models.CharField(max_length=100, blank=True, default='Not Provided')
     ann_com = models.CharField(max_length=100, blank=True, default='0')
     co_maker = models.CharField(max_length=255, null=True, blank=True)
+    mem_co = models.CharField(max_length=255, null=True, blank=True)
     relationship = models.CharField(max_length=100, default='Not Provided')
+    tin = models.CharField(max_length=100, blank=True, default='Not Provided') 
+    in_dep = models.CharField(max_length=100, blank=True, default='Not Provided') 
     valid_id = models.CharField(
         max_length=50, 
         choices=[
@@ -321,10 +323,10 @@ class Loan(models.Model):
         ('Utility Services', 'Utility Services'),
         ('Others', 'Others'),
     ]
-    control_number = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
+    control_number = models.CharField(primary_key=True, max_length=4, default=lambda:str(uuid.uuid4())[:4])
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     loan_amount = models.DecimalField(max_digits=15, decimal_places=2)
-    loanable_amount = models.DecimalField(max_digits=15, decimal_places=2 , default=Decimal('0.00'))
+    # loanable_amount = models.DecimalField(max_digits=15, decimal_places=2 , default=Decimal('0.00'))
     loan_type = models.CharField(
         max_length=200, choices=[('Regular', 'Regular'), ('Emergency', 'Emergency')], default='Emergency'
     )
@@ -340,25 +342,13 @@ class Loan(models.Model):
         max_length=50,choices=[('Ongoing', 'Ongoing'), ('Completed', 'Completed')],
         default='Ongoing'
     )
-   
     takehomePay = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
     penalty_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('2.00'))
     purpose = models.CharField(max_length=200, choices=PURPOSE_CHOICES, default='Education')
-    annual_interest = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))  
+    annual_interest = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))
+    
 
-    def save(self, *args, **kwargs):
-        # Debugging to ensure account and shareCapital are available
-        if self.account:
-            print(f"Account exists: {self.account}")
-            if hasattr(self.account, 'shareCapital') and self.account.shareCapital is not None:
-                print(f"Share Capital: {self.account.shareCapital}")
-                self.loanable_amount = self.account.shareCapital * 3
-            else:
-                print("Share Capital is missing or None.")
-        else:
-            print("Account is missing.")
-        
-        super().save(*args, **kwargs)
+    
 
 
     def archive(self):

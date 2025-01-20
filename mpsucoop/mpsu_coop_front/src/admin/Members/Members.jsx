@@ -130,23 +130,23 @@ const confirmDeleteMember = async () => {
     <div className={styles.membersSection}>
       {showAddForm ? (
         <div className={styles.addMemberForm}>
-          <h3 style={{fontSize: '26px', marginTop: '-10px', marginBottom: '50px'}}>{editingMember ? 'Edit Member' : 'Add Member'}</h3>
+          <h3 style={{fontSize: '26px', marginTop: '-40px', marginBottom: '10px'}}>{editingMember ? 'Edit Member' : 'Add Member'}</h3>
           {formError && <p className={styles.errorText}>{formError}</p>}
 
           <div style={{
             fontFamily: 'Arial, sans-serif',
             color: '#000',
             padding: '20px',
-            width: '103%',
+            width: '100%',
             boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
             borderRadius: '5px',
             marginRight: '50px',
-            marginLeft: '-15px',
+            marginLeft: '3px',
             boxSizing: 'border-box',
-            height: '480px'
+            height: '565px'
           }}>
-            <div style={{ display: 'grid', gap: '20px' }}>
-              <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'grid', gap: '5px' }}>
+              <div style={{ display: 'flex', gap: '5px' }}>
                 
               <div style={{ flex: '1' }}>
               <label style={{ display: 'block', fontWeight: 'bold' }}>First Name:</label>
@@ -263,7 +263,7 @@ const confirmDeleteMember = async () => {
                   className="form-control"
                   placeholder="Zip Code"
                   name="zip_code"
-                  value={editingMember?.zip_code || newMember.zip_code || ''}
+                  value={editingMember?.zip_code || newMember.zip_code || '2616'}
                   onChange={(e) =>
                     handleInputChange(e, editingMember ? setEditingMember : setNewMember)
                   }
@@ -272,27 +272,27 @@ const confirmDeleteMember = async () => {
             </div>
             </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold', marginTop: '15px' }}>Gender:</label>
-                  <select 
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ flex: '1' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Gender:</label>
+                <select 
                   className="form-control"
                   name="gender"
                   value={editingMember?.gender || newMember.gender || ''}
                   onChange={(e) =>
                     handleInputChange(e, editingMember ? setEditingMember : setNewMember)
                   }
-                  >
+                >
                   <option value="" disabled>Select Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Others">Others</option>
-                  </select>
-                  </div>
+                </select>
+              </div>
 
-                <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold', marginTop: '15px' }}>Civil Status:</label>
-                  <select 
+              <div style={{ flex: '1' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Civil Status:</label>
+                <select 
                   className="form-control"
                   name="pstatus"
                   value={editingMember?.pstatus || newMember.pstatus || ''}
@@ -300,22 +300,21 @@ const confirmDeleteMember = async () => {
                     handleInputChange(e, editingMember ? setEditingMember : setNewMember)
                   }
                 >
-                    <option value="" disabled>Select Relationship Status</option> {/* Optional placeholder */}
-                    <option value="Single">Single</option>
-                    <option value="Married">Married</option>
-                    <option value="Divorced">Divorced</option>
-                    <option value="Widowed">Widowed</option>
-                    <option value="In a relationship">In a relationship</option>
-                    <option value="Engaged">Engaged</option>
-                    <option value="Baak">Baak</option>
-                  </select>
-                </div>
+                  <option value="" disabled>Select Relationship Status</option>
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Divorced">Divorced</option>
+                  <option value="Widowed">Widowed</option>
+                  <option value="In a relationship">In a relationship</option>
+                  <option value="Engaged">Engaged</option>
+                  <option value="Baak">Baak</option>
+                </select>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Religion:</label>
-                  <input type="text" 
+              <div style={{ flex: '1' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Religion:</label>
+                <input 
+                  type="text" 
                   className="form-control"
                   placeholder="Religion"
                   name="religion"
@@ -323,11 +322,13 @@ const confirmDeleteMember = async () => {
                   onChange={(e) =>
                     handleInputChange(e, editingMember ? setEditingMember : setNewMember)
                   }
-                  />
-                </div>
-                <div style={{ flex: '2' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Address:</label>
-                  <input type="text" 
+                />
+              </div>
+
+              <div style={{ flex: '2' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Address:</label>
+                <input 
+                  type="text" 
                   className="form-control"
                   placeholder="Address"
                   name="address"
@@ -335,10 +336,11 @@ const confirmDeleteMember = async () => {
                   onChange={(e) =>
                     handleInputChange(e, editingMember ? setEditingMember : setNewMember)
                   }
-                  />
-                </div>
+                />
+              </div>
+
                 <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Phone Number:</label>
+                  <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '5px'}}>Phone Number:</label>
                   <input type="text" 
                   className="form-control"
                   placeholder="Phone Number"
@@ -351,9 +353,9 @@ const confirmDeleteMember = async () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1 1 200px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Height (cm)</label>
+              <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 200px',marginTop: '-3px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold'}}>Height (cm)</label>
                 <input 
                   type="number" 
                   className="form-control"
@@ -364,8 +366,8 @@ const confirmDeleteMember = async () => {
                 />
               </div>
 
-              <div style={{ flex: '1 1 200px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Weight (kg)</label>
+              <div style={{ flex: '1 1 200px',marginTop: '-3px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold'}}>Weight (kg)</label>
                 <input 
                   type="number" 
                   className="form-control"
@@ -375,44 +377,275 @@ const confirmDeleteMember = async () => {
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
-
-              <div style={{ flex: '1 1 200px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Annual Income</label>
+              <div style={{ flex: '1 1 200px',marginTop: '-3px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold'}}>Tax Identification Number:</label>
                 <input 
                   type="number" 
                   className="form-control"
-                  placeholder="Annual Income"
-                  name="ann_com"
-                  value={editingMember?.ann_com || newMember.ann_com || ''}
+                  placeholder="TIN"
+                  name="tin"
+                  value={editingMember?.tin || newMember.tin || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
-
-              <div style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Name of Co-Maker</label>
-              <input 
+              <div style={{ flex: '1 1 200px',marginTop: '5px' }}>
+              <label style={{ display: 'block', fontWeight: 'bold'}}>Issued Government ID</label>
+              <select 
                 className="form-control"
-                name="co_maker"
-                placeholder="Comaker"
-                value={editingMember?.co_maker || newMember.co_maker || ''}
+                name="valid_id"
+                value={editingMember?.valid_id || newMember.valid_id || ''}
                 onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
               >
-              </input>
+                <option value="" disabled>Select Valid ID</option>
+                <option value="Philippine Passport">Philippine Passport</option>
+                <option value="Driver's License">Driver's License</option>
+                <option value="SSS ID">SSS ID</option>
+                <option value="GSIS ID">GSIS ID</option>
+                <option value="Postal ID">Postal ID</option>
+                <option value="Voter's ID">Voter's ID</option>
+                <option value="PhilHealth ID">PhilHealth ID</option>
+                <option value="National ID">National ID</option>
+              </select>
             </div>
-
-              <div style={{ flex: '1 1 200px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '20px'}}>Rel: with the Co-Maker</label>
+              <div style={{ flex: '1 1 200px',marginTop: '-3px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold'}}>ID Number</label>
                 <input 
                   type="text" 
                   className="form-control"
-                  name="relationship"
-                  placeholder="Relationship"
-                  value={editingMember?.relationship || newMember.relationship || ''}
+                  placeholder="ID Number"
+                  name="id_no"
+                  value={editingMember?.id_no || newMember.id_no || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
+              
+              <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+  {/* Annual Income */}
+  <div style={{ flex: '1 1 30%', maxWidth: '300px' }}>
+    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+      Annual Income
+    </label>
+    <input
+      type="number"
+      className="form-control"
+      placeholder="Annual Income"
+      name="ann_com"
+      value={editingMember?.ann_com || newMember.ann_com || ''}
+      onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+    />
+  </div>
+
+  {/* Membership in other Cooperatives */}
+  <div style={{ flex: '1 1 30%', maxWidth: '300px' }}>
+    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+      Membership in other Cooperatives
+    </label>
+    <input
+      className="form-control"
+      name="mem_co"
+      placeholder="Cooperatives"
+      value={editingMember?.mem_co || newMember.mem_co || ''}
+      onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+    />
+  </div>
+
+  {/* Address of the Cooperative */}
+  <div style={{ flex: '1 1 30%', maxWidth: '300px' }}>
+    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+      Address of the Cooperative
+    </label>
+    <input
+      type="text"
+      className="form-control"
+      placeholder="Address"
+      name="address"
+      value={editingMember?.address || newMember.address || ''}
+      onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+    />
+  </div>
+            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 30%', maxWidth: '300px' }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+              Initial Deposit
+            </label>
+            <input
+              type="number"
+              className="form-control"
+              placeholder="Deposit"
+              name="in_dep"
+              value={editingMember?.in_dep || newMember.in_dep || ''}
+              onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+            />
+          </div>
+        </div>
+              
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+            {/* Beneficiaries Name 1 */}
+            <div style={{ display: 'flex', gap: '20px', width: '100%' }}>
+              <div style={{ flex: '1 1 200px', minWidth: '200px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginTop: '-20px' }}>
+                  Beneficiaries Name
+                </label>
+                <input
+                  className="form-control"
+                  name="co_maker1"
+                  placeholder="Beneficiaries Name 1"
+                  value={editingMember?.co_maker1 || newMember.co_maker1 || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
+              
+              <div style={{ flex: '1', minWidth: '200px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginTop: '-20px' }}>
+                  Relationship
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="relationship1"
+                  placeholder="Relationship"
+                  value={editingMember?.relationship1 || newMember.relationship1 || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
+
+              <div style={{ flex: '1', minWidth: '200px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginTop: '-20px' }}>
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  className="form-control"
+                  placeholder="Birth Date"
+                  name="birth_date1"
+                  min="1980-01-01"
+                  max="2005-12-31"
+                  value={editingMember?.birth_date1 || newMember.birth_date1 || ''}
+                  onChange={(e) => {
+                    const selectedDate = new Date(e.target.value);
+                    const today = new Date();
+                    let age = today.getFullYear() - selectedDate.getFullYear();
+                    const monthDiff = today.getMonth() - selectedDate.getMonth();
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+                      age -= 1;
+                    }
+
+                    const updatedMember = editingMember
+                      ? { ...editingMember, birth_date1: e.target.value, age: age > 0 ? age : '' }
+                      : { ...newMember, birth_date1: e.target.value, age: age > 0 ? age : '' };
+
+                    editingMember ? setEditingMember(updatedMember) : setNewMember(updatedMember);
+                  }}
+                />
+              </div>
             </div>
+
+            {/* Beneficiaries Name 2 */}
+            <div style={{ display: 'flex', gap: '20px', width: '100%' }}>
+
+              <div style={{ flex: '1 1 200px', minWidth: '200px',marginTop: '-35px' }}>
+                <input
+                  className="form-control"
+                  name="co_maker2"
+                  placeholder="Beneficiaries Name 2"
+                  value={editingMember?.co_maker2 || newMember.co_maker2 || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
+              
+              <div style={{ flex: '1', minWidth: '200px',marginTop: '-35px' }}>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="relationship2"
+                  placeholder="Relationship"
+                  value={editingMember?.relationship2 || newMember.relationship2 || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
+
+              <div style={{ flex: '1', minWidth: '200px',marginTop: '-35px' }}>
+                <input
+                  type="date"
+                  className="form-control"
+                  placeholder="Birth Date"
+                  name="birth_date2"
+                  min="1980-01-01"
+                  max="2005-12-31"
+                  value={editingMember?.birth_date2 || newMember.birth_date2 || ''}
+                  onChange={(e) => {
+                    const selectedDate = new Date(e.target.value);
+                    const today = new Date();
+                    let age = today.getFullYear() - selectedDate.getFullYear();
+                    const monthDiff = today.getMonth() - selectedDate.getMonth();
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+                      age -= 1;
+                    }
+
+                    const updatedMember = editingMember
+                      ? { ...editingMember, birth_date2: e.target.value, age: age > 0 ? age : '' }
+                      : { ...newMember, birth_date2: e.target.value, age: age > 0 ? age : '' };
+
+                    editingMember ? setEditingMember(updatedMember) : setNewMember(updatedMember);
+                  }}
+                />
+              </div>
             </div>
+
+            {/* Beneficiaries Name 3 */}
+            <div style={{ display: 'flex', gap: '20px', width: '100%' }}>
+              <div style={{ flex: '1 1 200px', minWidth: '200px',marginTop: '-35px' }}>
+                <input
+                  className="form-control"
+                  name="co_maker3"
+                  placeholder="Beneficiaries Name 3"
+                  value={editingMember?.co_maker3 || newMember.co_maker3 || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
+              
+              <div style={{ flex: '1', minWidth: '200px',marginTop: '-35px'}}>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="relationship3"
+                  placeholder="Relationship"
+                  value={editingMember?.relationship3 || newMember.relationship3 || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+              </div>
+
+              <div style={{ flex: '1', minWidth: '200px',marginTop: '-35px' }}>
+                <input
+                  type="date"
+                  className="form-control"
+                  placeholder="Birth Date"
+                  name="birth_date3"
+                  min="1980-01-01"
+                  max="2005-12-31"
+                  value={editingMember?.birth_date3 || newMember.birth_date3 || ''}
+                  onChange={(e) => {
+                    const selectedDate = new Date(e.target.value);
+                    const today = new Date();
+                    let age = today.getFullYear() - selectedDate.getFullYear();
+                    const monthDiff = today.getMonth() - selectedDate.getMonth();
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+                      age -= 1;
+                    }
+
+                    const updatedMember = editingMember
+                      ? { ...editingMember, birth_date3: e.target.value, age: age > 0 ? age : '' }
+                      : { ...newMember, birth_date3: e.target.value, age: age > 0 ? age : '' };
+
+                    editingMember ? setEditingMember(updatedMember) : setNewMember(updatedMember);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
            {/* Buttons */}
            <button onClick={editingMember ? handleEditMember : handleAddMember}>
@@ -576,7 +809,7 @@ const confirmDeleteMember = async () => {
                     >
                       <FaEdit /> Edit
                     </button>
-                    <button
+                    {/* <button
                     onClick={() => openDeleteModal(member)}
                     style={{
                       padding: '5px 10px',
@@ -587,7 +820,7 @@ const confirmDeleteMember = async () => {
                     }}
                   >
                     <FaTrash /> Delete
-                  </button>
+                  </button> */}
                   </td>
                 </tr>
               ))}
@@ -817,7 +1050,53 @@ const confirmDeleteMember = async () => {
                   </tr>
                   <tr>
                     <td style={{ padding: '10px'}}>
-                      <strong>Co-Maker</strong>
+                      <strong>Tax Identification Number:</strong>
+                    </td>
+                    <td style={{ padding: '10px'}}>
+                      {selectedMember.tin}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px'}}>
+                      <strong>Issued Government ID</strong>
+                    </td>
+                    <td style={{ padding: '10px'}}>
+                      {selectedMember.valid_id}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px'}}>
+                      <strong>ID Number</strong>
+                    </td>
+                    <td style={{ padding: '10px'}}>
+                      {selectedMember.id_no}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px'}}>
+                      <strong>Membership in other Cooperatives</strong>
+                    </td>
+                    <td style={{ padding: '10px'}}>
+                      {selectedMember.mem_co}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px'}}>
+                      <strong>Address of the Cooperative</strong>
+                    </td>
+                    <td style={{ padding: '10px'}}>
+                      {selectedMember.address}
+                    </td>
+                    <td style={{ padding: '10px'}}>
+                      <strong>Initial Deposit</strong>
+                    </td>
+                    <td style={{ padding: '10px'}}>
+                      {selectedMember.in_dep}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px'}}>
+                      <strong>Beneficiaries Name</strong>
                     </td>
                     <td style={{ padding: '10px'}}>
                       {selectedMember.co_maker}
@@ -825,10 +1104,18 @@ const confirmDeleteMember = async () => {
                   </tr>
                   <tr>
                     <td style={{ padding: '10px'}}>
-                      <strong>Relationship with the Co-Maker</strong>
+                      <strong>Relationship with the Beneficiaries</strong>
                     </td>
                     <td style={{ padding: '10px'}}>
                       {selectedMember.relationship}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px'}}>
+                      <strong>Birth Date</strong>
+                    </td>
+                    <td style={{ padding: '10px'}}>
+                      {selectedMember.birth_date}
                     </td>
                   </tr>
 
@@ -855,3 +1142,5 @@ const confirmDeleteMember = async () => {
 );
 }
 export default Members;
+
+

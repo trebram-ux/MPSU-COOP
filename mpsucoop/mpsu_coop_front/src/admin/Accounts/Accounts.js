@@ -3,13 +3,12 @@ import axios from 'axios';
 import DepositWithdrawForm from '../DepositWithdrawForm/DepositWithdrawForm';
 import { PiHandDepositFill } from 'react-icons/pi';
 import { BiMoneyWithdraw } from 'react-icons/bi';
-import { FaSearch } from 'react-icons/fa';
 
 function Accounts() {
   const [accounts, setAccounts] = useState([]);
   const [archivedAccounts, setArchivedAccounts] = useState([]);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null);  // General error state
   const [showForm, setShowForm] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [actionType, setActionType] = useState('');
@@ -17,6 +16,7 @@ function Accounts() {
   const [refreshArchives, setRefreshArchives] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState(null);
+
   const formatNumber = (number) => {
     if (number == null || isNaN(number)) return "N/A";
     return new Intl.NumberFormat('en-US').format(number);
@@ -37,7 +37,7 @@ function Accounts() {
       const response = await axios.get('http://localhost:8000/accounts/');
       setAccounts(response.data);
     } catch (err) {
-      setError(err);
+      setError(err);  // Set general error message here
     } finally {
       setLoadingAccounts(false);
     }
@@ -63,6 +63,27 @@ function Accounts() {
     }
   };
 
+  const handleDepositWithdrawErrors = (error) => {
+    if (actionType === 'deposit') {
+      if (error.response && error.response.data) {
+        if (error.response.data.amount < 50000) {
+          return 'The deposit amount must be at least 50,000.';
+        } else if (error.response.data.amount > 1000000) {
+          return 'Deposits over 1,000,000 are not allowed.';
+        }
+      }
+      return 'Deposits must be between 50,000 and 1,000,000.';
+    } 
+    else if (actionType === 'withdraw') {
+      if (error.response && error.response.data) {
+        return 'No share capital available to be withdrawn.';
+      }
+      return 'You have No Share Capital amount to withdraw.';
+    }
+    
+    return 'An unexpected error occurred.';
+  };
+  
   const openArchiveConfirmation = (account) => {
     setModalContent({
       message: `Are you sure you want to move this account to archive? This action will remove the account from active records.`,
@@ -80,27 +101,27 @@ function Accounts() {
         archive_type: 'Account',
         archived_data: account,
       };
-  
+
       // Archive the account
       await axios.post('http://localhost:8000/archives/', archivePayload);
-  
+
       // Then delete the account from the active list on the server
       await axios.delete(`http://localhost:8000/accounts/${account.account_number}/`);
-  
+
       alert('Account successfully archived.');
-  
+
       // Update the active accounts list by removing the archived account locally
       setAccounts(prevAccounts => prevAccounts.filter(acc => acc.account_number !== account.account_number));
-  
+
       // Optionally, refresh the list of archived accounts
       setRefreshArchives(!refreshArchives);
-  
+
     } catch (err) {
       console.error('Error archiving the account:', err.response || err.message || err);
       alert(`An error occurred: ${err.response?.data?.message || 'Unable to complete the operation. Please try again.'}`);
     }
   };
-  
+
   const closeModal = () => {
     setShowModal(false);
     setModalContent(null);
@@ -148,7 +169,8 @@ function Accounts() {
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    const errorMessage = handleDepositWithdrawErrors(error);
+    return <div style={{ fontSize: '30px' }}>{errorMessage}</div>;  // Display different error messages here
   }
 
   return (
@@ -266,7 +288,7 @@ function Accounts() {
           account={selectedAccount}
           actionType={actionType}
           fetchAccounts={fetchAccounts}
-          setError={setError}
+          setError={setError}  // Corrected: Pass setError to the form
         />
       )}
 

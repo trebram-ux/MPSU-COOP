@@ -19,6 +19,9 @@ const PaymentSchedule = () => {
   const [loanType, setLoanType] = useState('Regular'); 
   const [searchQuery, setSearchQuery] = useState('');
   const [receiptPrinted, setReceiptPrinted] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  
   const formatNumber = (number) => {
     if (number == null || isNaN(number)) return "N/A";
     return new Intl.NumberFormat('en-US').format(number);
@@ -167,6 +170,24 @@ const PaymentSchedule = () => {
       }, 0)
       .toFixed(2);
   };
+  const openPaymentModal = () => {
+    setIsPaymentModalOpen(true);
+  };
+
+  const closePaymentModal = () => {
+    setIsPaymentModalOpen(false);
+    setPaymentAmount('');
+  };
+
+  const submitPayment = (amount) => {
+    if (!amount || parseFloat(amount) <= 0) {
+      alert('Please enter a valid payment amount.');
+      return;
+    }
+
+    console.log(`Payment of ₱${amount} submitted for schedule.`);
+    closePaymentModal();
+  };
 
   // Handle loan type selection (Regular or Emergency)
   const handleLoanTypeChange = (type) => {
@@ -306,13 +327,18 @@ const generateReceipt = (schedule) => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
-  return (
+return (
     <div style={{ marginTop: '20px' }} className="payments-container">
       {!selectedAccount ? (
         <>
           <h2
             style={{
-              width: '98%', marginTop: '-25px',  padding: '20px', textAlign: 'center', color: 'black', fontSize: '30px'
+              width: '98%',
+              marginTop: '-25px',
+              padding: '20px',
+              textAlign: 'center',
+              color: 'black',
+              fontSize: '30px',
             }}
           >
             Ongoing Payment Schedules
@@ -333,7 +359,7 @@ const generateReceipt = (schedule) => {
               fontSize: '14px',
             }}
             onMouseEnter={(e) => {
-              e.target.style.color = 'goldenrod'; 
+              e.target.style.color = 'goldenrod';
             }}
             onMouseLeave={(e) => {
               e.target.style.color = 'black';
@@ -374,7 +400,7 @@ const generateReceipt = (schedule) => {
                 borderRadius: '5px',
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
-                fontSize: '20px' 
+                fontSize: '20px',
               }}
             >
               <table
@@ -391,7 +417,7 @@ const generateReceipt = (schedule) => {
                       top: '-5px',
                       backgroundColor: '#fff',
                       zIndex: 1,
-                      fontSize: '20px' 
+                      fontSize: '20px',
                     }}
                   >
                     <th>Account Number</th>
@@ -424,206 +450,229 @@ const generateReceipt = (schedule) => {
       ) : (
         <>
           {accountDetails && (
-            <>
-              <div style={{ width: '390px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <h3 style={{ color: 'black', fontSize: '20px', marginTop: '-50px' }}>Payment History For:</h3>
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-                  <tbody>
+            <div style={{ width: '390px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <h3 style={{ color: 'black', fontSize: '20px', marginTop: '-50px' }}>Payment History For:</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+                <tbody>
                   <tr>
-                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>Name:</td>
+                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>Name:</td>
                     <td style={{ padding: '5px', border: '0px', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)', verticalAlign: 'bottom', width: 'fit-content', display: 'flex', justifyContent: 'space-between' }}>
                       <span>{accountDetails.first_name}</span>
                       <span style={{ paddingLeft: '5px' }}>{accountDetails.middle_name}</span>
                       <span style={{ paddingLeft: '5px' }}>{accountDetails.last_name}</span>
                     </td>
                   </tr>
-                    <tr>
-                      <td style={{ padding: '5px', border: '0px', fontWeight: 'bold' , fontSize: '18px' }}>Account Number:</td>
-                      <td style={{ padding: '5px', border: '0px' , fontSize: '18px' }}>
-                        {selectedAccount}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '5px', border: '0px', fontWeight: 'bold' , fontSize: '18px' }}>Remaining Balance:</td>
-                      <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold'  }}>
-                        ₱ {formatNumber(calculateRemainingBalance())}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              </>
+                  <tr>
+                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px' }}>Account Number:</td>
+                    <td style={{ padding: '5px', border: '0px', fontSize: '18px' }}>{selectedAccount}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px' }}>Remaining Balance:</td>
+                    <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold' }}>₱ {formatNumber(calculateRemainingBalance())}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           )}
-          
-          <div
-          className = "button"
-          style = {{
-          display: 'inline-flex',
-          marginTop: '20px'
-          }}
-          >
-          <div
-          > 
-            <button onClick={() => setSelectedAccount(null)}><IoArrowBackCircle /> Back </button>
-            <button 
-              onClick={() => handleLoanTypeChange('Regular')} 
-              style={{
-                backgroundColor: 'transparent', 
-                color: loanType === 'Regular' ? 'rgb(4, 202, 93)' : 'black', 
-                cursor: 'pointer', 
-                border: 'none', 
-                padding: '5px 10px',
-                textDecoration: loanType === 'Regular' ? 'underline' : 'none',
-                marginLeft: '50px'
-              }}
-            >
-              Regular Loans
-            </button>
 
-            <button 
-              onClick={() => handleLoanTypeChange('Emergency')} 
-              style={{
-                backgroundColor: 'transparent', 
-                color: loanType === 'Emergency' ? 'rgb(4, 202, 93)' : 'black', 
-                cursor: 'pointer', 
-                border: 'none', 
-                padding: '5px 10px',
-                textDecoration: loanType === 'Emergency' ? 'underline' : 'none'
-              }}
-            >
-              Emergency Loans
-            </button>
-          </div>
+          <div
+            className="button"
+            style={{
+              display: 'inline-flex',
+              marginTop: '20px',
+            }}
+          >
+            <div>
+              <button onClick={() => setSelectedAccount(null)}>
+                <IoArrowBackCircle /> Back 
+              </button>
+              <button 
+                onClick={() => handleLoanTypeChange('Regular')} 
+                style={{
+                  backgroundColor: 'transparent', 
+                  color: loanType === 'Regular' ? 'rgb(4, 202, 93)' : 'black', 
+                  cursor: 'pointer', 
+                  border: 'none', 
+                  padding: '5px 10px',
+                  textDecoration: loanType === 'Regular' ? 'underline' : 'none',
+                  marginLeft: '50px',
+                }}
+              >
+                Regular Loans
+              </button>
+
+              <button 
+                onClick={() => handleLoanTypeChange('Emergency')} 
+                style={{
+                  backgroundColor: 'transparent', 
+                  color: loanType === 'Emergency' ? 'rgb(4, 202, 93)' : 'black', 
+                  cursor: 'pointer', 
+                  border: 'none', 
+                  padding: '5px 10px',
+                  textDecoration: loanType === 'Emergency' ? 'underline' : 'none',
+                }}
+              >
+                Emergency Loans
+              </button>
+            </div>
           </div>
 
           {schedules.length > 0 ? (
             <div
-            style={{
-              maxHeight: '365px',
-              overflowY: 'auto',
-              boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
-              marginTop: '20px',
-              padding: '5px',
-              borderRadius: '5px',
-              scrollbarWidth: 'none', // For Firefox
-              msOverflowStyle: 'none', // For IE and Edge
-              width: '99%',
-              marginRight: '400px',
-            }}
-          >
-            <style>
-              {`
-                /* For WebKit-based browsers (Chrome, Safari, etc.) */
-                div::-webkit-scrollbar {
-                  display: none;
-                }
-              `}
-
-            </style>
-            <table
-              className="payment-schedule-table"
               style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                textAlign: 'center',
-                fontSize: '18px',
+                maxHeight: '365px',
+                overflowY: 'auto',
+                boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
+                marginTop: '20px',
+                padding: '5px',
+                borderRadius: '5px',
+                scrollbarWidth: 'none', 
+                msOverflowStyle: 'none', 
+                width: '99%',
+                marginRight: '400px',
               }}
             >
-              <thead>
-                <tr
-                  style={{
-                    backgroundColor: 'red',
-                    color: 'black',
-                    position: 'sticky',
-                    top: '-10px',
-                    zIndex: '1',
-                  }}
-                >
-                  <th>Principal Amount</th>
-                  <th>Interest Amount</th>
-                  {loanType === 'Regular' && <th>Service Fee</th>} {/* Conditionally render Service Fee */}
-                  <th>Payment Amount</th>
-                  <th>Due Date</th>
-                  <th>Balance</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              
-              <tbody>
-                {schedules.map((schedule) => (
-                  <tr key={schedule.id}>
-                    <td>₱ {formatNumber((parseFloat(schedule.principal_amount) || 0).toFixed(2))}</td>
-                    <td>₱ {formatNumber((parseFloat(schedule.interest_amount) || 0).toFixed(2))}</td>
-                    {loanType === 'Regular' && (
-                      <td>₱ {formatNumber((parseFloat(schedule.service_fee) || 0).toFixed(2))}</td>
-                    )}
-                    <td>₱ {formatNumber((parseFloat(schedule.payment_amount) || 0).toFixed(2))}</td>
-                    <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
-                    <td>₱ {formatNumber((parseFloat(schedule.balance) || 0).toFixed(2))}</td>
-                    <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
-                      {schedule.is_paid ? 'Paid!' : 'Ongoing'}
-                    </td>
-                    <td>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        gap: '10px',
-                      }}
-                    >
-                      {!schedule.is_paid && (
-                        <button
-                        style={{
-                          backgroundColor: 'goldenrod',
-                          color: 'black',
-                          border: '0px',
-                          padding: '5px 10px',
-                          borderRadius: '5px',
-                          cursor: arePreviousPaymentsPaid(schedule.id) ? 'pointer' : 'not-allowed',
-                          fontSize: '14px',
-                          flex: '1',
-                        }}
-                        onClick={() => {
-                          if (arePreviousPaymentsPaid(schedule.id)) {
-                            markAsPaid(schedule.id);
-                          }
-                        }}
-                        disabled={!arePreviousPaymentsPaid(schedule.id)} // Disable if previous payment is not paid
-                      >
-                        {paying ? 'Processing...' : 'Pay'}
-                      </button>
-                      )}
-
-                      <button
-                        onClick={() => generateReceipt(schedule)}
-                        style={{
-                          backgroundColor: 'rgb(0, 199, 90)',
-                          color: 'black',
-                          cursor: 'pointer',
-                          border: '0px',
-                          padding: '5px 10px',
-                          borderRadius: '5px',
-                          fontSize: '14px',
-                          flex: '1',
-                        }}
-                      >
-                        {receiptPrinted ? 'View Receipt' : 'Print Receipt'}
-                      </button>
-
-                    </div>
-                  </td>
+              <style>
+                {`
+                  /* For WebKit-based browsers (Chrome, Safari, etc.) */
+                  div::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}
+              </style>
+              <table
+                className="payment-schedule-table"
+                style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  textAlign: 'center',
+                  fontSize: '18px',
+                }}
+              >
+                <thead>
+                  <tr
+                    style={{
+                      backgroundColor: 'red',
+                      color: 'black',
+                      position: 'sticky',
+                      top: '-10px',
+                      zIndex: '1',
+                    }}
+                  >
+                    <th>Principal Amount</th>
+                    <th>Interest Amount</th>
+                    {loanType === 'Regular' && <th>Service Fee</th>}
+                    <th>Payment Amount</th>
+                    <th>Due Date</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>          
+                </thead>
+                <tbody>
+                  {schedules.map((schedule) => (
+                    <tr key={schedule.id}>
+                      <td>₱ {formatNumber((parseFloat(schedule.principal_amount) || 0).toFixed(2))}</td>
+                      <td>₱ {formatNumber((parseFloat(schedule.interest_amount) || 0).toFixed(2))}</td>
+                      {loanType === 'Regular' && (
+                        <td>₱ {formatNumber((parseFloat(schedule.service_fee) || 0).toFixed(2))}</td>
+                      )}
+                      <td>₱ {formatNumber((parseFloat(schedule.payment_amount) || 0).toFixed(2))}</td>
+                      <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
+                      <td>₱ {formatNumber((parseFloat(schedule.balance) || 0).toFixed(2))}</td>
+                      <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
+                        {schedule.is_paid ? 'Paid!' : 'Ongoing'}
+                      </td>
+                      <td>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            gap: '10px',
+                          }}
+                        >
+                          {!schedule.is_paid && (
+                            <button
+                              style={{
+                                backgroundColor: 'goldenrod',
+                                color: 'black',
+                                border: '0px',
+                                padding: '5px 10px',
+                                borderRadius: '5px',
+                                cursor: arePreviousPaymentsPaid(schedule.id) ? 'pointer' : 'not-allowed',
+                                fontSize: '14px',
+                                flex: '1',
+                              }}
+                              onClick={() => {
+                                if (arePreviousPaymentsPaid(schedule.id)) {
+                                  markAsPaid(schedule.id);
+                                }
+                              }}
+                              disabled={!arePreviousPaymentsPaid(schedule.id)}
+                            >
+                              {paying ? 'Processing...' : 'Pay'}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>          
           ) : (
             <p>No payment schedules found for this account.</p>
           )}
         </>
       )}
+
+      {isPaymentModalOpen && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={closePaymentModal}
+          onSubmit={submitPayment}
+          paymentAmount={paymentAmount}
+          setPaymentAmount={setPaymentAmount}
+        />
+      )}
+    </div>
+  );
+};
+
+const PaymentModal = ({ isOpen, onClose, onSubmit, paymentAmount, setPaymentAmount }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+      background: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center',
+    }}>
+      <div style={{
+        background: '#fff', padding: '20px', borderRadius: '8px', width: '300px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+      }}>
+        <h2>Enter Payment Amount</h2>
+        <input
+          type="number"
+          value={paymentAmount}
+          onChange={(e) => setPaymentAmount(e.target.value)}
+          placeholder="Enter amount"
+          style={{ width: '100%', padding: '10px', margin: '10px 0' }}
+        />
+        <button
+          onClick={() => onSubmit(paymentAmount)}
+          style={{ marginRight: '10px', padding: '10px 20px', background: 'green', color: '#fff', border: 'none', borderRadius: '4px' }}
+        >
+          Submit
+        </button>
+        <button
+          onClick={onClose}
+          style={{ padding: '10px 20px', background: 'red', color: '#fff', border: 'none', borderRadius: '4px' }}
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 };

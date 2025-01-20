@@ -140,7 +140,7 @@ const Loans = () => {
                 <td>{loan.purpose}</td>
                 <td>
                   <Link to={`/payment-schedules/${loan.control_number}`}>Schedules</Link><br/>
-                  <Link to={`/payments/`}>Payments</Link>
+                  {/* <Link to={`/payments/`}>Payments</Link> */}
                 </td>
               </tr>
             ))}

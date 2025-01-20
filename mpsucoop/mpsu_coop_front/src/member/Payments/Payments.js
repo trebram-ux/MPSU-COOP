@@ -157,7 +157,7 @@ const MemberPayments = () => {
               <th style={{ padding: '15px' }}>Payment Amount</th>
               <th style={{ padding: '15px' }}>Payment Date</th>
               <th style={{ padding: '15px' }}>Status</th>
-              <th style={{ padding: '15px' }}>OR NO</th>
+              {/* <th style={{ padding: '15px' }}>OR NO</th> */}
             </tr>
           </thead>
           <tbody>
@@ -174,7 +174,7 @@ const MemberPayments = () => {
                     : 'No Date Available'}
                 </td>
                 <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
-                <td>{schedule.or_number}</td>
+                {/* <td>{schedule.or_number}</td> */}
               </tr>
             ))}
           </tbody>

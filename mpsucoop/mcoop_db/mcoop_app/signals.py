@@ -31,12 +31,22 @@ def create_account_for_member(sender, instance, created, **kwargs):
 
         account_number = f"{prefix}-{incremental_part}"
 
+        
+        initial_deposit = instance.initial_deposit if hasattr(instance, 'initial_deposit') else None
+
+        
+        in_dep_value = str(initial_deposit) if initial_deposit else 'Not Provided'
+
+        
         Account.objects.create(
             account_number=account_number,
             account_holder=instance,
-            shareCapital=Decimal('0.00'),
-            status='Active'
+            shareCapital=initial_deposit or Decimal('0.00'), 
+            status='Active',
+            in_dep=in_dep_value 
         )
+
+
 @receiver(post_save, sender=Loan)
 def handle_loan_post_save(sender, instance, created, **kwargs):
     if created and instance.status == 'Ongoing':

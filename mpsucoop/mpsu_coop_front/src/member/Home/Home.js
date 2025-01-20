@@ -159,7 +159,7 @@ const Home = () => {
                 >
                 
                   <p style={{ margin: 0, fontSize: '30px' }}>REGULAR LOAN</p>
-                  <p style={{ margin: 0, fontSize: '30px' }}>{loanData[0]?.loanable_amount !== undefined ? formatNumber(loanData[0].loanable_amount) : 'N/A'}</p>
+                  <p style={{ margin: 0, fontSize: '30px' }}>{loanData.regular_loan_amount || '1.5 million'}</p>
                 </div>
                 <div
                   style={{
@@ -188,7 +188,7 @@ const Home = () => {
                     {formatNumber(nearestPaymentSchedule?.payment_amount || 0)}
                   </p>
 
-                  <p>Amount Paid:</p>
+                  {/* <p>Amount Paid:</p>
                   <p>{formatNumber(totalAmountPaid.toFixed(2))} out of {formatNumber(totalPaymentAmount.toFixed(2))}</p>
                   <div style={{ backgroundColor: 'red', borderRadius: '20px', height: '8px', width: '10px', fontSize: '30px' }}>
                     <div
@@ -211,7 +211,7 @@ const Home = () => {
                         fontSize: '30px'
                       }}
                     ></div>
-                  </div>
+                  </div> */}
 
                   <p style={{ marginTop: '10px' }}><strong>Interest Rate:</strong> {loanData[0]?.interest_rate || '0'}%</p>
                   <div style={{ textAlign: 'left', marginTop: '15px' }}>

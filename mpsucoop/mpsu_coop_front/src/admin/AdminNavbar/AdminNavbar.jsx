@@ -49,7 +49,7 @@ function AdminNavbar({ onLinkClick }) {
             marginTop: '10px'
           }}
         />
-        <h1 className={styles.logoText}>MPSU EMPLOYEES <br /> CREDIT COOP</h1>
+        <h1 className={styles.logoText}>MPSPC EMPLOYEES <br /> CREDIT COOP</h1>
       </div>
       <ul className={styles.navList}>
         {navItems.map((item, index) => (

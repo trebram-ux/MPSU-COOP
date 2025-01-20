@@ -30,16 +30,19 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
       return;
     }
   
-    let numericAmount = 0;
-  
+    let numericAmount = parseFloat(amount.replace(/,/g, ''));  // Remove commas and parse to float
+
     if (actionType === 'deposit') {
-      numericAmount = parseFloat(amount.replace(/,/g, ''));  // Ensure no commas
       if (isNaN(numericAmount) || numericAmount <= 0) {
         setError('Invalid amount for deposit.');
         return;
       }
+      if (numericAmount < 50000 || numericAmount > 1000000) {
+        setError('Deposit must be between 50K and 1M.');
+        return;
+      }
     }
-  
+
     if (actionType === 'withdraw') {
       numericAmount = account.shareCapital;
       if (numericAmount <= 0) {
@@ -80,9 +83,8 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
       fetchAccounts();
       onClose();
     } catch (err) {
-      // Log error response if available
       if (err.response) {
-        console.error("Error response data:", err.response.data);  // Log error response
+        console.error("Error response data:", err.response.data);
         setError(err.response?.data?.error || 'An error occurred while processing your request.');
       } else {
         setError('An error occurred while processing your request.');
