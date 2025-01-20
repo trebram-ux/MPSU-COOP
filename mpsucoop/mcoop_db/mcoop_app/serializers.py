@@ -144,7 +144,7 @@ class LoanSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Loan
-        fields = ['control_number', 'account', 'loan_amount', 'loan_type', 'interest_rate', 
+        fields = ['control_number', 'account', 'loan_amount', 'loan_type', 'interest_rate', 'loanable_amount', 
                   'loan_period', 'loan_period_unit', 'loan_date', 'due_date', 'status', 'takehomePay'
                   ,'penalty_rate', 'purpose', 'bi_monthly_installment', 'payment_schedule','account_holder']
         read_only_fields = ['control_number', 'loan_date', 'due_date', 'interest_rate',  'penalty_rate']

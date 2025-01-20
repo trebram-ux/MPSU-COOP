@@ -271,6 +271,23 @@ class MemberProfileView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Member.DoesNotExist:
             return Response({"error": "Member not found"}, status=status.HTTP_404_NOT_FOUND)
+    def put(self, request):
+        try:
+            member = Member.objects.get(user=request.user)
+            # Pass partial=True to allow only modified fields to be updated
+            serializer = MemberSerializer(member, data=request.data, partial=True)
+            if serializer.is_valid():
+                # Ensure unique validation only for the email field
+                if 'email' in request.data:
+                    email = request.data.get('email')
+                    if email and Member.objects.filter(email=email).exclude(memId=member.memId).exists():
+                        return Response({"error": "This email is already in use by another member."}, status=status.HTTP_400_BAD_REQUEST)
+                
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Member.DoesNotExist:
+            return Response({"error": "Member not found"}, status=status.HTTP_404_NOT_FOUND)
         
 class MemberFilter(django_filters.FilterSet):
     account_number = django_filters.CharFilter(field_name='accountN__account_number', lookup_expr='exact')
@@ -349,6 +366,17 @@ class AccountViewSet(viewsets.ModelViewSet):
         account = self.get_object()
         amount = request.data.get('amount')
         return self._handle_transaction(account, amount, 'withdraw')
+
+
+def get_account_sharecapital(request, account_number):
+    try:
+        # Fetch the account using the account_number
+        account = Account.objects.get(account_number=account_number)
+        
+        # Return the share capital of the account
+        return JsonResponse({'shareCapital': account.shareCapital})  # Adjust field name as needed
+    except Account.DoesNotExist:
+        return JsonResponse({'error': 'Account not found'}, status=404)
 
 
 class LoanViewSet(viewsets.ModelViewSet):

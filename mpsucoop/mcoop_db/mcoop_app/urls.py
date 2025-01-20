@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/loan-summary/', views.loan_summary, name='loan_summary'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('reset-password/<uidb64>/<token>/', views.reset_password, name='reset-password'),
+    path('accounts/<str:account_number>/sharecapital/', views.get_account_sharecapital, name='get_account_sharecapital'),
     # path('api/archived-records/', ArchivedRecordsView.as_view(), name='archived_records'),
     path('api/account/<str:account_number>/transactions/', AccountTransactionView.as_view(), name='account-transactions'),
     path('users/<int:pk>/reset-password/', ResetPasswordView.as_view(), name='reset_password'),

@@ -46,7 +46,7 @@ const Home = () => {
         const paymentResponse = await axios.get(`http://localhost:8000/payments/?account_number=${accountNumber}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
+        console.log(loanResponse.data);
         setMemberData(memberResponse.data);
         setLoanData(loanResponse.data);
         setPaymentSchedules(paymentScheduleResponse.data);
@@ -83,10 +83,11 @@ const Home = () => {
     .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))[0]; // Sort by due date and get the nearest one
 
   // Calculate total amount paid for the loan (sum of payment_amount for this loan)
-  const totalAmountPaid = paymentSchedules
-    .filter(schedule => schedule.loan_id === loanForMember?.id && schedule.status === 'Paid') // Filter payments for the same loan
-    .reduce((acc, schedule) => acc + parseFloat(schedule.payment_amount || 0), 0);
-    console.log(`Total Amount Paid: ${totalAmountPaid}`);
+  const totalAmountPaid = payments
+    .filter(payment => payment.loan_id === loanForMember?.id) // Filter payments for the same loan
+    .reduce((acc, payment) => acc + parseFloat(payment.payment_amount || 0), 0);
+    
+
 
   // Calculate total payment amount for the loan (sum of payment_amount for this loan)
   const totalPaymentAmount = paymentSchedules
@@ -156,8 +157,9 @@ const Home = () => {
                     fontWeight: 'bold',
                   }}
                 >
+                
                   <p style={{ margin: 0, fontSize: '30px' }}>REGULAR LOAN</p>
-                  <p style={{ margin: 0, fontSize: '30px' }}>{loanData.regular_loan_amount || '1,500,000.00'}</p>
+                  <p style={{ margin: 0, fontSize: '30px' }}>{loanData[0]?.loanable_amount !== undefined ? formatNumber(loanData[0].loanable_amount) : 'N/A'}</p>
                 </div>
                 <div
                   style={{
