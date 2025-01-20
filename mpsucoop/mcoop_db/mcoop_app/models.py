@@ -324,6 +324,7 @@ class Loan(models.Model):
     control_number = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     loan_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    loanable_amount = models.DecimalField(max_digits=15, decimal_places=2 , default=Decimal('0.00'))
     loan_type = models.CharField(
         max_length=200, choices=[('Regular', 'Regular'), ('Emergency', 'Emergency')], default='Emergency'
     )
@@ -344,6 +345,21 @@ class Loan(models.Model):
     penalty_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('2.00'))
     purpose = models.CharField(max_length=200, choices=PURPOSE_CHOICES, default='Education')
     annual_interest = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))  
+
+    def save(self, *args, **kwargs):
+        # Debugging to ensure account and shareCapital are available
+        if self.account:
+            print(f"Account exists: {self.account}")
+            if hasattr(self.account, 'shareCapital') and self.account.shareCapital is not None:
+                print(f"Share Capital: {self.account.shareCapital}")
+                self.loanable_amount = self.account.shareCapital * 3
+            else:
+                print("Share Capital is missing or None.")
+        else:
+            print("Account is missing.")
+        
+        super().save(*args, **kwargs)
+
 
     def archive(self):
         Archive.objects.create(

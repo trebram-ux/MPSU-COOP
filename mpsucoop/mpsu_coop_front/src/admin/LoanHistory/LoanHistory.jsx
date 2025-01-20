@@ -37,6 +37,7 @@ const LoanManager = () => {
     const [startDate, setStartDate] = useState(''); // State for start date in date range
     const [endDate, setEndDate] = useState(''); // State for end date in date range // Add this line for the filter state
     const [showNoLoanPopup, setShowNoLoanPopup] = useState(false); 
+    const [shareCapital, setShareCapital] = useState(null);
 
     const formatNumber = (number) => {
         if (number == null || isNaN(number)) return "N/A";
@@ -46,6 +47,27 @@ const LoanManager = () => {
     const BASE_URL = 'http://localhost:8000';
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const fetchShareCapital = async () => {
+            if (!loanData.account) {
+                setErrors('Account number is required to fetch share capital.');
+                return;
+            }
+    
+            try {
+                // Replace `loanData.account` with the actual account number
+                const response = await axios.get(`${BASE_URL}/accounts/${loanData.account}/sharecapital/`);
+                setShareCapital(response.data.shareCapital); // Assuming the API returns { shareCapital: number }
+            } catch (err) {
+                console.error('Error fetching share capital:', err);
+                setErrors('Error fetching share capital');
+            }
+        };
+    
+        fetchShareCapital();
+    }, [loanData.account]); // Fetch share capital when account changes
+    
+    
     // Fetch loans
     const fetchLoans = async () => {
         try {
@@ -63,6 +85,7 @@ const LoanManager = () => {
         fetchLoans();
     }, []);
     
+    
     const validateLoanData = () => {
         const errors = {};
         const { loan_type, loan_amount, loan_period } = loanData;
@@ -73,7 +96,10 @@ const LoanManager = () => {
             errors.loan_amount = 'Emergency loans cannot exceed 50,000.';
         } else if (loan_type === 'Regular' && loan_amount > 1500000) {
             errors.loan_amount = 'Regular loans cannot exceed 1.5 million.';
+        }else if (loan_type === 'Regular' && loan_amount > shareCapital * 3) {
+        errors.loan_amount = 'Regular loans cannot exceed 3 times your share capital.';
         }
+    
 
         if (!loan_period || loan_period <= 0) {
             errors.loan_period = 'Loan period must be greater than 0.';
@@ -140,12 +166,18 @@ const LoanManager = () => {
     const handleLoanSubmit = async (e) => {
         e.preventDefault();
 
+        if (!shareCapital) {
+            // Handle the case where shareCapital is not yet fetched
+            setErrors('Unable to retrieve share capital.');
+            return;
+          }
+
         // Validate the form data
     const validationErrors = validateLoanData();
     if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
         setShowPopup(true);
-        setPopupMessage('There are errors in the form. Please correct them.');
+        setPopupMessage('Kindly look into this.');
         return; // Stop if validation errors exist
     }
 
