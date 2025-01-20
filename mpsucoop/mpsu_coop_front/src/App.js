@@ -51,6 +51,7 @@ import Loans from './member/Loans/Loans';
 import PaymentSchedule from './member/PaymentSchedule';
 import Payments from './member/Payments/Payments';
 import Accounts from './member/Account/Account';
+import Info from './member/Info/Info';
 import Ledger from './member/Ledger/Ledger';
 import Archive from './admin/Archive/Archive';
 import Usermgmt from './admin/Usermgmt/Usermgmt';
@@ -129,6 +130,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Accounts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/infos"
+            element={
+              <ProtectedRoute>
+                <Info />
               </ProtectedRoute>
             }
           />

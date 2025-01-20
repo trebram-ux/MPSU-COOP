@@ -109,6 +109,12 @@ const Topbar = () => {
           </Link>
         </li>
         <li style={navItemStyle}>
+          <Link to="/infos" style={navLinkStyle}>
+            <FontAwesomeIcon icon={faUser} style={navIconStyle} />
+            <p>Account</p>
+          </Link>
+        </li>
+        <li style={navItemStyle}>
           <Link to="/payments" style={navLinkStyle}>
             <FontAwesomeIcon icon={faUser} style={navIconStyle} />
             <p>Payment</p>
