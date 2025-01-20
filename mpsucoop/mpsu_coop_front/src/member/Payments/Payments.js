@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Topbar from '../Topbar/Topbar';
 
 axios.defaults.withCredentials = false;
 
 const MemberPayments = () => {
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
   const formatNumber = (number) => {
-    if (!number) return "0.00"; // Handle empty or undefined values
+    if (!number) return "0.00";
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
@@ -21,7 +21,7 @@ const MemberPayments = () => {
     setLoading(true);
     setError('');
     try {
-      const accountNumber = localStorage.getItem('account_number'); // Assuming account number is stored on login
+      const accountNumber = localStorage.getItem('account_number');
 
       if (!accountNumber) {
         setError('Account number is missing. Please log in again.');
@@ -45,6 +45,7 @@ const MemberPayments = () => {
         payment_date: schedule.payment_date
           ? new Date(schedule.payment_date).toLocaleDateString()
           : 'N/A',
+        or_number: schedule.or_number || 'N/A', // Ensure OR NO field is included
       }));
 
       setSchedules(schedulesWithDetails);
@@ -123,7 +124,7 @@ const MemberPayments = () => {
             fontSize: '16px',
             borderRadius: '4px',
             width: '300px',
-            marginLeft: '580px'
+            marginLeft: '580px',
           }}
         />
       </div>
@@ -173,7 +174,7 @@ const MemberPayments = () => {
                     : 'No Date Available'}
                 </td>
                 <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
-                <td>{schedule.or_number || 'N/A'}</td>
+                <td>{schedule.or_number}</td>
               </tr>
             ))}
           </tbody>

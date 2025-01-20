@@ -85,7 +85,7 @@ const Loans = () => {
           marginTop: '-150px',
         }}
       >
-        MY Loans</h2>
+        My Loans</h2>
 
         <button
         onClick={() => navigate(-1)}

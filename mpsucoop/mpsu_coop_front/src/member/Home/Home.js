@@ -140,6 +140,7 @@ const Home = () => {
               <p style={{ textAlign: 'center', fontSize: '30px' }}>
                 <strong>ACCOUNT NUMBER:</strong> {memberData.accountN || 'N/A'}
               </p>
+              
               <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '30px' }}>
                 SHARE CAPITAL: <span style={{ fontSize: '28px', fontWeight: '900' }}>₱{formatNumber(memberData.share_capital || 'N/A')}</span>
               </p>
@@ -187,7 +188,7 @@ const Home = () => {
 
                   <p>Amount Paid:</p>
                   <p>{formatNumber(totalAmountPaid.toFixed(2))} out of {formatNumber(totalPaymentAmount.toFixed(2))}</p>
-                  <div style={{ backgroundColor: 'red', borderRadius: '20px', height: '8px', width: '100%', fontSize: '30px' }}>
+                  <div style={{ backgroundColor: 'red', borderRadius: '20px', height: '8px', width: '10px', fontSize: '30px' }}>
                     <div
                       style={{
                         height: '10%',

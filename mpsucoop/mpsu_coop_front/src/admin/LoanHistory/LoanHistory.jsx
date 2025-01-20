@@ -160,7 +160,12 @@ const LoanManager = () => {
                 setShowPrintButton(true);
                 setPopupMessage('Loan successfully created!');
                 setShowPopup(true);
-            }
+            
+                // Automatically hide the popup after 3 seconds
+                setTimeout(() => {
+                    setShowPopup(false);
+                }, 3000); // 3000 milliseconds = 3 seconds
+            }            
             fetchLoans();
         } catch (err) {
             console.error('Error saving loan:', err);
@@ -601,25 +606,25 @@ return (
                     <option value="Emergency">Emergency</option>
                 </select>
 
-<label>Loan Amount:</label>
-<input
-    type="text" // Change to "text" to allow formatted input display
-    name="loan_amount"
-    value={formatNumber(loanData.loan_amount)} // Display the formatted value
-    onChange={(e) => {
-        const rawValue = e.target.value.replace(/,/g, ""); // Remove commas for raw numeric value
-        if (!isNaN(rawValue)) {
-            setLoanData({ ...loanData, loan_amount: rawValue });
-        }
-    }}
-    onBlur={(e) => {
-        // Optionally, format on blur for enhanced user experience
-        const formattedValue = formatNumber(loanData.loan_amount);
-        e.target.value = formattedValue;
-    }}
-    required
-    className="form-control"
-/>
+                <label>Loan Amount:</label>
+                <input
+                    type="text" // Change to "text" to allow formatted input display
+                    name="loan_amount"
+                    value={formatNumber(loanData.loan_amount)} // Display the formatted value
+                    onChange={(e) => {
+                        const rawValue = e.target.value.replace(/,/g, ""); // Remove commas for raw numeric value
+                        if (!isNaN(rawValue)) {
+                            setLoanData({ ...loanData, loan_amount: rawValue });
+                        }
+                    }}
+                    onBlur={(e) => {
+                        // Optionally, format on blur for enhanced user experience
+                        const formattedValue = formatNumber(loanData.loan_amount);
+                        e.target.value = formattedValue;
+                    }}
+                    required
+                    className="form-control"
+                />
 
                 <label>Loan Term:</label>
                 <input

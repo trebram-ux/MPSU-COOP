@@ -62,7 +62,7 @@
 }
 
 .loan-card.red {
-  background-color: red;
+  background-color: rgb(85, 26, 26);
 }
 
 /* Right Card (Payment Info) */
@@ -82,7 +82,7 @@
 .payment-progress-bar {
   background-color: red;
   height: 8px;
-  width: 100%;
+  width: 10px;
   border-radius: 20px;
   position: relative;
   margin: 10px 0;

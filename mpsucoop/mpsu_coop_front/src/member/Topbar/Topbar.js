@@ -1,7 +1,7 @@
 import React, { useState } from 'react'; // Import useState
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTachometerAlt, faUser, faMoneyBill, faPowerOff, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faTachometerAlt,faExchangeAlt,faUser,faPowerOff,faCreditCard,faHandHoldingUsd} from '@fortawesome/free-solid-svg-icons';
 import './Topbar.css';
 
 const Topbar = () => {
@@ -103,33 +103,33 @@ const Topbar = () => {
           </Link>
         </li>
         <li style={navItemStyle}>
-          <Link to="/accounts" style={navLinkStyle}>
-            <FontAwesomeIcon icon={faUser} style={navIconStyle} />
-            <p>Transaction</p>
-          </Link>
-        </li>
-        <li style={navItemStyle}>
           <Link to="/infos" style={navLinkStyle}>
             <FontAwesomeIcon icon={faUser} style={navIconStyle} />
             <p>Account</p>
           </Link>
         </li>
         <li style={navItemStyle}>
+          <Link to="/accounts" style={navLinkStyle}>
+            <FontAwesomeIcon icon={faExchangeAlt} style={navIconStyle} />
+            <p>Transaction</p>
+          </Link>
+        </li>
+        <li style={navItemStyle}>
           <Link to="/payments" style={navLinkStyle}>
-            <FontAwesomeIcon icon={faUser} style={navIconStyle} />
+            <FontAwesomeIcon icon={faCreditCard} style={navIconStyle} />
             <p>Payment</p>
           </Link>
         </li>
         <li style={navItemStyle}>
           <Link to="/Loans" style={navLinkStyle}>
-            <FontAwesomeIcon icon={faMoneyBill} style={navIconStyle} />
+            <FontAwesomeIcon icon={faHandHoldingUsd} style={navIconStyle} />
             <p>Loan</p>
           </Link>
         </li>
         {/* Log out button */}
         <li style={navItemStyle}>
           <div onClick={handleLogout} style={navLinkStyle}>
-            <FontAwesomeIcon icon={faSignOutAlt} style={navIconStyle} />
+            <FontAwesomeIcon icon={faPowerOff} style={navIconStyle} />
             <p>Log Out</p>
           </div>
         </li>
