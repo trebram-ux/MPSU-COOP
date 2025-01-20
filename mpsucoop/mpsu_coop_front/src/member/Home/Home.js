@@ -141,11 +141,7 @@ const Home = () => {
                 <strong>ACCOUNT NUMBER:</strong> {memberData.accountN || 'N/A'}
               </p>
               <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '30px' }}>
-<<<<<<< HEAD
-                SHARE CAPITAL: <span style={{ fontSize: '30px', fontWeight: '900' }}>₱{memberData.share_capital || 'N/A'}</span>
-=======
-                SHARE CAPITAL: <span style={{ fontSize: '30px', fontWeight: '900' }}>{formatNumber(memberData.share_capital || 'N/A')}</span>
->>>>>>> 8670a220a0663d42fc8f19b882c5bfcf494312a8
+                SHARE CAPITAL: <span style={{ fontSize: '28px', fontWeight: '900' }}>₱{formatNumber(memberData.share_capital || 'N/A')}</span>
               </p>
 
               <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '50px' }}>
@@ -180,7 +176,7 @@ const Home = () => {
 
             {/* Right Card */}
             <section style={{ flex: 1 }}>
-              <div style={{ backgroundColor: '#c8f7ce', borderRadius: '8px', width: '600px', padding: '20px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}>
+              <div style={{ backgroundColor:' #f0f0f0', borderRadius: '8px', width: '600px', padding: '20px', boxShadow: '0px 4px 20px rgba(187, 186, 186, 0.99)',height: '400px' }}>
                 <h3 style={{ textAlign: 'left', color: 'black', fontSize: '30px' }}>
                   {nearestPaymentSchedule ? `Loan Due on: ${new Date(nearestPaymentSchedule.due_date).toLocaleDateString()}` : 'Loan Due Date: N/A'}
                 </h3>
@@ -225,14 +221,20 @@ const Home = () => {
                       </button>
                     )}
                     {dropdownOpen && (
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
-                        <button onClick={() => handleNavigation('/accounts')} style={{ marginBottom: '10px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', borderRadius: '5px', fontWeight: 'bold' }}>
-                          View Ledger
-                        </button>
-                        <button onClick={() => handleNavigation('/loans')} style={{ padding: '8px 15px', backgroundColor: '#007bff', color: 'white', borderRadius: '5px', fontWeight: 'bold' }}>
-                          View Loan
-                        </button>
-                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px', gap: '10px' }}>
+                      <button 
+                        onClick={() => handleNavigation('/accounts')} 
+                        style={{ padding: '8px 5px', backgroundColor: '#28a745', color: 'black', borderRadius: '5px', fontWeight: 'bold'}}
+                      >
+                        View Ledger
+                      </button>
+                      <button 
+                        onClick={() => handleNavigation('/loans')} 
+                        style={{ padding: '8px 5px', backgroundColor: '#007bff', color: 'black', borderRadius: '5px', fontWeight: 'bold' }}
+                      >
+                        View Loan
+                      </button>
+                    </div>                    
                     )}
                   </div>
                 </div>

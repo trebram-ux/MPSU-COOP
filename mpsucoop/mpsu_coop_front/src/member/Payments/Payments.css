@@ -1,17 +1,97 @@
-.payment-schedule-table {
+/* General Layout */
+.member-payments-container {
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+  
+  /* Header */
+  .member-payments-container h2 {
+    text-align: center;
+    color: #000000;
+    font-size: 30px;
+    margin-bottom: 50px;
+    margin-top: 110px;
+  }
+  
+  /* Back Button */
+  .member-payments-container .back-button {
+    font-size: 16px;
+    background-color: #37ff7d;
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: -10px;
+  }
+  
+  .member-payments-container .back-button:hover {
+    background-color: #ff00e1;
+  }
+  
+  /* Search Bar */
+  .member-payments-container .search-bar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    margin-top: -50px;
+  }
+  
+  .member-payments-container .search-bar input {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    width: 300px;
+  }
+  
+  /* Table Styles */
+  .member-payments-container table {
     width: 100%;
     border-collapse: collapse;
+    text-align: left;
     margin-top: 20px;
-}
-
-.payment-schedule-table th,
-.payment-schedule-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-}
-
-.payment-schedule-table th {
-    background-color: #f2f2f2;
+  }
+  
+  .member-payments-container table th,
+  .member-payments-container table td {
+    padding: 15px;
+  }
+  
+  .member-payments-container table th {
+    background-color: #007bff;
+    color: rgb(0, 0, 0);
+    text-transform: uppercase;
     font-weight: bold;
-}
+  }
+  
+  .member-payments-container table td {
+    font-size: 14px;
+    color: #000000;
+  }
+  
+  /* Empty State */
+  .member-payments-container p {
+    text-align: center;
+    font-size: 16px;
+    color: #000000;
+    margin-top: 20px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .member-payments-container .search-bar input {
+      width: 100%;
+      max-width: 300px;
+    }
+  
+    .member-payments-container table {
+      font-size: 12px;
+    }
+  
+    .member-payments-container h2 {
+      font-size: 24px;
+    }
+  }
+  

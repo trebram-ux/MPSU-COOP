@@ -219,16 +219,18 @@ const Payments = () => {
         <>
           <div id="print-section">
             {accountDetails && (
-              <div style={{ width: '48%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ width: '55%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <h3 style={{ color: 'black', fontSize: '20px', marginTop: '-50px'}}>Payment History For:</h3>
               <table style={{borderCollapse: 'collapse', marginTop: '10px' }}>
               <tbody>
-                <tr>
-                  <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>Name:</td>
-                  <td style={{ padding: '5px', border: '0px', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)', width: '100px'}}>
-                    {accountDetails.first_name} {accountDetails.middle_name}  {accountDetails.last_name}
-                  </td>
-                </tr>
+              <tr>
+                <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>Name:</td>
+                <td style={{ padding: '5px', border: '0px', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)', verticalAlign: 'bottom', width: 'fit-content', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{accountDetails.first_name}</span>
+                  <span style={{ paddingLeft: '5px' }}>{accountDetails.middle_name}</span>
+                  <span style={{ paddingLeft: '5px' }}>{accountDetails.last_name}</span>
+                </td>
+              </tr>
                 <tr>
                   <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>Account Number:</td>
                   <td style={{ padding: '5px', border: '0px', fontSize: '18px', borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>
@@ -252,7 +254,7 @@ const Payments = () => {
                       ).toLocaleDateString() || 'No Date Available'}
                     </td>
                     <td style={{ padding: '5px', border: '0px', fontWeight: 'bold', fontSize: '18px', borderBottom: '1px solidrgba(218, 218, 218, 0.68)'}}>Amount:</td>
-                    <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold' , borderBottom: '1px solid rgba(218, 218, 218, 0.68)'}}>
+                    <td style={{ padding: '5px', border: '0px', fontSize: '18px', fontWeight: 'bold' , borderBottom: '1px solid rgba(218, 218, 218, 0.68)' }}>
                       ₱{formatNumber(parseFloat(
                         filterSchedulesByLoanType().find(schedule => schedule.loan_type === 'Regular')?.loan_amount || 0
                       ).toFixed(2))}

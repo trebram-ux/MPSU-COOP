@@ -59,6 +59,7 @@ const Topbar = () => {
 
   const navItemStyle = {
     margin: '0 20px',
+    cursor: 'pointer'
   };
 
   const navLinkStyle = {
@@ -130,14 +131,32 @@ const Topbar = () => {
 
       {/* Popup Overlay for Logout Confirmation */}
       {showLogoutPopup && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '10px', textAlign: 'center' }}>
-            <p>Are you sure you want to log out?</p>
-            <button onClick={handleLogoutConfirm} style={{ marginRight: '10px' }}>Yes</button>
-            <button onClick={handleLogoutCancel}>Cancel</button>
-          </div>
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        bottom: 0, 
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center' 
+      }}>
+        <div style={{ 
+          backgroundColor: 'white', 
+          boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
+          color: 'black',
+          padding: '20px', 
+          borderRadius: '10px', 
+          textAlign: 'center', 
+          fontSize: '20px'
+        }}>
+          <p>Are you sure you want to log out?</p>
+          <button onClick={handleLogoutConfirm} style={{ marginRight: '10px' }}>Yes</button>
+          <button onClick={handleLogoutCancel}>Cancel</button>
         </div>
-      )}
+      </div>
+    )}
     </div>
   );
 };

@@ -76,14 +76,39 @@ const Loans = () => {
   return (
     <div>
       <Topbar />
-      <h2>MY Loans</h2>
+      <h2
+        style={{
+          textAlign: 'center',
+          color: '#000000',
+          fontSize: '30px',
+          marginBottom: '50px',
+          marginTop: '-150px',
+        }}
+      >
+        MY Loans</h2>
 
-      <button onClick={() => navigate(-1)}>Back</button>
+        <button
+        onClick={() => navigate(-1)}
+        style={{
+          fontSize: '16px',
+          backgroundColor: '#37ff7d',
+          color: 'rgb(0, 0, 0)',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          transition: 'background-color 0.3s ease',
+          marginBottom: '15px',
+        }}
+        onMouseOver={(e) => (e.target.style.backgroundColor = '#ff00e1')}
+        onMouseOut={(e) => (e.target.style.backgroundColor = '#37ff7d')}
+      >
+        Back
+      </button>
 
       <label htmlFor="filter">Filter Loans: </label>
       <select id="filter" onChange={(e) => setFilter(e.target.value)}>
         <option value="">All</option>
-        <option value="Pending">Pending</option>
+        <option value="Pending">Ongoing</option>
         <option value="Paid">Paid</option>
       </select>
 

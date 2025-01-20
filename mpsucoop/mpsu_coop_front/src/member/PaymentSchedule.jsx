@@ -55,33 +55,47 @@ const PaymentSchedule = () => {
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', marginTop: '220px' }}>
       <Topbar />
-      <h2 style={{ textAlign: 'center', color: 'black' }}>MY PAYMENT SCHEDULES</h2>
+      <h2 style={{
+          textAlign: 'center',
+          color: '#000000',
+          fontSize: '30px',
+          marginBottom: '50px',
+          marginTop: '-150px',
+        }}
+        >MY PAYMENT SCHEDULES</h2>
 
-      <button 
-        onClick={() => navigate(-1)} 
+      <button
+        onClick={() => navigate(-1)}
         style={{
-          backgroundColor: 'red',
-          padding: '10px 15px',
-          border: '1px solid black',
-          borderRadius: '5px',
-          cursor: 'pointer',
           fontSize: '16px',
-          marginBottom: '20px',
-        }}>
+          backgroundColor: '#37ff7d',
+          color: 'rgb(0, 0, 0)',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          transition: 'background-color 0.3s ease',
+          marginBottom: '15px',
+          marginLeft: '-500px'
+        }}
+        onMouseOver={(e) => (e.target.style.backgroundColor = '#ff00e1')}
+        onMouseOut={(e) => (e.target.style.backgroundColor = '#37ff7d')}
+      >
         Back
       </button>
 
       {paymentSchedules.length > 0 ? (
         <div 
           style={{
-            overflowY: 'auto', 
-            maxHeight: '400px', 
-            border: '2px solid black', 
-            borderRadius: '5px', 
-            padding: '10px',
-            marginTop: '10px',
-            width: '150%',
-            marginLeft: '-25%',
+            maxHeight: '460px',
+              width: '360%',
+              overflowY: 'auto',
+              boxShadow: '0px 0px 15px 0px rgb(154, 154, 154)',
+              marginTop: '20px',
+              padding: '5px',
+              borderRadius: '5px',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              marginLeft: '-500px'
           }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>

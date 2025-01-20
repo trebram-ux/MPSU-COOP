@@ -135,11 +135,7 @@ function Login() {
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const signupData = {
-      account_number,
-      email,
-      password,
-    };
+    const signupData = { account_number, email, password };
 
     try {
       const response = await fetch('http://localhost:8000/register/', {
@@ -155,9 +151,7 @@ function Login() {
         throw new Error(errorData.detail || 'Signup failed');
       }
 
-      console.log('Signup successful');
       setShowSignup(false);
-      setRole(''); // Reset role to allow further login attempts
       navigate('/');
     } catch (err) {
       setError(err.message);
@@ -165,7 +159,7 @@ function Login() {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="lcontainer">
       <div className="background"></div>

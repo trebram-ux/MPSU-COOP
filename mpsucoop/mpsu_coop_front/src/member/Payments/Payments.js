@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import axios from 'axios';
-import { FaSearch } from 'react-icons/fa';
+import Topbar from '../Topbar/Topbar';
 
 axios.defaults.withCredentials = false;
 
@@ -15,7 +15,7 @@ const MemberPayments = () => {
   const formatNumber = (number) => {
     if (!number) return "0.00"; // Handle empty or undefined values
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
+  };
 
   const fetchPaymentSchedules = async () => {
     setLoading(true);
@@ -68,31 +68,49 @@ const MemberPayments = () => {
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
   return (
-    <div style={{ marginTop: '20px' }} className="member-payments-container">
-      
-      <button
-        onClick={() => navigate(-1)} // Go back to the previous page
+    <div
+      style={{
+        padding: '10px',
+        fontFamily: 'Arial, sans-serif',
+        minHeight: '100vh',
+        boxSizing: 'border-box',
+      }}
+    >
+      <Topbar />
+      <h2
         style={{
-          padding: '10px 20px',
-          marginBottom: '20px',
+          textAlign: 'center',
+          color: '#000000',
+          fontSize: '30px',
+          marginBottom: '50px',
+          marginTop: '110px',
+        }}
+      >
+        My Paid Payments
+      </h2>
+      <button
+        onClick={() => navigate(-1)}
+        style={{
           fontSize: '16px',
-          backgroundColor: '#007bff',
-          color: 'white',
+          backgroundColor: '#37ff7d',
+          color: 'rgb(0, 0, 0)',
           border: 'none',
           borderRadius: '4px',
           cursor: 'pointer',
+          transition: 'background-color 0.3s ease',
+          marginBottom: '-10px',
         }}
+        onMouseOver={(e) => (e.target.style.backgroundColor = '#ff00e1')}
+        onMouseOut={(e) => (e.target.style.backgroundColor = '#37ff7d')}
       >
         Back
       </button>
-      <h2 style={{ textAlign: 'center', color: 'black', fontSize: '30px' }}>
-        My Paid Payments
-      </h2>
       <div
         style={{
           display: 'flex',
           justifyContent: 'center',
           marginBottom: '20px',
+          marginTop: '-50px',
         }}
       >
         <input
@@ -103,25 +121,11 @@ const MemberPayments = () => {
           style={{
             padding: '10px',
             fontSize: '16px',
-            border: '2px solid #000',
             borderRadius: '4px',
             width: '300px',
+            marginLeft: '580px'
           }}
         />
-        <button
-          style={{
-            marginLeft: '10px',
-            padding: '10px 15px',
-            fontSize: '16px',
-            borderRadius: '4px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <FaSearch />
-        </button>
       </div>
 
       {filteredSchedules.length > 0 ? (
@@ -135,51 +139,56 @@ const MemberPayments = () => {
         >
           <thead>
             <tr>
-              <th style={{ borderBottom: '2px solid black', padding: '10px' }}>Approval Date</th>
-              <th style={{ borderBottom: '2px solid black', padding: '10px' }}>Loan Type</th>
-              <th style={{ borderBottom: '2px solid black', padding: '10px' }}>Loan Amount</th>
-              <th style={{ borderBottom: '2px solid black', padding: '10px' }}>Principal Amount</th>
-              <th style={{ borderBottom: '2px solid black', padding: '10px' }}>Payment Amount</th>
-              <th style={{ borderBottom: '2px solid black', padding: '10px' }}>Payment Date</th>
-              <th style={{ borderBottom: '2px solid black', padding: '10px' }}>Status</th>
-              <th style={{ borderBottom: '2px solid black', padding: '10px' }}>OR NO</th>
+              <th
+                style={{
+                  backgroundColor: '#007bff',
+                  color: 'rgb(0, 0, 0)',
+                  textTransform: 'uppercase',
+                  fontWeight: 'bold',
+                  padding: '15px',
+                }}
+              >
+                Approval Date
+              </th>
+              <th style={{ padding: '15px' }}>Loan Type</th>
+              <th style={{ padding: '15px' }}>Loan Amount</th>
+              <th style={{ padding: '15px' }}>Principal Amount</th>
+              <th style={{ padding: '15px' }}>Payment Amount</th>
+              <th style={{ padding: '15px' }}>Payment Date</th>
+              <th style={{ padding: '15px' }}>Status</th>
+              <th style={{ padding: '15px' }}>OR NO</th>
             </tr>
           </thead>
           <tbody>
             {filteredSchedules.map((schedule, index) => (
               <tr key={index}>
-                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  {schedule.loan_date || 'No Date Available'}
-                </td>
-                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  {schedule.loan_type || 'N/A'}
-                </td>
-                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  ₱ {formatNumber(parseFloat(schedule.loan_amount || 0).toFixed(2))}
-                </td>
-                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  ₱ {formatNumber(parseFloat(schedule.principal_amount || 0).toFixed(2))}
-                </td>
-                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  ₱ {formatNumber(parseFloat(schedule.payment_amount || 0).toFixed(2))}
-                </td>
-                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
+                <td>{schedule.loan_date || 'No Date Available'}</td>
+                <td>{schedule.loan_type || 'N/A'}</td>
+                <td>₱ {formatNumber(parseFloat(schedule.loan_amount || 0).toFixed(2))}</td>
+                <td>₱ {formatNumber(parseFloat(schedule.principal_amount || 0).toFixed(2))}</td>
+                <td>₱ {formatNumber(parseFloat(schedule.payment_amount || 0).toFixed(2))}</td>
+                <td>
                   {schedule.payment_date
                     ? new Date(schedule.due_date).toLocaleDateString()
                     : 'No Date Available'}
                 </td>
-                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  {schedule.is_paid ? 'Paid' : 'Unpaid'}
-                </td>
-                <td style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  {schedule.or_number || 'N/A'}
-                </td>
+                <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
+                <td>{schedule.or_number || 'N/A'}</td>
               </tr>
             ))}
           </tbody>
         </table>
       ) : (
-        <p>No paid payments found.</p>
+        <p
+          style={{
+            textAlign: 'center',
+            fontSize: '16px',
+            color: '#000000',
+            marginTop: '20px',
+          }}
+        >
+          No paid payments found.
+        </p>
       )}
     </div>
   );

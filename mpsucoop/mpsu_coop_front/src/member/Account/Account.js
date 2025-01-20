@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Topbar from '../Topbar/Topbar';
-import Payment from '../Payments/Payments'; // Import the Payment component
+import Payment from '../Payments/Payments';
+import './Account.css';
 
 const Ledger = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showPayments, setShowPayments] = useState(false); // State to toggle Payment view
+  const [showPayments, setShowPayments] = useState(false);
 
   const formatNumber = (number) => {
-    if (!number) return "0.00"; // Handle empty or undefined values
-    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (!number) return '0.00';
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
   const accountNumber = localStorage.getItem('account_number');
@@ -59,31 +60,28 @@ const Ledger = () => {
   }
 
   return (
-    <div style={{ display: 'flex', height: '80vh' }}>
+    <div className="ledger-container">
       {/* Left Section */}
-      <div style={{ flex: 1, padding: '20px', borderRight: '1px solid #ccc' }}>
+      <div className="ledger-left">
         <Topbar />
         <h1>{isAdmin ? 'All Transactions' : 'My Transactions'}</h1>
 
         {/* Back Button */}
-        <button onClick={() => window.history.back()}>Go Back</button>
+        <button
+          onClick={() => window.history.back()}
+          className="back-button"
+        >
+          Go Back
+        </button>
 
         {/* Payment Toggle Link */}
-        <button 
-          onClick={() => setShowPayments(!showPayments)} 
-          style={{
-            margin: '10px 0',
-            padding: '10px',
-            background: '#007bff',
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
-          }}
+        <button
+          onClick={() => setShowPayments(!showPayments)}
         >
           {showPayments ? 'Hide Payments' : 'View Payments'}
         </button>
 
-        <table border="1" cellPadding="5" cellSpacing="0">
+        <table className="ledger-table">
           <thead>
             <tr>
               <th>Transaction Type</th>
@@ -108,7 +106,7 @@ const Ledger = () => {
       </div>
 
       {/* Right Section for Payments */}
-      <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
+      <div className="ledger-right">
         {showPayments && <Payment />}
       </div>
     </div>
