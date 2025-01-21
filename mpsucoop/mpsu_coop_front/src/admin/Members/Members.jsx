@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 import styles from './Members.css';
-// import MembershipForm from './MembershipForm';
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { FaEdit, FaTrash, FaEye} from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
-import { FaSearch } from 'react-icons/fa';
-import { SiFormspree } from "react-icons/si";
 
 function Members() {
   const [members, setMembers] = useState([]);
@@ -52,7 +49,7 @@ function Members() {
       setFormError('First and last names are required.');
       return;
     }
-  
+
     try {
       const response = await axios.post('http://localhost:8000/members/', newMember);
       setMembers([...members, response.data]);
@@ -60,15 +57,9 @@ function Members() {
       setShowAddForm(false);  
       setFormError(null);
     } catch (err) {
-      // Check for error response and provide a more detailed error message
-      if (err.response && err.response.data) {
-        setFormError(err.response.data.detail || 'Error adding member. Please try again.');
-      } else {
-        setFormError('An unexpected error occurred. Please try again.');
-      }
-      console.error(err);  // For debugging purposes
+      setFormError('Error adding member. Please try again.');
     }
-  };  
+  }; 
 
   // Function to open the modal
 const openDeleteModal = (member) => {
@@ -458,8 +449,8 @@ const confirmDeleteMember = async () => {
       type="text"
       className="form-control"
       placeholder="Address"
-      name="address"
-      value={editingMember?.address || newMember.address || ''}
+      name="addresss"
+      value={editingMember?.addresss || newMember.addresss || ''}
       onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
     />
   </div>
@@ -517,10 +508,10 @@ const confirmDeleteMember = async () => {
                   type="date"
                   className="form-control"
                   placeholder="Birth Date"
-                  name="birth_date"
+                  name="birth_dates"
                   min="1980-01-01"
                   max="2005-12-31"
-                  value={editingMember?.birth_date || newMember.birth_date || ''}
+                  value={editingMember?.birth_dates || newMember.birth_dates || ''}
                   onChange={(e) => {
                     const selectedDate = new Date(e.target.value);
                     const today = new Date();
@@ -531,12 +522,12 @@ const confirmDeleteMember = async () => {
                     }
 
                     const updatedMember = editingMember
-                      ? { ...editingMember, birth_date: e.target.value, age: age > 0 ? age : '' }
-                      : { ...newMember, birth_date: e.target.value, age: age > 0 ? age : '' };
+                      ? { ...editingMember, birth_dates: e.target.value, age: age > 0 ? age : '' }
+                      : { ...newMember, birth_dates: e.target.value, age: age > 0 ? age : '' };
 
                     editingMember ? setEditingMember(updatedMember) : setNewMember(updatedMember);
                   }}
-                />
+                />  
               </div>
             </div>
 

@@ -7,6 +7,12 @@ from django.db.models import Max
 from .models import Member, Account, Loan, Payment, PaymentSchedule
 import uuid
 from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+from datetime import datetime
+from django.db.models import Max
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 @receiver(post_save, sender=Member)
 def create_account_for_member(sender, instance, created, **kwargs):
@@ -15,7 +21,6 @@ def create_account_for_member(sender, instance, created, **kwargs):
         current_day = datetime.now().day
         year_suffix = str(current_year)[-2:]  
         day_suffix = str(current_day).zfill(2)  
-        
         
         prefix = f"{year_suffix}{day_suffix}"
 
@@ -30,11 +35,15 @@ def create_account_for_member(sender, instance, created, **kwargs):
         incremental_part = str(increment).zfill(4)
 
         account_number = f"{prefix}-{incremental_part}"
+        try:
+            initial_deposit = Decimal(instance.in_dep) if instance.in_dep.isdigit() else Decimal('0.00')
+        except (ValueError, InvalidOperation):
+            initial_deposit = Decimal('0.00')
 
         Account.objects.create(
             account_number=account_number,
             account_holder=instance,
-            shareCapital=Decimal('0.00'),
+            shareCapital=initial_deposit,
             status='Active'
         )
 @receiver(post_save, sender=Loan)
