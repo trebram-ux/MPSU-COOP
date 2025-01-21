@@ -15,30 +15,28 @@ def create_account_for_member(sender, instance, created, **kwargs):
         current_day = datetime.now().day
         year_suffix = str(current_year)[-2:]  
         day_suffix = str(current_day).zfill(2)  
+        
+        
         prefix = f"{year_suffix}{day_suffix}"
+
         last_account = Account.objects.filter(account_number__startswith=prefix).aggregate(Max('account_number'))
+
         last_account_number = last_account['account_number__max']
         if last_account_number:
             increment = int(last_account_number.split('-')[1]) + 1
         else:
             increment = 1
+
         incremental_part = str(increment).zfill(4)
 
         account_number = f"{prefix}-{incremental_part}"
-        try:
-            initial_deposit = Decimal(instance.in_dep) if instance.in_dep.stripe().isdigit() else Decimal('0.00')
-        except (ValueError, InvalidOperation):
-            initial_deposit = Decimal('0.00') #Default to 0.00 if conversation fails
-        
+
         Account.objects.create(
             account_number=account_number,
             account_holder=instance,
-            shareCapital=initial_deposit or Decimal('0.00'), 
-            status='Active',
-            in_dep=in_dep_value 
+            shareCapital=Decimal('0.00'),
+            status='Active'
         )
-
-
 @receiver(post_save, sender=Loan)
 def handle_loan_post_save(sender, instance, created, **kwargs):
     if created and instance.status == 'Ongoing':
