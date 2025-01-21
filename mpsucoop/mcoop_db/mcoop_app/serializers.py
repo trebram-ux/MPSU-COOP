@@ -154,6 +154,10 @@ class LoanSerializer(serializers.ModelSerializer):
             member = obj.account.account_holder
             return f"{member.first_name} {member.middle_name or ''} {member.last_name}".strip()
         return "N/A"
+    def validate_account_holder(self, value):
+        if not value:
+            raise serializers.ValidationError("Account Holder is required.")
+        return value
     def validate_control_number(self, value):
         try:
             uuid.UUID(str(value))

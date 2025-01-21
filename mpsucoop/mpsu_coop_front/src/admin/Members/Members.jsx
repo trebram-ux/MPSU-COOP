@@ -488,9 +488,9 @@ const confirmDeleteMember = async () => {
                 </label>
                 <input
                   className="form-control"
-                  name="co_maker1"
+                  name="co_maker"
                   placeholder="Beneficiaries Name 1"
-                  value={editingMember?.co_maker1 || newMember.co_maker1 || ''}
+                  value={editingMember?.co_maker || newMember.co_maker || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
@@ -502,9 +502,9 @@ const confirmDeleteMember = async () => {
                 <input
                   type="text"
                   className="form-control"
-                  name="relationship1"
+                  name="relationship"
                   placeholder="Relationship"
-                  value={editingMember?.relationship1 || newMember.relationship1 || ''}
+                  value={editingMember?.relationship || newMember.relationship || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
@@ -517,10 +517,10 @@ const confirmDeleteMember = async () => {
                   type="date"
                   className="form-control"
                   placeholder="Birth Date"
-                  name="birth_date1"
+                  name="birth_date"
                   min="1980-01-01"
                   max="2005-12-31"
-                  value={editingMember?.birth_date1 || newMember.birth_date1 || ''}
+                  value={editingMember?.birth_date || newMember.birth_date || ''}
                   onChange={(e) => {
                     const selectedDate = new Date(e.target.value);
                     const today = new Date();
@@ -531,8 +531,8 @@ const confirmDeleteMember = async () => {
                     }
 
                     const updatedMember = editingMember
-                      ? { ...editingMember, birth_date1: e.target.value, age: age > 0 ? age : '' }
-                      : { ...newMember, birth_date1: e.target.value, age: age > 0 ? age : '' };
+                      ? { ...editingMember, birth_date: e.target.value, age: age > 0 ? age : '' }
+                      : { ...newMember, birth_date: e.target.value, age: age > 0 ? age : '' };
 
                     editingMember ? setEditingMember(updatedMember) : setNewMember(updatedMember);
                   }}
@@ -546,9 +546,9 @@ const confirmDeleteMember = async () => {
               <div style={{ flex: '1 1 200px', minWidth: '200px',marginTop: '-35px' }}>
                 <input
                   className="form-control"
-                  name="co_maker2"
+                  name="co_maker"
                   placeholder="Beneficiaries Name 2"
-                  value={editingMember?.co_maker2 || newMember.co_maker2 || ''}
+                  value={editingMember?.co_maker || newMember.co_maker || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
@@ -557,9 +557,9 @@ const confirmDeleteMember = async () => {
                 <input
                   type="text"
                   className="form-control"
-                  name="relationship2"
+                  name="relationship"
                   placeholder="Relationship"
-                  value={editingMember?.relationship2 || newMember.relationship2 || ''}
+                  value={editingMember?.relationship || newMember.relationship || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
@@ -572,7 +572,7 @@ const confirmDeleteMember = async () => {
                   name="birth_date2"
                   min="1980-01-01"
                   max="2005-12-31"
-                  value={editingMember?.birth_date2 || newMember.birth_date2 || ''}
+                  value={editingMember?.birth_date || newMember.birth_date || ''}
                   onChange={(e) => {
                     const selectedDate = new Date(e.target.value);
                     const today = new Date();
@@ -583,8 +583,8 @@ const confirmDeleteMember = async () => {
                     }
 
                     const updatedMember = editingMember
-                      ? { ...editingMember, birth_date2: e.target.value, age: age > 0 ? age : '' }
-                      : { ...newMember, birth_date2: e.target.value, age: age > 0 ? age : '' };
+                      ? { ...editingMember, birth_date: e.target.value, age: age > 0 ? age : '' }
+                      : { ...newMember, birth_date: e.target.value, age: age > 0 ? age : '' };
 
                     editingMember ? setEditingMember(updatedMember) : setNewMember(updatedMember);
                   }}
@@ -597,9 +597,9 @@ const confirmDeleteMember = async () => {
               <div style={{ flex: '1 1 200px', minWidth: '200px',marginTop: '-35px' }}>
                 <input
                   className="form-control"
-                  name="co_maker3"
+                  name="co_maker"
                   placeholder="Beneficiaries Name 3"
-                  value={editingMember?.co_maker3 || newMember.co_maker3 || ''}
+                  value={editingMember?.co_maker || newMember.co_maker || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
@@ -610,7 +610,7 @@ const confirmDeleteMember = async () => {
                   className="form-control"
                   name="relationship3"
                   placeholder="Relationship"
-                  value={editingMember?.relationship3 || newMember.relationship3 || ''}
+                  value={editingMember?.relationship || newMember.relationship || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
               </div>
@@ -620,10 +620,10 @@ const confirmDeleteMember = async () => {
                   type="date"
                   className="form-control"
                   placeholder="Birth Date"
-                  name="birth_date3"
+                  name="birth_date"
                   min="1980-01-01"
                   max="2005-12-31"
-                  value={editingMember?.birth_date3 || newMember.birth_date3 || ''}
+                  value={editingMember?.birth_date || newMember.birth_date || ''}
                   onChange={(e) => {
                     const selectedDate = new Date(e.target.value);
                     const today = new Date();
@@ -632,10 +632,9 @@ const confirmDeleteMember = async () => {
                     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
                       age -= 1;
                     }
-
                     const updatedMember = editingMember
-                      ? { ...editingMember, birth_date3: e.target.value, age: age > 0 ? age : '' }
-                      : { ...newMember, birth_date3: e.target.value, age: age > 0 ? age : '' };
+                      ? { ...editingMember, birth_date: e.target.value, age: age > 0 ? age : '' }
+                      : { ...newMember, birth_date: e.target.value, age: age > 0 ? age : '' };
 
                     editingMember ? setEditingMember(updatedMember) : setNewMember(updatedMember);
                   }}
@@ -809,7 +808,7 @@ const confirmDeleteMember = async () => {
                     >
                       <FaEdit /> Edit
                     </button>
-                    {/* <button
+                    <button
                     onClick={() => openDeleteModal(member)}
                     style={{
                       padding: '5px 10px',
@@ -820,7 +819,7 @@ const confirmDeleteMember = async () => {
                     }}
                   >
                     <FaTrash /> Delete
-                  </button> */}
+                  </button>
                   </td>
                 </tr>
               ))}

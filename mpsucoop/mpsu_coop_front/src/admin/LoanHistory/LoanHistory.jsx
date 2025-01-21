@@ -210,38 +210,6 @@ const LoanManager = () => {
     const closePopup = () => {
         setShowPopup(false);
     };
-    
-    const handleDeleteLoan = async (loan) => {
-        // Log the raw loan object to check its status
-        console.log("Loan Object Before Check:", loan);
-        console.log("Loan Status (raw):", loan.status);
-    
-        // Sanitize status to remove extra spaces or case issues
-        const loanStatus = loan.status.trim().toLowerCase();
-        console.log("Loan Status (sanitized):", loanStatus);  // log the sanitized value
-    
-        // Check if loan status is 'fully paid'
-        if (loanStatus !== "fully paid") {
-            alert("This loan cannot be deleted as it is not fully paid.");
-            return;
-        }
-    
-        const confirmDelete = window.confirm(
-            `Are you sure you want to delete the loan with Control Number: ${loan.control_number}? This action cannot be undone.`
-        );
-    
-        if (!confirmDelete) return;
-    
-        try {
-            await axios.delete(`${BASE_URL}/loans/${loan.control_number}/`);
-            alert("Loan deleted successfully.");
-            fetchLoans(); // Refresh the loan list
-        } catch (err) {
-            console.error("Error deleting loan:", err);
-            const serverMessage = err.response?.data?.message || "Failed to delete the loan. Please try again later.";
-            alert(serverMessage); // Provide error feedback
-        }
-    };
 
     const handleDateFilter = () => {
         let filtered = loans;
@@ -596,37 +564,34 @@ return (
                 <h3 className="form-header">Create Loan</h3>
                 <div>
                 <select
-    name="search_option"
-    value={searchOption}
-    onChange={(e) => setSearchOption(e.target.value)}  // Update state based on selection
-    className="form-control"
->
-    <option value="accountNumber">Account Number</option>
-    <option value="accountHolder">Account Holder</option>
-</select>
+                name="search_option"
+                value={searchOption}
+                onChange={(e) => setSearchOption(e.target.value)}  // Update state based on selection
+                className="form-control"
+            >
+                <option value="accountNumber">Account Number</option>
+                <option value="accountHolder">Account Holder</option>
+            </select>
 
-{/* Conditionally render input field */}
-{searchOption === 'accountNumber' ? (
-    <input
-        type="text"
-        className="form-control"
-        placeholder="Account Number"
-        value={loanData.account}
-        onChange={(e) => setLoanData({ ...loanData, account: e.target.value })}
-        required
-    />
-) : (
-    <input
-        type="text"
-        className="form-control"
-        placeholder="Account Holder"
-        value={loanData.account_holder}
-        onChange={(e) => setLoanData({ ...loanData, account_holder: e.target.value })}
-        required
-    />
-)}
-
-
+            {searchOption === '' ? (
+                <input
+                type="text"
+                className="form-control"
+                placeholder="Account Number"
+                value={loanData.account}
+                onChange={(e) => setLoanData({ ...loanData, account: e.target.value })}
+                required
+            />
+            ) : (
+            <input
+                type="text"
+                className="form-control"
+                placeholder="Account Holder"
+                value={loanData.account_holder}
+                onChange={(e) => setLoanData({ ...loanData, account_holder: e.target.value })}
+                required
+                />
+            )}
                 </div>
                 <label>Loan Type:</label>
                 <select

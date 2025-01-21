@@ -145,7 +145,7 @@ class Member(models.Model):
         ], 
         default='Single'
     )
-    address = models.TextField(blank=True, default='Not Provided')
+    address = models.TextField(blank=True)
     account_number = models.OneToOneField(
         'Account', 
         on_delete=models.CASCADE, 
@@ -154,17 +154,18 @@ class Member(models.Model):
         related_name='member'
     )
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='member_profile')
-    birth_place = models.CharField(max_length=100, blank=True, default='Not Provided')  
-    age = models.CharField(max_length=100, blank=True, default='Unknown')  
-    zip_code = models.CharField(max_length=100, blank=True, default='0000')  
-    height = models.CharField(max_length=100, blank=True, default='Not Provided')
-    weight = models.CharField(max_length=100, blank=True, default='Not Provided')
-    ann_com = models.CharField(max_length=100, blank=True, default='0')
+    birth_place = models.CharField(max_length=100, blank=True)  
+    age = models.CharField(max_length=100, blank=True)  
+    zip_code = models.CharField(max_length=100, blank=True, default='2616')  
+    height = models.CharField(max_length=100, blank=True)
+    weight = models.CharField(max_length=100, blank=True)
+    ann_com = models.CharField(max_length=100, blank=True)
     co_maker = models.CharField(max_length=255, null=True, blank=True)
+    relationship = models.CharField(max_length=100)
+    birth_date = models.DateField()
     mem_co = models.CharField(max_length=255, null=True, blank=True)
-    relationship = models.CharField(max_length=100, default='Not Provided')
-    tin = models.CharField(max_length=100, blank=True, default='Not Provided') 
-    in_dep = models.CharField(max_length=100, blank=True, default='Not Provided') 
+    tin = models.CharField(max_length=100, blank=True) 
+    in_dep = models.CharField(max_length=100, blank=True) 
     valid_id = models.CharField(
         max_length=50, 
         choices=[
@@ -180,7 +181,7 @@ class Member(models.Model):
         ], 
         default='TIN ID'
     )
-    id_no = models.CharField(max_length=100, blank=True, default='Not Provided') 
+    id_no = models.CharField(max_length=100, blank=True) 
 
     def delete(self, *args, **kwargs):
         try:
@@ -325,6 +326,7 @@ class Loan(models.Model):
     ]
     control_number = models.CharField(primary_key=True, max_length=4, default=lambda:str(uuid.uuid4())[:4])
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
+    # account_holder = models.OneToOneField(Member, on_delete=models.CASCADE, related_name='accountN', blank=True, null=True)
     loan_amount = models.DecimalField(max_digits=15, decimal_places=2)
     # loanable_amount = models.DecimalField(max_digits=15, decimal_places=2 , default=Decimal('0.00'))
     loan_type = models.CharField(
