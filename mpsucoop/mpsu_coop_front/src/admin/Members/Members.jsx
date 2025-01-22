@@ -34,6 +34,39 @@ function Members() {
     fetchMembers();
   }, []);
 
+  const validateInput = (field, value) => {
+    switch (field) {
+      case 'email':
+        if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
+          return 'Invalid email address.';
+        }
+        break;
+  
+      case 'phone_number':
+        if (!/^\d{11}$/.test(value)) {
+          return 'Phone number must contain 11 digits total.';
+        }
+        break;
+  
+      case 'tin':
+        if (!/^\d{9}$/.test(value)) {
+          return 'TIN must be a 9-digit number.';
+        }
+        break;
+
+      case 'in_dep': // Validate initial deposit
+        const depositValue = parseFloat(value);
+        if (depositValue < 50000 || depositValue > 1000000) {
+          return 'Initial deposit must be between 50,000 to 1,000,000.';
+        }
+        break;
+  
+      default:
+        return '';
+    }
+    return ''; // No error
+  };
+
    // Filter members based on the search query
    const filteredMembers = members.filter(member => 
     `${member.first_name} ${member.middle_name} ${member.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -179,17 +212,21 @@ const confirmDeleteMember = async () => {
                 </div>
 
                 <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' }}>Email Address:</label>
-                  <input type="email"
+                <label style={{ display: 'block', fontWeight: 'bold' }}>Email Address:</label>
+                <input
+                  type="email"
                   className="form-control"
                   placeholder="Email"
                   name="email"
                   value={editingMember?.email || newMember.email || ''}
-                  onChange={(e) =>
-                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-                  }
-                  />
-                </div>
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+                {editingMember?.email_error || newMember.email_error ? (
+                  <span style={{ color: 'red', fontSize: '12px' }}>
+                    {editingMember?.email_error || newMember.email_error}
+                  </span>
+                ) : null}
+              </div>
               </div>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'center' }}>
@@ -200,8 +237,8 @@ const confirmDeleteMember = async () => {
                   className="form-control"
                   placeholder="Birth Date"
                   name="birth_date"
-                  min="1980-01-01"
-                  max="2005-12-31"
+                  min="1950-01-01"
+                  max="2002-01-01"
                   value={editingMember?.birth_date || newMember.birth_date || ''}
                   onChange={(e) => {
                     const selectedDate = new Date(e.target.value);
@@ -245,6 +282,11 @@ const confirmDeleteMember = async () => {
                   value={editingMember?.age || newMember.age || ''}
                   readOnly
                 />
+                {editingMember?.age < 21 || newMember.age < 21 ? (
+                  <span style={{ color: 'red', fontSize: '12px' }}>
+                    Applicants must be at least 21 years old to qualify for a loan.
+                  </span>
+                ) : null}
               </div>
 
               <div style={{ flex: '1', minWidth: '200px' }}>
@@ -330,18 +372,22 @@ const confirmDeleteMember = async () => {
                 />
               </div>
 
-                <div style={{ flex: '1' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold' , marginTop: '5px'}}>Phone Number:</label>
-                  <input type="text" 
+              <div style={{ flex: '1', marginTop: '5px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold' }}>Phone Number:</label>
+                <input
+                  type="text"
                   className="form-control"
                   placeholder="Phone Number"
                   name="phone_number"
                   value={editingMember?.phone_number || newMember.phone_number || ''}
-                  onChange={(e) =>
-                    handleInputChange(e, editingMember ? setEditingMember : setNewMember)
-                  }
-                  />
-                </div>
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+                {editingMember?.phone_number_error || newMember.phone_number_error ? (
+                  <span style={{ color: 'red', fontSize: '12px' }}>
+                    {editingMember?.phone_number_error || newMember.phone_number_error}
+                  </span>
+                ) : null}
+              </div>
               </div>
 
               <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
@@ -370,14 +416,19 @@ const confirmDeleteMember = async () => {
               </div>
               <div style={{ flex: '1 1 200px',marginTop: '-3px' }}>
                 <label style={{ display: 'block', fontWeight: 'bold'}}>Tax Identification Number:</label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   className="form-control"
                   placeholder="TIN"
                   name="tin"
                   value={editingMember?.tin || newMember.tin || ''}
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
+                {editingMember?.tin_error || newMember.tin_error ? (
+                  <span style={{ color: 'red', fontSize: '12px' }}>
+                    {editingMember?.tin_error || newMember.tin_error}
+                  </span>
+                ) : null}
               </div>
               <div style={{ flex: '1 1 200px',marginTop: '5px' }}>
               <label style={{ display: 'block', fontWeight: 'bold'}}>Issued Government ID</label>
@@ -454,21 +505,27 @@ const confirmDeleteMember = async () => {
       onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
     />
   </div>
-            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 30%', maxWidth: '300px' }}>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
-              Initial Deposit
-            </label>
-            <input
-              type="number"
-              className="form-control"
-              placeholder="Deposit"
-              name="in_dep"
-              value={editingMember?.in_dep || newMember.in_dep || ''}
-              onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
-            />
-          </div>
-        </div>
+  <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 30%', maxWidth: '300px' }}>
+                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+                  Initial Deposit
+                </label>
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Deposit"
+                  name="in_dep"
+                  value={editingMember?.in_dep || newMember.in_dep || ''}
+                  onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
+                />
+                {/* Display error message if validation fails */}
+                {newMember?.in_dep_error && (
+                  <div style={{ color: 'red', fontSize: '12px' }}>
+                    {newMember.in_dep_error}
+                  </div>
+                )}
+              </div>
+            </div>
               
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
             {/* Beneficiaries Name 1 */}

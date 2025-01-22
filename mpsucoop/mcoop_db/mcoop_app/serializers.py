@@ -146,7 +146,7 @@ class LoanSerializer(serializers.ModelSerializer):
         model = Loan
         fields = ['control_number', 'account', 'loan_amount', 'loan_type', 'interest_amount','system_settings',
                   'loan_period', 'loan_period_unit', 'loan_date', 'due_date', 'status', 'takehomePay', 'cisp', 'admincost', 'notarial', 'outstanding_balance', 
-                   'purpose',  'payment_schedule','account_holder']
+                   'purpose',  'payment_schedule','account_holder','co_make','relationships']
         read_only_fields = ['control_number', 'loan_date', 'due_date', 'interest_amount',  ]
         
     def get_account_holder(self, obj):

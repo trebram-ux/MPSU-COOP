@@ -335,7 +335,7 @@ class Loan(models.Model):
     control_number = models.CharField(primary_key=True,
         max_length=100,
         unique=True,
-        default=uuid.uuid4,  # Automatically generate a unique value
+        default=uuid.uuid4,
     )
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     loan_amount = models.DecimalField(max_digits=15, decimal_places=2)
@@ -365,6 +365,8 @@ class Loan(models.Model):
     purpose = models.CharField(max_length=200, choices=PURPOSE_CHOICES, default='Education')
     annual_interest = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))  
     outstanding_balance = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))  
+    co_make = models.CharField(max_length=255, null=True, blank=True)
+    relationships = models.CharField(max_length=100, default='Brother')
 
     
 

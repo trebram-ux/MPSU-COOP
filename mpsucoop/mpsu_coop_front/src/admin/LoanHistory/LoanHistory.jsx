@@ -39,6 +39,9 @@ const LoanManager = () => {
     const [showNoLoanPopup, setShowNoLoanPopup] = useState(false); 
     const [shareCapital, setShareCapital] = useState(null);
     const [searchOption, setSearchOption] = useState('');
+    const [accountNumber, setAccountNumber] = useState('');
+    const [accountHolder, setAccountHolder] = useState('');
+
 
     const formatNumber = (number) => {
         if (number == null || isNaN(number)) return "N/A";
@@ -563,126 +566,384 @@ return (
         {formVisible && (
             <form onSubmit={handleLoanSubmit} className="loan-form">
                 <h3 className="form-header">Create Loan</h3>
-                <div>
-                <select
-                name="search_option"
-                value={searchOption}
-                onChange={(e) => setSearchOption(e.target.value)}  // Update state based on selection
-                className="form-control"
-            >
-                <option value="accountNumber">Account Number</option>
-                <option value="accountHolder">Account Holder</option>
-            </select>
-
-            {searchOption === '' ? (
-                <input
-                type="text"
-                className="form-control"
-                placeholder="Account Number"
-                value={loanData.account}
-                onChange={(e) => setLoanData({ ...loanData, account: e.target.value })}
-                required
-            />
-            ) : (
-            <input
-                type="text"
-                className="form-control"
-                placeholder="Account Holder"
-                value={loanData.account_holder}
-                onChange={(e) => setLoanData({ ...loanData, account_holder: e.target.value })}
-                required
-                />
-            )}
-                </div>
-                <label>Loan Type:</label>
-                <select
-                    name="loan_type"
-                    className="form-control"
-                    value={loanData.loan_type}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, loan_type: e.target.value })
-                    }
-                >
-                    <option value="Regular">Regular</option>
-                    <option value="Emergency">Emergency</option>
-                </select>
-
-                <label>Loan Amount:</label>
-                <input
-                    type="text" // Change to "text" to allow formatted input display
-                    name="loan_amount"
-                    value={formatNumber(loanData.loan_amount)} // Display the formatted value
-                    onChange={(e) => {
-                        const rawValue = e.target.value.replace(/,/g, ""); // Remove commas for raw numeric value
-                        if (!isNaN(rawValue)) {
-                            setLoanData({ ...loanData, loan_amount: rawValue });
-                        }
-                    }}
-                    onBlur={(e) => {
-                        // Optionally, format on blur for enhanced user experience
-                        const formattedValue = formatNumber(loanData.loan_amount);
-                        e.target.value = formattedValue;
-                    }}
-                    required
-                    className="form-control"
-                />
-
-                <label>Loan Term:</label>
-                <input
-                    type="number"
-                    name="loan_period"
-                    value={loanData.loan_period}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, loan_period: e.target.value})
-                    }
-                    required
-                    className="form-control"
-                />
-
-                <label>Loan Term Unit:</label>
-                <select
-                    name="loan_period_unit"
-                    value={loanData.loan_period_unit}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, loan_period_unit: e.target.value })
-                    }
-                    required
-                    className="form-control"
-                >
-                    <option value="months">Month</option>
-                    <option value="years">Years</option>
-               </select>
-                <label>Purpose:</label>
-                <select
-                    name="purpose"
-                    value={loanData.purpose}
-                    onChange={(e) => {
-                        const selectedValue = e.target.value;
-                        setLoanData({ ...loanData, purpose: selectedValue });
-                        setShowOtherPurpose(selectedValue === "Others");
-                    }}
-                    className="form-control"
-                >
-                    <option value="Education">Education</option>
-                    <option value="Medical/Emergency">Medical/Emergency</option>
-                    <option value="House Construction">House Construction</option>
-                    <option value="Commodity/Appliances">Commodity/Appliances</option>
-                    <option value="Utility Services">Utility Services</option>
-                    <option value="Others">Others</option>
-                </select>
-
-                {showOtherPurpose && (
-                    <input
-                        type="text"
-                        placeholder="Specify other Purpose"
-                        value={loanData.otherPurpose || ''}
-                        onChange={(e) =>
-                            setLoanData({ ...loanData, otherPurpose: e.target.value })
-                        }
+                <div className="form-row">
+                <div className="form-group">
+                    <label>Account</label>
+                    <select
+                        name="search_option"
+                        value={searchOption}
+                        onChange={(e) => setSearchOption(e.target.value)}
                         className="form-control"
-                    />
+                    >
+                        <option value="accountNumber">Account Number</option>
+                        <option value="accountHolder">Account Holder</option>
+                    </select>
+                </div>
+
+                {/* Conditionally show input field based on selection */}
+                {searchOption === 'accountNumber' && (
+                    <div className="form-group">
+                        <label>Enter Account Number</label>
+                        <input
+                            type="text"
+                            name="account_number"
+                            value={accountNumber}
+                            onChange={(e) => setAccountNumber(e.target.value)}
+                            className="form-control"
+                            placeholder="Enter Account Number"
+                        />
+                    </div>
                 )}
 
+                {searchOption === 'accountHolder' && (
+                    <div className="form-group">
+                        <label>Enter Account Holder's Name</label>
+                        <input
+                            type="text"
+                            name="account_holder"
+                            value={accountHolder}
+                            onChange={(e) => setAccountHolder(e.target.value)}
+                            className="form-control"
+                            placeholder="Enter Account Holder's Name"
+                        />
+                    </div>
+                )}
+
+
+                    <div className="form-group">
+                    <label>Loan Type</label>
+                        <select
+                            name="loan_type"
+                            className="form-control"
+                            value={loanData.loan_type}
+                            onChange={(e) => setLoanData({ ...loanData, loan_type: e.target.value })}
+                        >
+                            <option value="Regular">Regular</option>
+                            <option value="Emergency">Emergency</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                    <label>Loan Amount</label>
+                    <input
+                        type="text"
+                        name="loan_amount"
+                        value={formatNumber(loanData.loan_amount)}
+                        onChange={(e) => {
+                            const rawValue = e.target.value.replace(/,/g, "");
+                            if (!isNaN(rawValue)) {
+                                setLoanData({ ...loanData, loan_amount: rawValue });
+                            }
+                        }}
+                        onBlur={(e) => {
+                            const formattedValue = formatNumber(loanData.loan_amount);
+                            e.target.value = formattedValue;
+                        }}
+                        required
+                        className="form-control"
+                        placeholder="Loan Amount"
+                    />
+                </div>
+
+                    <div className="form-group">
+                    <label>Loan Term</label>
+                        <input
+                            type="number"
+                            name="loan_period"
+                            value={loanData.loan_period}
+                            onChange={(e) => setLoanData({ ...loanData, loan_period: e.target.value })}
+                            required
+                            className="form-control"
+                            placeholder="Loan Term"
+                        />
+                    </div>
+                </div>
+
+                <div className="form-row">
+                    <div className="form-group">
+                        <label>Loan Term Unit:</label>
+                        <select
+                            name="loan_period_unit"
+                            value={loanData.loan_period_unit}
+                            onChange={(e) =>
+                                setLoanData({ ...loanData, loan_period_unit: e.target.value })
+                            }
+                            required
+                            className="form-control"
+                        >
+                            <option value="months">Months</option>
+                            <option value="years">Years</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label>Purpose:</label>
+                        <select
+                            name="purpose"
+                            value={loanData.purpose}
+                            onChange={(e) => {
+                                const selectedValue = e.target.value;
+                                setLoanData({ ...loanData, purpose: selectedValue });
+                                setShowOtherPurpose(selectedValue === "Others");
+                            }}
+                            className="form-control"
+                        >
+                            <option value="Education">Education</option>
+                            <option value="Medical/Emergency">Medical/Emergency</option>
+                            <option value="House Construction">House Construction</option>
+                            <option value="Commodity/Appliances">Commodity/Appliances</option>
+                            <option value="Utility Services">Utility Services</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+
+                    {showOtherPurpose && (
+                        <div className="form-group">
+                            <label>Other Purpose:</label>
+                            <input
+                                type="text"
+                                placeholder="Specify other Purpose"
+                                value={loanData.otherPurpose || ''}
+                                onChange={(e) =>
+                                    setLoanData({ ...loanData, otherPurpose: e.target.value })
+                                }
+                                className="form-control"
+                            />
+                        </div>
+                    )}
+
+    {/* Check if loan amount is 1 million or below */}
+    {parseInt(loanData.loan_amount) <= 999999 && (
+    <>
+        <div className="form-group d-flex justify-content-between">
+            <div className="flex-fill mr-2">
+                <label>Co Maker 1</label>
+                <input
+                    type="text"
+                    placeholder="Enter Co Maker"
+                    value={loanData.co_make_1 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, co_make_1: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+
+            <div className="flex-fill">
+                <label>Relationship with Co Maker 1</label>
+                <input
+                    type="text"
+                    placeholder="Enter Relationship"
+                    value={loanData.relationship_1 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, relationship_1: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+        </div>
+
+        <div className="form-group d-flex justify-content-between">
+            <div className="flex-fill mr-2">
+                <label>Co Maker 2</label>
+                <input
+                    type="text"
+                    placeholder="Enter Co Maker"
+                    value={loanData.co_make_2 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, co_make_2: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+
+            <div className="flex-fill">
+                <label>Relationship with Co Maker 2</label>
+                <input
+                    type="text"
+                    placeholder="Enter Relationship"
+                    value={loanData.relationship_2 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, relationship_2: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+        </div>
+
+        <div className="form-group d-flex justify-content-between">
+            <div className="flex-fill mr-2">
+                <label>Co Maker 3</label>
+                <input
+                    type="text"
+                    placeholder="Enter Co Maker"
+                    value={loanData.co_make_3 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, co_make_3: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+
+            <div className="flex-fill">
+                <label>Relationship with Co Maker 3</label>
+                <input
+                    type="text"
+                    placeholder="Enter Relationship"
+                    value={loanData.relationship_3 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, relationship_3: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+        </div>
+    </>
+)}
+
+{/* Check if loan amount is 1 million or above */}
+{parseInt(loanData.loan_amount) >= 1000000 && (
+    <>
+        <div className="form-group d-flex justify-content-between">
+            <div className="flex-fill mr-2">
+                <label>Co Maker 1</label>
+                <input
+                    type="text"
+                    placeholder="Enter Co Maker"
+                    value={loanData.co_make_1 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, co_make_1: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+
+            <div className="flex-fill">
+                <label>Relationship with Co Maker 1</label>
+                <input
+                    type="text"
+                    placeholder="Enter Relationship"
+                    value={loanData.relationship_1 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, relationship_1: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+        </div>
+
+        <div className="form-group d-flex justify-content-between">
+            <div className="flex-fill mr-2">
+                <label>Co Maker 2</label>
+                <input
+                    type="text"
+                    placeholder="Enter Co Maker"
+                    value={loanData.co_make_2 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, co_make_2: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+
+            <div className="flex-fill">
+                <label>Relationship with Co Maker 2</label>
+                <input
+                    type="text"
+                    placeholder="Enter Relationship"
+                    value={loanData.relationship_2 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, relationship_2: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+        </div>
+
+        <div className="form-group d-flex justify-content-between">
+            <div className="flex-fill mr-2">
+                <label>Co Maker 3</label>
+                <input
+                    type="text"
+                    placeholder="Enter Co Maker"
+                    value={loanData.co_make_3 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, co_make_3: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+
+            <div className="flex-fill">
+                <label>Relationship with Co Maker 3</label>
+                <input
+                    type="text"
+                    placeholder="Enter Relationship"
+                    value={loanData.relationship_3 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, relationship_3: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+        </div>
+        <div className="form-group d-flex justify-content-between">
+            <div className="flex-fill mr-2">
+                <label>Co Maker 4</label>
+                <input
+                    type="text"
+                    placeholder="Enter Co Maker"
+                    value={loanData.co_make_4 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, co_make_4: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+
+            <div className="flex-fill">
+                <label>Relationship with Co Maker 4</label>
+                <input
+                    type="text"
+                    placeholder="Enter Relationship"
+                    value={loanData.relationship_4 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, relationship_4: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+        </div>
+        <div className="form-group d-flex justify-content-between">
+            <div className="flex-fill mr-2">
+                <label>Co Maker 5</label>
+                <input
+                    type="text"
+                    placeholder="Enter Co Maker"
+                    value={loanData.co_make_5 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, co_make_5: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+
+            <div className="flex-fill">
+                <label>Relationship with Co Maker 5</label>
+                <input
+                    type="text"
+                    placeholder="Enter Relationship"
+                    value={loanData.relationship_5 || ''}
+                    onChange={(e) =>
+                        setLoanData({ ...loanData, relationship_5: e.target.value })
+                    }
+                    className="form-control"
+                />
+            </div>
+        </div>
+    </>
+)}
+</div>
                 <button type="submit" className="form-submit">
                     {editingLoan ? 'Update Loan' : 'Create Loan'}
                 </button>
