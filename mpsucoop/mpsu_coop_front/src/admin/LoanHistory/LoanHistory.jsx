@@ -39,8 +39,8 @@ const LoanManager = () => {
     const [showNoLoanPopup, setShowNoLoanPopup] = useState(false); 
     const [shareCapital, setShareCapital] = useState(null);
     const [searchOption, setSearchOption] = useState('');
-    const [accountNumber, setAccountNumber] = useState('');
-    const [accountHolder, setAccountHolder] = useState('');
+    const [loanSubmitted, setLoanSubmitted] = useState(false);
+
 
 
     const formatNumber = (number) => {
@@ -197,11 +197,13 @@ const LoanManager = () => {
                 setShowPrintButton(true);
                 setPopupMessage('Loan successfully created!');
                 setShowPopup(true);
+
+                // Hide the buttons after submission
+                setLoanSubmitted(true);
             
-                // Automatically hide the popup after 3 seconds
                 setTimeout(() => {
                     setShowPopup(false);
-                }, 3000); // 3000 milliseconds = 3 seconds
+                }, 2000);
             }            
             fetchLoans();
         } catch (err) {
@@ -243,7 +245,7 @@ const LoanManager = () => {
         // Set the filtered loans for display
         setFilteredLoans(filtered);
     };
-    
+
     const resetForm = () => {
         setLoanData({
             control_number: '',
@@ -567,6 +569,7 @@ return (
             <form onSubmit={handleLoanSubmit} className="loan-form">
                 <h3 className="form-header">Create Loan</h3>
                 <div className="form-row">
+                    
                 <div className="form-group">
                     <label>Account</label>
                     <select
@@ -580,37 +583,36 @@ return (
                     </select>
                 </div>
 
-                {/* Conditionally show input field based on selection */}
-                {searchOption === 'accountNumber' && (
-                    <div className="form-group">
-                        <label>Enter Account Number</label>
-                        <input
-                            type="text"
-                            name="account_number"
-                            value={accountNumber}
-                            onChange={(e) => setAccountNumber(e.target.value)}
-                            className="form-control"
-                            placeholder="Enter Account Number"
+             {/* Conditionally show input field based on selection */}
+             {searchOption === 'accountNumber' && (
+                <div className="form-group">
+                    <label>Enter Account Number</label>
+                    <input
+                        type="text"
+                        name="account_number"
+                        value={loanData.account}
+                        onChange={(e) => setLoanData({ ...loanData, account: e.target.value })}
+                        className="form-control"
+                        placeholder="Enter Account Number"
                         />
                     </div>
-                )}
+                )} 
 
                 {searchOption === 'accountHolder' && (
                     <div className="form-group">
                         <label>Enter Account Holder's Name</label>
                         <input
-                            type="text"
-                            name="account_holder"
-                            value={accountHolder}
-                            onChange={(e) => setAccountHolder(e.target.value)}
-                            className="form-control"
-                            placeholder="Enter Account Holder's Name"
+                        type="text"
+                        name="account_holder"
+                        value={loanData.account_holder}
+                        onChange={(e) => setLoanData({ ...loanData, account_holder: e.target.value })}
+                        className="form-control"
+                        placeholder="Enter Account Holder's Name"
                         />
                     </div>
                 )}
-
-
-                    <div className="form-group">
+        
+        <div className="form-group">
                     <label>Loan Type</label>
                         <select
                             name="loan_type"
@@ -712,251 +714,256 @@ return (
                         </div>
                     )}
 
-    {/* Check if loan amount is 1 million or below */}
-    {parseInt(loanData.loan_amount) <= 999999 && (
-    <>
-        <div className="form-group d-flex justify-content-between">
-            <div className="flex-fill mr-2">
-                <label>Co Maker 1</label>
-                <input
-                    type="text"
-                    placeholder="Enter Co Maker"
-                    value={loanData.co_make_1 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, co_make_1: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
+                    {/* Check if loan amount is 1 million or below */}
+                    {parseInt(loanData.loan_amount) <= 999999 && (
+                    <>
+                        <div className="form-group d-flex justify-content-between">
+                            <div className="flex-fill mr-2">
+                                <label>Co Maker 1</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Co Maker"
+                                    value={loanData.co_make || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, co_make: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
 
-            <div className="flex-fill">
-                <label>Relationship with Co Maker 1</label>
-                <input
-                    type="text"
-                    placeholder="Enter Relationship"
-                    value={loanData.relationship_1 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, relationship_1: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
-        </div>
+                            <div className="flex-fill">
+                                <label>Relationship with Co Maker 1</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Relationship"
+                                    value={loanData.relationships || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, relationships: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
+                        </div>
 
-        <div className="form-group d-flex justify-content-between">
-            <div className="flex-fill mr-2">
-                <label>Co Maker 2</label>
-                <input
-                    type="text"
-                    placeholder="Enter Co Maker"
-                    value={loanData.co_make_2 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, co_make_2: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
+                        <div className="form-group d-flex justify-content-between">
+                            <div className="flex-fill mr-2">
+                                <label>Co Maker 2</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Co Maker"
+                                    value={loanData.co_make_2 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, co_make_2: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
 
-            <div className="flex-fill">
-                <label>Relationship with Co Maker 2</label>
-                <input
-                    type="text"
-                    placeholder="Enter Relationship"
-                    value={loanData.relationship_2 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, relationship_2: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
-        </div>
+                            <div className="flex-fill">
+                                <label>Relationship with Co Maker 2</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Relationship"
+                                    value={loanData.relationship_2 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, relationship_2: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
+                        </div>
 
-        <div className="form-group d-flex justify-content-between">
-            <div className="flex-fill mr-2">
-                <label>Co Maker 3</label>
-                <input
-                    type="text"
-                    placeholder="Enter Co Maker"
-                    value={loanData.co_make_3 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, co_make_3: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
+                        <div className="form-group d-flex justify-content-between">
+                            <div className="flex-fill mr-2">
+                                <label>Co Maker 3</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Co Maker"
+                                    value={loanData.co_make_3 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, co_make_3: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
 
-            <div className="flex-fill">
-                <label>Relationship with Co Maker 3</label>
-                <input
-                    type="text"
-                    placeholder="Enter Relationship"
-                    value={loanData.relationship_3 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, relationship_3: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
-        </div>
-    </>
-)}
+                            <div className="flex-fill">
+                                <label>Relationship with Co Maker 3</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Relationship"
+                                    value={loanData.relationship_3 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, relationship_3: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
 
-{/* Check if loan amount is 1 million or above */}
-{parseInt(loanData.loan_amount) >= 1000000 && (
-    <>
-        <div className="form-group d-flex justify-content-between">
-            <div className="flex-fill mr-2">
-                <label>Co Maker 1</label>
-                <input
-                    type="text"
-                    placeholder="Enter Co Maker"
-                    value={loanData.co_make_1 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, co_make_1: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
+                {/* Check if loan amount is 1 million or above */}
+                {parseInt(loanData.loan_amount) >= 1000000 && (
+                    <>
+                        <div className="form-group d-flex justify-content-between">
+                            <div className="flex-fill mr-2">
+                                <label>Co Maker 1</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Co Maker"
+                                    value={loanData.co_make || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, co_make: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
 
-            <div className="flex-fill">
-                <label>Relationship with Co Maker 1</label>
-                <input
-                    type="text"
-                    placeholder="Enter Relationship"
-                    value={loanData.relationship_1 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, relationship_1: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
-        </div>
+                            <div className="flex-fill">
+                                <label>Relationship with Co Maker 1</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Relationship"
+                                    value={loanData.relationships || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, relationships: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
+                        </div>
 
-        <div className="form-group d-flex justify-content-between">
-            <div className="flex-fill mr-2">
-                <label>Co Maker 2</label>
-                <input
-                    type="text"
-                    placeholder="Enter Co Maker"
-                    value={loanData.co_make_2 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, co_make_2: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
+                        <div className="form-group d-flex justify-content-between">
+                            <div className="flex-fill mr-2">
+                                <label>Co Maker 2</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Co Maker"
+                                    value={loanData.co_make_2 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, co_make_2: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
 
-            <div className="flex-fill">
-                <label>Relationship with Co Maker 2</label>
-                <input
-                    type="text"
-                    placeholder="Enter Relationship"
-                    value={loanData.relationship_2 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, relationship_2: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
-        </div>
+                            <div className="flex-fill">
+                                <label>Relationship with Co Maker 2</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Relationship"
+                                    value={loanData.relationship_2 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, relationship_2: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
+                        </div>
 
-        <div className="form-group d-flex justify-content-between">
-            <div className="flex-fill mr-2">
-                <label>Co Maker 3</label>
-                <input
-                    type="text"
-                    placeholder="Enter Co Maker"
-                    value={loanData.co_make_3 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, co_make_3: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
+                        <div className="form-group d-flex justify-content-between">
+                            <div className="flex-fill mr-2">
+                                <label>Co Maker 3</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Co Maker"
+                                    value={loanData.co_make_3 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, co_make_3: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
 
-            <div className="flex-fill">
-                <label>Relationship with Co Maker 3</label>
-                <input
-                    type="text"
-                    placeholder="Enter Relationship"
-                    value={loanData.relationship_3 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, relationship_3: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
-        </div>
-        <div className="form-group d-flex justify-content-between">
-            <div className="flex-fill mr-2">
-                <label>Co Maker 4</label>
-                <input
-                    type="text"
-                    placeholder="Enter Co Maker"
-                    value={loanData.co_make_4 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, co_make_4: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
+                            <div className="flex-fill">
+                                <label>Relationship with Co Maker 3</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Relationship"
+                                    value={loanData.relationship_3 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, relationship_3: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
+                        </div>
+                        <div className="form-group d-flex justify-content-between">
+                            <div className="flex-fill mr-2">
+                                <label>Co Maker 4</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Co Maker"
+                                    value={loanData.co_make_4 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, co_make_4: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
 
-            <div className="flex-fill">
-                <label>Relationship with Co Maker 4</label>
-                <input
-                    type="text"
-                    placeholder="Enter Relationship"
-                    value={loanData.relationship_4 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, relationship_4: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
-        </div>
-        <div className="form-group d-flex justify-content-between">
-            <div className="flex-fill mr-2">
-                <label>Co Maker 5</label>
-                <input
-                    type="text"
-                    placeholder="Enter Co Maker"
-                    value={loanData.co_make_5 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, co_make_5: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
+                            <div className="flex-fill">
+                                <label>Relationship with Co Maker 4</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Relationship"
+                                    value={loanData.relationship_4 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, relationship_4: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
+                        </div>
+                        <div className="form-group d-flex justify-content-between">
+                            <div className="flex-fill mr-2">
+                                <label>Co Maker 5</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Co Maker"
+                                    value={loanData.co_make_5 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, co_make_5: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
 
-            <div className="flex-fill">
-                <label>Relationship with Co Maker 5</label>
-                <input
-                    type="text"
-                    placeholder="Enter Relationship"
-                    value={loanData.relationship_5 || ''}
-                    onChange={(e) =>
-                        setLoanData({ ...loanData, relationship_5: e.target.value })
-                    }
-                    className="form-control"
-                />
-            </div>
-        </div>
-    </>
-)}
-</div>
-                <button type="submit" className="form-submit">
-                    {editingLoan ? 'Update Loan' : 'Create Loan'}
-                </button>
-                <button
-                    type="button"
-                    onClick={() => {
-                        resetForm();
-                        setFormVisible(false);
-                    }}
-                    className="form-cancel"
-                >
-                    Cancel
-                </button>
+                            <div className="flex-fill">
+                                <label>Relationship with Co Maker 5</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter Relationship"
+                                    value={loanData.relationship_5 || ''}
+                                    onChange={(e) =>
+                                        setLoanData({ ...loanData, relationship_5: e.target.value })
+                                    }
+                                    className="form-control"
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
+                </div>
+
+                {!loanSubmitted && (
+                    <>
+                        <button type="submit" className="form-submit">
+                            {editingLoan ? 'Update Loan' : 'Create Loan'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                resetForm();
+                                setFormVisible(false);
+                            }}
+                            className="form-cancel"
+                        >
+                            Cancel
+                        </button>
+                    </>
+                )}
             </form>
         )}
         {/* Popup Modal */}
@@ -977,6 +984,7 @@ return (
             </div>
         </div>
         )}
+
         {!formVisible && !paymentFormVisible && (
             <div className="loan-table-container">
                 <table className="loan-table">
@@ -1004,11 +1012,12 @@ return (
                         {filteredLoans.map((loan) => (
                             <tr key={loan.control_number}>
                                 <td>{loan.control_number}</td>
-                                <td>{loan.account}</td>
+                                <td style={{ position: 'relative', color: 'blue', cursor: 'pointer' }}>{loan.account || 'N/A'}</td>
                                 <td>{loan.account_holder || 'N/A'}</td>
                                 <td>{loan.loan_type}</td>
                                 <td>{formatNumber(loan.loan_amount)}</td>
                                 <td>{formatNumber(loan.service_fee)}</td>
+                                <td>{formatNumber(loan.interest_amount)}</td>
                                 <td>{formatNumber(loan.admincost)}</td>
                                 <td>{formatNumber(loan.notarial)}</td>
                                 <td>{formatNumber(loan.cisp)}</td>

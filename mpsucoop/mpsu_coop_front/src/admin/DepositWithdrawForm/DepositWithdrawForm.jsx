@@ -1,10 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// ErrorModal Component
+const ErrorModal = ({ message, onClose }) => {
+  return (
+    <div style={modalStyles.overlay}>
+      <div style={modalStyles.modal}>
+        <div style={modalStyles.message}>{message}</div>
+        <button style={modalStyles.closeButton} onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+};
+
+const modalStyles = {
+  overlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modal: {
+    boxShadow: '0px 0px 20px 0px rgb(154, 154, 154)',
+    backgroundColor: '#bbbbbb',
+    color: 'black',
+    padding: '20px',
+    borderRadius: '8px',
+    textAlign: 'center',
+    width: '280px',
+  },
+  message: {
+    marginBottom: '15px',
+    fontSize: '22px',
+    color: 'black',
+  },
+  closeButton: {
+    padding: '10px 20px',
+    backgroundColor: '#f44336',
+    color: 'black',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  },
+};
+
 function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setError }) {
   const [amount, setAmount] = useState('');
   const [formattedShareCapital, setFormattedShareCapital] = useState('');
   const [isInactive, setIsInactive] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null); // New state for error modal
 
   const formatAmount = (value) => {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -26,19 +76,19 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
     e.preventDefault();
   
     if (isInactive) {
-      setError('Account is inactive. Cannot perform transactions.');
+      setErrorMessage('Account is inactive. Cannot perform transactions.');
       return;
     }
   
-    let numericAmount = parseFloat(amount.replace(/,/g, ''));  // Remove commas and parse to float
+    let numericAmount = parseFloat(amount.replace(/,/g, ''));
 
     if (actionType === 'deposit') {
       if (isNaN(numericAmount) || numericAmount <= 0) {
-        setError('Invalid amount for deposit.');
+        setErrorMessage('Invalid amount for deposit.');
         return;
       }
       if (numericAmount < 50000 || numericAmount > 1000000) {
-        setError('Deposit must be between 50K and 1M.');
+        setErrorMessage('Deposit must be between 50,000 and 1,000,000 only!');
         return;
       }
     }
@@ -46,7 +96,7 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
     if (actionType === 'withdraw') {
       numericAmount = account.shareCapital;
       if (numericAmount <= 0) {
-        setError('Insufficient funds to withdraw.');
+        setErrorMessage('Insufficient funds to withdraw.');
         return;
       }
     }
@@ -85,13 +135,12 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
     } catch (err) {
       if (err.response) {
         console.error("Error response data:", err.response.data);
-        setError(err.response?.data?.error || 'An error occurred while processing your request.');
+        setErrorMessage(err.response?.data?.error || 'An error occurred while processing your request.');
       } else {
-        setError('An error occurred while processing your request.');
+        setErrorMessage('An error occurred while processing your request.');
       }
     }
   };
-  
 
   const formStyle = {
     display: 'flex',
@@ -182,6 +231,9 @@ function DepositWithdrawForm({ account, actionType, onClose, fetchAccounts, setE
             </button>
           </div>
         </form>
+      )}
+      {errorMessage && (
+        <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />
       )}
     </div>
   );

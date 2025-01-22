@@ -148,7 +148,7 @@ const SystemSettings = () => {
                                                 }}
                                             />
                                         ) : (
-                                            <span>{settings[key]}%</span>
+                                            <span>{settings[key]}</span>
                                         )}
                                     </td>
                                 </tr>
