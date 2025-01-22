@@ -84,10 +84,11 @@ const PaymentSchedule = () => {
     summary.account_number.toString().includes(searchQuery) ||
     summary.account_holder.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
+  const [loanDetails, setLoanDetails] = useState(null);
   // Fetch payment schedules based on account number and loan type
   const fetchPaymentSchedules = async (accountNumber, loanType) => {
     setSchedules([]);
+    setLoanDetails(null);
     setLoading(true);
     setError('');
     try {
@@ -112,6 +113,15 @@ const PaymentSchedule = () => {
         }
       );
       setAccountDetails(memberResponse.data[0]);
+      const loanResponse = await axios.get(
+        `http://127.0.0.1:8000/loans/?account_number=${accountNumber}&loan_type=${loanType}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        }
+      );
+      setLoanDetails(loanResponse.data);
     } catch (err) {
       console.error('Error fetching schedules or account details:', err);
       setError('Failed to fetch payment schedules or account details. Please try again.');
@@ -160,15 +170,11 @@ const PaymentSchedule = () => {
   };
   
   // Calculate remaining balance
-  const calculateRemainingBalance = () => {
-    return schedules
-      .reduce((total, schedule) => {
-        if (!schedule.is_paid || schedule.status === 'Ongoing') {
-          return total + parseFloat(schedule.payment_amount || 0);
-        }
-        return total;
-      }, 0)
-      .toFixed(2);
+  const calculateRemainingBalance = (loan) => {
+    if (!loan || !loan.outstanding_balance) {
+      return "0.00";
+    }
+    return parseFloat(loan.outstanding_balance).toFixed(2);
   };
   const openPaymentModal = () => {
     setIsPaymentModalOpen(true);
@@ -560,10 +566,13 @@ return (
                     }}
                   >
                     <th>Principal Amount</th>
-                    <th>Interest Amount</th>
-                    {loanType === 'Regular' && <th>Service Fee</th>}
                     <th>Payment Amount</th>
+                    {loanType === 'Regular' && <th>Service Fee</th>}
+                    <th>Advance Payment</th>
+                    <th>Previous Balance</th>
+                    <th>Penalty</th>
                     <th>Due Date</th>
+                    <th>Received Amount</th>
                     <th>Balance</th>
                     <th>Status</th>
                     <th>Action</th>
@@ -573,12 +582,14 @@ return (
                   {schedules.map((schedule) => (
                     <tr key={schedule.id}>
                       <td>₱ {formatNumber((parseFloat(schedule.principal_amount) || 0).toFixed(2))}</td>
-                      <td>₱ {formatNumber((parseFloat(schedule.interest_amount) || 0).toFixed(2))}</td>
+                      <td>₱ {formatNumber((parseFloat(schedule.advance_pay) || 0).toFixed(2))}</td>
                       {loanType === 'Regular' && (
                         <td>₱ {formatNumber((parseFloat(schedule.service_fee) || 0).toFixed(2))}</td>
                       )}
-                      <td>₱ {formatNumber((parseFloat(schedule.payment_amount) || 0).toFixed(2))}</td>
+                      <td>₱ {formatNumber((parseFloat(schedule.under_pay) || 0).toFixed(2))}</td>
+                      <td>₱ {formatNumber((parseFloat(schedule.penalty) || 0).toFixed(2))}</td>
                       <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
+                      <td>₱ {formatNumber((parseFloat(schedule.receied_amnt) || 0).toFixed(2))}</td>
                       <td>₱ {formatNumber((parseFloat(schedule.balance) || 0).toFixed(2))}</td>
                       <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
                         {schedule.is_paid ? 'Paid!' : 'Ongoing'}

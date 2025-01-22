@@ -1,5 +1,5 @@
 from django.db import models
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, ROUND_HALF_UP,InvalidOperation
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
@@ -14,6 +14,8 @@ from django.core.exceptions import ValidationError
 import logging
 logger = logging.getLogger(__name__)
 
+
+
 import json
 from django.core.exceptions import ValidationError
 from datetime import date, datetime
@@ -22,7 +24,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from datetime import timedelta
-
+def save(self, *args, **kwargs):
+    try:
+        super().save(*args, **kwargs)
+    except InvalidOperation as e:
+        logger.error(f"Invalid decimal value: {e}")
+        raise
 class PasswordResetToken(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     token = models.CharField(max_length=255, unique=True)
@@ -67,7 +74,7 @@ class Archive(models.Model):
         super().save(*args, **kwargs)
 
 class SystemSettings(models.Model):
-   
+
     interest_rate = models.DecimalField(
         max_digits=5, decimal_places=2, default=Decimal('0.00'), verbose_name="Interest Rate"
     )
@@ -93,7 +100,8 @@ class SystemSettings(models.Model):
         max_digits=5, decimal_places=3, default=Decimal('0.025'),
         verbose_name="Regular Loan Service Fee Rate (>3 years)"
     )
-
+    admincost_r = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('240.00'))
+    notarialfee_r = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('10.00'))
     def __str__(self):
         return "System Settings"
 
@@ -118,6 +126,7 @@ class SystemSettings(models.Model):
 
     def __str__(self):
         return f"System Settings (Interest Rate: {self.interest_rate}%)"
+
 
 class Member(models.Model):
     memId = models.AutoField(primary_key=True)
@@ -323,15 +332,20 @@ class Loan(models.Model):
         ('Utility Services', 'Utility Services'),
         ('Others', 'Others'),
     ]
-    control_number = models.CharField(primary_key=True, max_length=4)
+    control_number = models.CharField(primary_key=True,
+        max_length=100,
+        unique=True,
+        default=uuid.uuid4,  # Automatically generate a unique value
+    )
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     loan_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    
     # loanable_amount = models.DecimalField(max_digits=15, decimal_places=2 , default=Decimal('0.00'))
     loan_type = models.CharField(
         max_length=200, choices=[('Regular', 'Regular'), ('Emergency', 'Emergency')], default='Emergency'
     )
     system_settings = models.ForeignKey(SystemSettings, on_delete=models.SET_NULL, null=True, blank=True)
-    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00')) 
+    interest_amount = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00')) 
     loan_period = models.PositiveIntegerField(default=6)  
     loan_period_unit = models.CharField(
         max_length=10, choices=[('months', 'Months'), ('years', 'Years')], default='months'
@@ -344,9 +358,13 @@ class Loan(models.Model):
     )
    
     takehomePay = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
-    penalty_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('2.00'))
+    service_fee = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    admincost = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    notarial = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    cisp = models.DecimalField(max_digits=15, decimal_places=2,  null=True, blank=True,default=Decimal('0.00'))
     purpose = models.CharField(max_length=200, choices=PURPOSE_CHOICES, default='Education')
-    annual_interest = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))  
+    annual_interest = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))  
+    outstanding_balance = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))  
 
     
 
@@ -381,17 +399,20 @@ class Loan(models.Model):
         if not self.loan_date:
             self.loan_date = timezone.now().date()
             
-        if not self.interest_rate:
-            self.interest_rate = self.system_settings.interest_rate
-        
-        if not self.penalty_rate:
-            self.penalty_rate = self.system_settings.penalty_rate
+        if not self.annual_interest:
+            self.annual_interest = self.system_settings.interest_rate
+        if self.loan_period_unit == 'months' and self.loan_period > 48:
+            raise ValueError("Loan period cannot exceed 48 months for regular loans.")
+        if self.loan_period_unit == 'years' and self.loan_period > 4:
+            raise ValueError("Loan period cannot exceed 4 for regular loans.")
+        # if not self.penalty:
+        #     self.penalty = self.system_settings.penalty_rate
             
     
         self.calculate_service_fee()
         
-        self.takehomePay = self.loan_amount 
-        
+        self.takehomePay = (self.loan_amount - (self.service_fee + self.admincost + self.notarial + self.cisp))
+        self.outstanding_balance = self.takehomePay
         if not self.due_date:
             self.due_date = self.calculate_due_date()
     
@@ -446,44 +467,23 @@ class Loan(models.Model):
         total_months = self.loan_period * (12 if self.loan_period_unit == 'years' else 1)
         total_periods = total_months * 2  # Bi-monthly (payments every 15 days)
         
-        bi_monthly_rate = (self.interest_rate / Decimal('100')) / 24  # Bi-monthly interest rate
+
         loan_principal = self.loan_amount
-        total_interest = loan_principal * bi_monthly_rate * total_periods
-        total_amount_due = loan_principal + total_interest
-        bi_monthly_payment = total_amount_due / Decimal(total_periods)
+
         
         remaining_balance = loan_principal  # Start with the full loan amount
 
         for period in range(total_periods):
             due_date = self.loan_date + timedelta(days=(period +1) * 15)
             
-            # Initialize service fee to 0
-            service_fee = Decimal('0.00')
 
-            # Apply service fee calculation based on remaining balance at specific intervals (e.g., yearly)
-            if (period + 1) % 24 == 0:  # For example, every 12 months
-                # For Year 1: 1% of remaining balance
-                # For Year 2: 1.5% of remaining balance, etc.
-                if period < 24:
-                    service_fee = remaining_balance * Decimal('0.01')  # 1% for the first year
-                elif period < 48:
-                    service_fee = remaining_balance * Decimal('0.015')  # 1.5% for the second year
-                elif period < 72:
-                    service_fee = remaining_balance * Decimal('0.02')  # 1.5% for the second year
-                else:
-                    service_fee = remaining_balance * Decimal('0.025') # 1.5% for the second year
-                # Add more logic for further years
-
-            # Deduct the bi-monthly payment from the remaining balance
-            remaining_balance -= bi_monthly_payment
 
             # Create the payment schedule for this period
             PaymentSchedule.objects.create(
                 loan=self,
                 principal_amount=(loan_principal / total_periods).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
-                interest_amount=(total_interest / total_periods).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+                # interest_amount=(total_interest / total_periods).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                 due_date=due_date,
-                service_fee=service_fee,  # Assign calculated service fee for this period
                 balance=remaining_balance.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                 loan_type=self.loan_type  # Keep loan type consistent across schedules
             )
@@ -497,13 +497,14 @@ class Loan(models.Model):
 
 class PaymentSchedule(models.Model):
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)
-    principal_amount = models.DecimalField(max_digits=15, decimal_places=2)
-    installment_order = models.PositiveIntegerField(default=0)
-    interest_amount = models.DecimalField(max_digits=15, decimal_places=2)
-    payment_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
-    service_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    principal_amount = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    advance_pay = models.DecimalField(max_digits=15, decimal_places=2,  default=Decimal('0.00'))
+    under_pay = models.DecimalField(max_digits=15, decimal_places=2,  default=Decimal('0.00'))
+    received_amnt = models.DecimalField(max_digits=15, decimal_places=2,  default=Decimal('0.00'))
+    payment_amount = models.DecimalField(max_digits=15, decimal_places=2,  default=Decimal('0.00'))
+    penalty = models.DecimalField(max_digits=15, decimal_places=2,default=Decimal('0.00'))
     due_date = models.DateField()
-    balance = models.DecimalField(max_digits=15, decimal_places=2)
+    balance = models.DecimalField(max_digits=15, decimal_places=2,default=Decimal('0.00'))
     is_paid = models.BooleanField(default=False)
     loan_type = models.CharField(max_length=20, choices=[('Regular', 'Regular'), ('Emergency', 'Emergency')], default='Regular')  
     
@@ -515,41 +516,17 @@ class PaymentSchedule(models.Model):
         if self.balance <= Decimal('0.00'):       
             self.is_paid = True
             self.save()
-    def calculate_service_fee(self):
-        """Recalculate service fee based on the remaining balance and year."""
-        total_years = self.loan.loan_period if self.loan.loan_period_unit == 'years' else self.loan.loan_period / 12
 
-        # Check if we are at the end of each year (24th, 48th, 72nd, or 96th payment)
-        if self.installment_order in [24, 48, 72, 96]:
-            # Apply service fee based on the loan type (Regular/Emergency)
-            if self.loan.loan_type == 'Emergency':
-                # Emergency loan service fee rate
-                self.service_fee = self.loan.loan_amount * self.loan.system_settings.service_fee_rate_emergency
-            else:
-                # Regular loan service fee rate based on the year
-                if total_years <= 1:
-                    rate = self.loan.system_settings.service_fee_rate_regular_1yr
-                elif total_years <= 2:
-                    rate = self.loan.system_settings.service_fee_rate_regular_2yr
-                elif total_years <= 3:
-                    rate = self.loan.system_settings.service_fee_rate_regular_3yr
-                else:
-                    rate = self.loan.system_settings.service_fee_rate_regular_4yr
-                
-                # Calculate the service fee based on the applicable rate
-                self.service_fee = self.loan.loan_amount * rate
-            # Ensure the service fee is calculated correctly
-            self.service_fee = self.service_fee.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     def calculate_payment_amount(self):
-        self.payment_amount = self.principal_amount + self.interest_amount + self.service_fee
+        self.payment_amount = self.principal_amount + self.loan.interest_amount + self.loan.service_fee
 
     def save(self, *args, **kwargs):
         self.calculate_payment_amount()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Payment Schedule for {self.loan.account_number} - Installment {self.installment_order}"
+        return f"Payment Schedule for {self.loan.account_number} "
 
 
 
@@ -557,7 +534,7 @@ class Payment(models.Model):
     OR = models.CharField(max_length=50, primary_key=True, unique=True)
     payment_schedule = models.ForeignKey(PaymentSchedule, on_delete=models.CASCADE, related_name='payments')
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE, related_name='loans',default=0)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default = 0)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default = Decimal("0.00"))
     date = models.DateField(default=now)
     method = models.CharField(max_length=50, choices=[('Cash', 'Cash'), ('Bank Transfer', 'Bank Transfer')])
 

@@ -127,27 +127,27 @@ class AccountSerializer(serializers.ModelSerializer):
 
 class PaymentScheduleSerializer(serializers.ModelSerializer):
     loan_type = serializers.CharField(source='loan.loan_type', read_only=True)
-    loan_amount = serializers.DecimalField(source='loan.loan_amount', max_digits=10, decimal_places=2)
+    loan_amount = serializers.DecimalField(source='loan.loan_amount', max_digits=10, decimal_places=2,default=Decimal('0.00'))
     loan_date = serializers.DateField(source='loan.loan_date', read_only=True)
 
     class Meta:
         model = PaymentSchedule
-        fields = ['id', 'loan', 'principal_amount', 'interest_amount', 'payment_amount','service_fee',
-                  'due_date', 'balance', 'is_paid',  'loan_type', 'loan_amount', 'loan_date', 'installment_order']
+        fields = ['id', 'loan', 'principal_amount', 'payment_amount','advance_pay','under_pay','received_amnt','penalty',
+                  'due_date', 'balance', 'is_paid',  'loan_type', 'loan_amount', 'loan_date']
 
 class LoanSerializer(serializers.ModelSerializer):
     payment_schedules = PaymentSchedule.objects.select_related('loan').all()
     control_number = serializers.ReadOnlyField()
-    bi_monthly_installment = serializers.SerializerMethodField()
+    # bi_monthly_installment = serializers.SerializerMethodField()
     payment_schedule = PaymentScheduleSerializer(source='paymentschedule_set', many=True, read_only=True)
     account_holder = serializers.SerializerMethodField()
 
     class Meta:
         model = Loan
-        fields = ['control_number', 'account', 'loan_amount', 'loan_type', 'interest_rate', 
-                  'loan_period', 'loan_period_unit', 'loan_date', 'due_date', 'status', 'takehomePay'
-                  ,'penalty_rate', 'purpose', 'bi_monthly_installment', 'payment_schedule','account_holder']
-        read_only_fields = ['control_number', 'loan_date', 'due_date', 'interest_rate',  'penalty_rate']
+        fields = ['control_number', 'account', 'loan_amount', 'loan_type', 'interest_amount','system_settings',
+                  'loan_period', 'loan_period_unit', 'loan_date', 'due_date', 'status', 'takehomePay', 'cisp', 'admincost', 'notarial', 'outstanding_balance', 
+                   'purpose',  'payment_schedule','account_holder']
+        read_only_fields = ['control_number', 'loan_date', 'due_date', 'interest_amount',  ]
         
     def get_account_holder(self, obj):
         if obj.account and obj.account.account_holder:
@@ -164,23 +164,23 @@ class LoanSerializer(serializers.ModelSerializer):
         except ValueError:
             raise serializers.ValidationError("Invalid UUID format.")
         return value
-    def get_bi_monthly_installment(self, obj):
-        total_periods = (obj.loan_period * 2) if obj.loan_period_unit == 'years' else obj.loan_period * 2
-        print(f"Total periods: {total_periods}")
+    # def get_bi_monthly_installment(self, obj):
+    #     total_periods = (obj.loan_period * 2) if obj.loan_period_unit == 'years' else obj.loan_period * 2
+    #     print(f"Total periods: {total_periods}")
         
-        bi_monthly_rate = (obj.interest_rate / Decimal('100')) / 24  
-        print(f"Bi-monthly interest rate: {bi_monthly_rate}")
+    #     bi_monthly_rate = (obj.interest_rate / Decimal('100')) / 24  
+    #     print(f"Bi-monthly interest rate: {bi_monthly_rate}")
         
-        total_interest = (obj.loan_amount * bi_monthly_rate * total_periods)
-        print(f"Total interest: {total_interest}")
+    #     total_interest = (obj.loan_amount * bi_monthly_rate * total_periods)
+    #     print(f"Total interest: {total_interest}")
         
-        total_amount_due = obj.loan_amount + total_interest
-        print(f"Total amount due: {total_amount_due}")
+    #     total_amount_due = obj.loan_amount + total_interest
+    #     print(f"Total amount due: {total_amount_due}")
         
-        bi_monthly_payment = total_amount_due / Decimal(total_periods)
+    #     bi_monthly_payment = total_amount_due / Decimal(total_periods)
         
         
-        return bi_monthly_payment.quantize(Decimal('0.01'))
+    #     return bi_monthly_payment.quantize(Decimal('0.01'))
 
 
 

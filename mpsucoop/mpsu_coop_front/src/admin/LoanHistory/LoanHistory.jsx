@@ -138,7 +138,8 @@ const LoanManager = () => {
             try {
                 const response = await fetch("http://localhost:8000/api/members/");
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    console.error(`Fetch error: ${response.status} ${response.statusText}`);
+                    return;
                 }
                 const data = await response.json();
                 setMembers(data.members);
@@ -725,7 +726,14 @@ return (
                             <th>Account Holder</th>
                             <th>Loan Type</th>
                             <th>Loan Amount</th>
-                            {/* <th>Service Fee</th> */}
+                            <th>Service Fee</th>
+                            <th>Interest Amount</th>
+                            <th>Admin Cost</th>
+                            <th>Notarial Fee</th>
+                            <th>CISP</th>
+                            <th>TakeHome</th>
+                            <th>Outstanding<br/>
+                            Balance</th>
                             <th>Purpose</th>
                             <th>Status</th>
                             {/* <th>Actions</th> */}
@@ -739,7 +747,12 @@ return (
                                 <td>{loan.account_holder || 'N/A'}</td>
                                 <td>{loan.loan_type}</td>
                                 <td>{formatNumber(loan.loan_amount)}</td>
-                                {/* <td>{loan.service_fee}</td> */}
+                                <td>{formatNumber(loan.service_fee)}</td>
+                                <td>{formatNumber(loan.admincost)}</td>
+                                <td>{formatNumber(loan.notarial)}</td>
+                                <td>{formatNumber(loan.cisp)}</td>
+                                <td>{formatNumber(loan.takehomPay)}</td>
+                                <td>{formatNumber(loan.outstanding_balance)}</td>
                                 <td>{loan.purpose}</td>
                                 <td>{loan.status}</td>
                                 <td>

@@ -426,7 +426,7 @@ class LoanViewSet(viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 new_loan = Loan.objects.create(**loan_data)
-                new_loan.takehomePay = new_loan.loan_amount 
+                new_loan.takehomePay = (new_loan.loan_amount - (new_loan.service_fee + new_loan.admincost + new_loan.notarial + new_loan.cisp))
                 new_loan.save()
 
                 self.create_payment_schedule(new_loan)
