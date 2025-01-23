@@ -1152,7 +1152,7 @@ return (
                         fontSize: "16px",
                         cursor: "pointer",
                         borderRadius: "5px",
-                        marginRight: '300px'
+                        marginRight: '500px'
                     }}
                     onClick={resetForm}
                 >

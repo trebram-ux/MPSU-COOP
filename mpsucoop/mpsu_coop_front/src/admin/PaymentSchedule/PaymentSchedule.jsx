@@ -25,6 +25,7 @@ const PaymentSchedule = () => {
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [isPaymentInProgress, setIsPaymentInProgress] = useState(false);
   const [receivedAmount, setReceivedAmount] = useState(null); // Add the state here
+  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   
   const formatNumber = (number) => {
@@ -143,17 +144,16 @@ const PaymentSchedule = () => {
   };
 
   const handleExactAmount = () => {
-    if (selectedSchedule && !selectedSchedule.is_paid) { // Check if the schedule is not paid
-      console.log(`Schedule ID: ${selectedSchedule.id}, Paid Amount: ${paymentAmount}`);
-      markAsPaid(selectedSchedule.id); // Mark as paid logic
-      setIsPaymentModalOpen(false); // Close the modal
-      setAdvancePayment(paymentAmount);
-      setIsPaymentInProgress(true);
-      setReceivedAmount(parseFloat(paymentAmount)); // Set the advance payment to the exact payable amount
+    if (selectedSchedule && !selectedSchedule.is_paid) { // Check kung hindi pa bayad
+      alert('Payment required before setting Received Amount.');
     } else {
-      alert('This schedule is already marked as paid. No further payments are required.');
+      setReceivedAmount(parseFloat(paymentAmount)); // Set only if paid
+      markAsPaid(selectedSchedule.id); // Mark the schedule as paid
+      setIsPaymentModalOpen(false); // Close the modal
     }
   };
+  
+  
   
   const handlePaymentSubmit = () => {
     if (selectedSchedule && selectedSchedule.is_paid) { // Check if the schedule is already paid
@@ -246,6 +246,7 @@ const PaymentSchedule = () => {
     setLoanType(type); // Update the loanType state
     if (selectedAccount) {
       fetchPaymentSchedules(selectedAccount, type); // Re-fetch schedules based on selected account and loan type
+      setDropdownVisible(!dropdownVisible); // Toggle dropdown visibility
     }
   };
 
@@ -538,20 +539,21 @@ return (
               <button onClick={() => setSelectedAccount(null)}>
                 <IoArrowBackCircle /> Back 
               </button>
+
               <button 
-                onClick={() => handleLoanTypeChange('Regular')} 
-                style={{
-                  backgroundColor: 'transparent', 
-                  color: loanType === 'Regular' ? 'rgb(4, 202, 93)' : 'black', 
-                  cursor: 'pointer', 
-                  border: 'none', 
-                  padding: '5px 10px',
-                  textDecoration: loanType === 'Regular' ? 'underline' : 'none',
-                  marginLeft: '50px',
-                }}
-              >
-                Regular Loans
-              </button>
+              onClick={() => handleLoanTypeChange('Regular')} 
+              style={{
+                backgroundColor: 'transparent', 
+                color: loanType === 'Regular' ? 'rgb(4, 202, 93)' : 'black', 
+                cursor: 'pointer', 
+                border: 'none', 
+                padding: '5px 10px',
+                textDecoration: loanType === 'Regular' ? 'underline' : 'none',
+                marginLeft: '50px',
+              }}
+            >
+              Regular Loans
+            </button>
 
               <button 
                 onClick={() => handleLoanTypeChange('Emergency')} 
@@ -632,12 +634,17 @@ return (
                       <td>₱ {formatNumber((parseFloat(schedule.under_pay) || 0).toFixed(2))}</td>
                       <td>₱ {formatNumber((parseFloat(schedule.penalty) || 0).toFixed(2))}</td>
                       <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
+<<<<<<< HEAD
                       {/* <td>₱ {formatNumber((parseFloat(schedule.receied_amnt) || 0).toFixed(2))}</td> */}
                       <td>₱ {formatNumber((parseFloat(schedule.received_amnt) || 0).toFixed(2))}</td>
+=======
+                      <td>₱ {formatNumber((parseFloat(schedule.receied_amnt) || 0).toFixed(2))}</td>
+>>>>>>> fe3fb0c9bbd32b43830302ba6881d8778137a739
                       <td>₱ {formatNumber((parseFloat(schedule.balance) || 0).toFixed(2))}</td>
                       <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
                         {schedule.is_paid ? 'Paid!' : 'Ongoing'}
                       </td>
+                      
                       <td>
                         <div
                           style={{
@@ -671,62 +678,35 @@ return (
                   ))}
                 </tbody>
 
-      {/* Modal */}
-{isPaymentModalOpen && (
-  <div
-    style={{
-      position: 'fixed',
-      top: '350px',
-      left: '1000px',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}
-  >
+                
+  {isPaymentModalOpen && selectedSchedule && (
     <div
       style={{
-        backgroundColor: 'gray',
-        padding: '5px',
-        borderRadius: '5px',
-        width: '300px',
-        textAlign: 'center',
+        position: 'fixed',
+        top: '350px',
+        left: '1000px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
     >
-      <h3>Amount Payable</h3>
-      <p>Payment Amount: ₱ {parseFloat(paymentAmount).toFixed(2)}</p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
-        <button
-          style={{
-            backgroundColor: 'green',
-            color: 'white',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-          onClick={handleExactAmount}
-        >
-          Exact Amount
-        </button>
-        {receivedAmount !== null && (
-          <p style={{ marginTop: '10px' }}>Received Amount: ₱ {receivedAmount.toFixed(2)}</p>
+      <div
+        style={{
+          backgroundColor: 'gray',
+          padding: '5px',
+          borderRadius: '5px',
+          width: '300px',
+          textAlign: 'center',
+        }}
+      >
+        <h3>Amount Payable</h3>
+        <p>Payment Amount: ₱ {parseFloat(paymentAmount).toFixed(2)}</p>
+  
+        {/* Huwag ipakita ang Received Amount kung hindi pa bayad */}
+        {selectedSchedule.is_paid && (
+          <p>Received Amount: ₱ {parseFloat(receivedAmount).toFixed(2)}</p>
         )}
-        <div style={{ marginTop: '-5px' }}>
-          <input
-            id="advancePayment"
-            type="number"
-            placeholder="Enter Advance Payment Amount"
-            value={advancePayment}
-            onChange={(e) => setAdvancePayment(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px',
-              marginBottom: '-5px',
-              borderRadius: '5px',
-              border: '1px solid #ccc',
-            }}
-          />
-        </div>
+  
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
           <button
             style={{
@@ -737,29 +717,61 @@ return (
               borderRadius: '5px',
               cursor: 'pointer',
             }}
-            onClick={handlePaymentSubmit}
+            onClick={handleExactAmount}
           >
-            Submit Payment
+            Exact Amount
           </button>
-
-          <button
-            style={{
-              backgroundColor: 'red',
-              color: 'white',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
-            onClick={() => setIsPaymentModalOpen(false)}
-          >
-            Cancel
-          </button>
+          <div style={{ marginTop: '-5px' }}>
+            <label htmlFor="advancePayment" style={{ display: 'block' }}></label>
+            <input
+              id="advancePayment"
+              type="number"
+              placeholder="Enter Advance Payment Amount"
+              value={advancePayment}
+              onChange={(e) => setAdvancePayment(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px',
+                marginBottom: '-5px',
+                borderRadius: '5px',
+                border: '1px solid #ccc',
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+            <button
+              style={{
+                backgroundColor: 'green',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+              onClick={handlePaymentSubmit}
+            >
+              Submit Payment
+            </button>
+  
+            <button
+              style={{
+                backgroundColor: 'red',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+              onClick={() => setIsPaymentModalOpen(false)}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-)}
+  )}
+  
 
               </table>
             </div>          
