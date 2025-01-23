@@ -980,7 +980,7 @@ return (
             </li>
         ))}
         </ul>
-            <button onClick={closePopup} className="close-btn">Close</button>
+            <button onClick={closePopup} className="close-btn">OK</button>
             </div>
         </div>
         )}
@@ -1070,7 +1070,7 @@ return (
                         fontSize: "16px",
                         cursor: "pointer",
                         borderRadius: "5px",
-                        marginLeft: '100px',
+                        marginLeft: '5px',
                         marginTop: '5px'
 
                     }}
@@ -1152,7 +1152,7 @@ return (
                         fontSize: "16px",
                         cursor: "pointer",
                         borderRadius: "5px",
-                        marginRight: '300px'
+                        marginRight: '500px'
                     }}
                     onClick={resetForm}
                 >

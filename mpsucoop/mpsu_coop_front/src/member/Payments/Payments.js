@@ -11,6 +11,7 @@ const MemberPayments = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loanType, setLoanType] = useState('Regular');                                                                                                                                                                                                                                                                                                                                            
 
   const formatNumber = (number) => {
     if (!number) return "0.00";
@@ -82,13 +83,14 @@ const MemberPayments = () => {
         style={{
           textAlign: 'center',
           color: '#000000',
-          fontSize: '30px',
+          fontSize: '24px',
           marginBottom: '50px',
-          marginTop: '110px',
+          marginTop: '500px',
         }}
       >
         My Paid Payments
       </h2>
+
       <button
         onClick={() => navigate(-1)}
         style={{
@@ -110,7 +112,7 @@ const MemberPayments = () => {
         style={{
           display: 'flex',
           justifyContent: 'center',
-          marginBottom: '20px',
+          marginBottom: '5px',
           marginTop: '-50px',
         }}
       >
@@ -121,10 +123,10 @@ const MemberPayments = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
             padding: '10px',
-            fontSize: '16px',
+            fontSize: '11px',
             borderRadius: '4px',
             width: '300px',
-            marginLeft: '580px',
+            marginLeft: '1200px',
           }}
         />
       </div>
@@ -136,28 +138,35 @@ const MemberPayments = () => {
             borderCollapse: 'collapse',
             textAlign: 'left',
             marginTop: '20px',
+            fontSize: '14px'
           }}
         >
           <thead>
             <tr>
               <th
                 style={{
-                  backgroundColor: '#007bff',
+                  backgroundColor: 'gray',
                   color: 'rgb(0, 0, 0)',
                   textTransform: 'uppercase',
                   fontWeight: 'bold',
-                  padding: '15px',
+                  padding: '5px',
                 }}
               >
                 Approval Date
               </th>
-              <th style={{ padding: '15px' }}>Loan Type</th>
-              <th style={{ padding: '15px' }}>Loan Amount</th>
-              <th style={{ padding: '15px' }}>Principal Amount</th>
-              <th style={{ padding: '15px' }}>Payment Amount</th>
-              <th style={{ padding: '15px' }}>Payment Date</th>
-              <th style={{ padding: '15px' }}>Status</th>
-              {/* <th style={{ padding: '15px' }}>OR NO</th> */}
+              <th>Loan Type</th>
+              <th>Principal Amount</th>
+              <th>Payment Amount</th>
+              <th>Loan Amount</th>
+              {loanType === 'Regular' && <th>Service Fee</th>}
+              <th>Advance Payment</th>
+              <th>Previous Balance</th>
+              <th>Penalty</th>
+              <th>Received Amount</th>
+              <th>Balance</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>OR NO</th>
             </tr>
           </thead>
           <tbody>
@@ -165,16 +174,24 @@ const MemberPayments = () => {
               <tr key={index}>
                 <td>{schedule.loan_date || 'No Date Available'}</td>
                 <td>{schedule.loan_type || 'N/A'}</td>
-                <td>₱ {formatNumber(parseFloat(schedule.loan_amount || 0).toFixed(2))}</td>
                 <td>₱ {formatNumber(parseFloat(schedule.principal_amount || 0).toFixed(2))}</td>
                 <td>₱ {formatNumber(parseFloat(schedule.payment_amount || 0).toFixed(2))}</td>
+                <td>₱ {formatNumber(parseFloat(schedule.loan_amount || 0).toFixed(2))}</td>
+                {loanType === 'Regular' && (
+                <td>₱ {formatNumber((parseFloat(schedule.service_fee) || 0).toFixed(2))}</td>
+                )}
+                <td>₱ {formatNumber((parseFloat(schedule.advance_pay) || 0).toFixed(2))}</td>
+                <td>₱ {formatNumber((parseFloat(schedule.under_pay) || 0).toFixed(2))}</td>
+                <td>₱ {formatNumber((parseFloat(schedule.penalty) || 0).toFixed(2))}</td>
+                <td>₱ {formatNumber((parseFloat(schedule.receied_amnt) || 0).toFixed(2))}</td>
+                <td>₱ {formatNumber((parseFloat(schedule.balance) || 0).toFixed(2))}</td>
                 <td>
                   {schedule.payment_date
                     ? new Date(schedule.due_date).toLocaleDateString()
                     : 'No Date Available'}
                 </td>
                 <td>{schedule.is_paid ? 'Paid' : 'Unpaid'}</td>
-                {/* <td>{schedule.or_number}</td> */}
+                <td>{schedule.or_number}</td>
               </tr>
             ))}
           </tbody>
@@ -183,7 +200,7 @@ const MemberPayments = () => {
         <p
           style={{
             textAlign: 'center',
-            fontSize: '16px',
+            fontSize: '11px',
             color: '#000000',
             marginTop: '20px',
           }}

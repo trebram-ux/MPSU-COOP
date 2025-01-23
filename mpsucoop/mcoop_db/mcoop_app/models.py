@@ -335,7 +335,7 @@ class Loan(models.Model):
     control_number = models.CharField(primary_key=True,
         max_length=100,
         unique=True,
-        default=uuid.uuid4,
+        default=str(uuid.uuid4().hex[:5])
     )
     account = models.ForeignKey('Account', on_delete=models.CASCADE)
     loan_amount = models.DecimalField(max_digits=15, decimal_places=2)
