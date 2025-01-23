@@ -612,7 +612,7 @@ return (
                   >
                     <th>Principal Amount</th>
                     <th>Payment Amount</th>
-                    {loanType === 'Regular' && <th>Service Fee</th>}
+                    {/* {loanType === 'Regular' && <th>Service Fee</th>} */}
                     <th>Advance Payment</th>
                     <th>Previous Balance</th>
                     <th>Penalty</th>
@@ -629,14 +629,11 @@ return (
                       <td>₱ {formatNumber((parseFloat(schedule.principal_amount) || 0).toFixed(2))}</td>
                       <td>₱ {formatNumber((parseFloat(schedule.payment_amount) || 0).toFixed(2))}</td>
                       <td>₱ {formatNumber((parseFloat(schedule.advance_pay) || 0).toFixed(2))}</td>
-                      {loanType === 'Regular' && (
-                        <td>₱ {formatNumber((parseFloat(schedule.service_fee) || 0).toFixed(2))}</td>
-                      )}
                       <td>₱ {formatNumber((parseFloat(schedule.under_pay) || 0).toFixed(2))}</td>
                       <td>₱ {formatNumber((parseFloat(schedule.penalty) || 0).toFixed(2))}</td>
                       <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
                       {/* <td>₱ {formatNumber((parseFloat(schedule.receied_amnt) || 0).toFixed(2))}</td> */}
-                      <td>₱ {formatNumber((parseFloat(advancePayment) || 0).toFixed(2))}</td>
+                      <td>₱ {formatNumber((parseFloat(schedule.received_amnt) || 0).toFixed(2))}</td>
                       <td>₱ {formatNumber((parseFloat(schedule.balance) || 0).toFixed(2))}</td>
                       <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
                         {schedule.is_paid ? 'Paid!' : 'Ongoing'}

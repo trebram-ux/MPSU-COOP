@@ -76,13 +76,13 @@ class Archive(models.Model):
 class SystemSettings(models.Model):
 
     interest_rate = models.DecimalField(
-        max_digits=5, decimal_places=2, default=Decimal('0.00'), verbose_name="Interest Rate"
+        max_digits=5, decimal_places=2, default=Decimal('0.08'), verbose_name="Interest Rate"
     )
     service_fee_rate_emergency = models.DecimalField(
         max_digits=5, decimal_places=2, default=Decimal('0.01'), verbose_name="Emergency Loan Service Fee Rate"
     )
     penalty_rate = models.DecimalField(
-        max_digits=5, decimal_places=2, default=Decimal('2.00'), verbose_name="Penalty Rate"
+        max_digits=5, decimal_places=2, default=Decimal('.02'), verbose_name="Penalty Rate"
     )
     service_fee_rate_regular_1yr = models.DecimalField(
         max_digits=5, decimal_places=3, default=Decimal('0.010'),
@@ -101,7 +101,8 @@ class SystemSettings(models.Model):
         verbose_name="Regular Loan Service Fee Rate (>3 years)"
     )
     admincost_r = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('240.00'))
-    notarialfee_r = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('10.00'))
+    notarialfee_r = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('100.00'))
+
     def __str__(self):
         return "System Settings"
 
@@ -123,6 +124,9 @@ class SystemSettings(models.Model):
             return self.service_fee_rate_regular_3yr
         else:
             return self.service_fee_rate_regular_4yr
+
+
+
 
     def __str__(self):
         return f"System Settings (Interest Rate: {self.interest_rate}%)"
@@ -323,6 +327,7 @@ class Account(models.Model):
 #         return f"Payment for Loan {self.loan.control_number} on {self.due_date}"
 
 
+
 class Loan(models.Model):
     PURPOSE_CHOICES = [
         ('Education', 'Education'),
@@ -333,7 +338,7 @@ class Loan(models.Model):
         ('Others', 'Others'),
     ]
     control_number = models.CharField(primary_key=True,
-        max_length=100,
+        max_length=5,
         unique=True,
         default=uuid.uuid4,
     )
@@ -365,8 +370,6 @@ class Loan(models.Model):
     purpose = models.CharField(max_length=200, choices=PURPOSE_CHOICES, default='Education')
     annual_interest = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))  
     outstanding_balance = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))  
-    co_make = models.CharField(max_length=255, null=True, blank=True)
-    relationships = models.CharField(max_length=100, default='Brother')
 
     
 
@@ -394,63 +397,162 @@ class Loan(models.Model):
             self.save()
 
     def save(self, *args, **kwargs):
-        
+        print(f"Saving loan: {self.control_number}")
         if not self.system_settings:
             self.system_settings = SystemSettings.get_settings()
-        
+            print(f"Loaded system settings: {self.system_settings}")
+
+               # Validate loan period
+        self.validate_loan_period()
+
+        # Calculate initial values on loan creation
+        if not self.pk:
+            self.calculate_initial_values()
         if not self.loan_date:
             self.loan_date = timezone.now().date()
-            
         if not self.annual_interest:
             self.annual_interest = self.system_settings.interest_rate
+
+        
         if self.loan_period_unit == 'months' and self.loan_period > 48:
             raise ValueError("Loan period cannot exceed 48 months for regular loans.")
         if self.loan_period_unit == 'years' and self.loan_period > 4:
-            raise ValueError("Loan period cannot exceed 4 for regular loans.")
-        # if not self.penalty:
-        #     self.penalty = self.system_settings.penalty_rate
-            
-    
-        self.calculate_service_fee()
+            raise ValueError("Loan period cannot exceed 4 years for regular loans.")
+        if self.loan_period_unit not in ['years', 'months']:
+            raise ValueError("Invalid loan_period_unit. Must be 'years' or 'months'.")
+        if not hasattr(self.system_settings, 'service_fee_rate_regular_1yr'):
+            raise ValueError("Missing 1-year service fee rate in system settings.")
+
+        if not hasattr(self, 'system_settings') or not self.system_settings:
+            try:
+                self.system_settings = SystemSettings.objects.first()
+            except SystemSettings.DoesNotExist:
+                raise ValueError("System settings are not configured for this loan.")
         
-        self.takehomePay = (self.loan_amount - (self.service_fee + self.admincost + self.notarial + self.cisp))
-        self.outstanding_balance = self.takehomePay
+        self.calculate_initial_values()
+        # self.calculate_service_fee()
+        # self.calculate_takehome_pay()
+        # self.calculate_interest()
+        
+        print("Service Fee:", self.service_fee)  # Debugging line
+        print("Takehome Pay:", self.takehomePay)  # Debugging line
+        
+        self.admincost = Decimal(self.system_settings.admincost_r) 
+        self.notarial = Decimal(self.system_settings.notarialfee_r)
+        self.cisp = (self.loan_amount / Decimal('1000')) * Decimal('0.75') * Decimal('12')
+        self.takehomePay= self.loan_amount - (
+                self.service_fee + self.system_settings.admincost_r + self.system_settings.notarialfee_r + self.cisp + self.interest_amount)
+        
+        # For Year 1: Calculate outstanding balance (takehomePay formula)
+        if not self.outstanding_balance:
+            self.outstanding_balance = self.takehomePay
+            
+        else:
+            # For Year 2 and onward: Use formula excluding notarial fee
+            self.outstanding_balance = self.loan_amount - (
+                self.service_fee + self.admincost + self.cisp + self.interest_amount + 100
+            )
+        if not self.loan_date:
+            self.loan_date = timezone.now().date()
+        print(f"Loan date set to {self.loan_date}")     
+        # Calculate due date
         if not self.due_date:
             self.due_date = self.calculate_due_date()
-    
-        super().save(*args, **kwargs)
+            print(f"Calculated due date: {self.due_date}")
 
+        super().save(*args, **kwargs)
+        print(f"Loan {self.control_number} saved successfully.")
+
+        # Generate payment schedule if loan is ongoing
         if self.status == 'Ongoing':
             self.generate_payment_schedule()
+
+    def validate_loan_period(self):
+        """Ensure the loan period adheres to type-specific constraints."""
+        if self.loan_type == 'Regular' and self.loan_period > 48:
+            raise ValueError("Regular loans cannot exceed 4 years (48 months).")
+        if self.loan_type == 'Emergency' and self.loan_period > 6:
+            raise ValueError("Emergency loans cannot exceed 6 months.")
+
+    def calculate_initial_values(self):
+        """Calculate the initial loan-related values upon loan creation."""
+        self.calculate_service_fee()
+        self.interest_amount = self.loan_amount * (self.annual_interest / Decimal('100'))
+        self.admincost = Decimal(self.system_settings.admincost_r) 
+        self.notarial = Decimal(self.system_settings.notarialfee_r)
+        self.cisp = (self.loan_amount / Decimal('1000')) * Decimal('0.75') * 12
+        self.takehomePay = self.loan_amount - (
+            self.service_fee + self.admincost + self.notarial + self.cisp + self.interest_amount
+        )
+        self.outstanding_balance = (self.takehomePay)
+
+        print(
+            f"Initial values calculated: service_fee={self.service_fee}, interest_amount={self.interest_amount}, "
+            f"admincost={self.admincost}, notarial={self.notarial}, cisp={self.cisp}, "
+            f"takehomePay={self.takehomePay}, outstanding_balance={self.outstanding_balance}"
+        )
+    def calculate_interest(self):
+        """Calculate the interest amount based on the loan amount and annual interest rate."""
+        self.interest_amount = (self.loan_amount * (self.annual_interest / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
+    def yearly_recalculation(self):
+        """Recalculate values at the start of each new year."""
+        years_elapsed = (timezone.now().date() - self.loan_date).days // 365
+        if years_elapsed >= 1:
+            # Determine the service fee rate for the current year
+            rate_map = {
+                1: self.system_settings.service_fee_rate_regular_1yr,
+                2: self.system_settings.service_fee_rate_regular_2yr,
+                3: self.system_settings.service_fee_rate_regular_3yr,
+                4: self.system_settings.service_fee_rate_regular_4yr,
+            }
+            rate = rate_map.get(years_elapsed, self.system_settings.service_fee_rate_regular_4yr)
+            self.service_fee = self.loan_amount * rate
+
+            # Update admin cost and CISP
+            self.admincost += Decimal(self.system_settings.admincost_r) * 12
+            self.cisp = (self.outstanding_balance / Decimal('1000')) * Decimal('0.75') * Decimal('12')
+
+            # Exclude notarial fee and take-home pay from recalculations
+            self.outstanding_balance = self.loan_amount - (
+                self.service_fee + self.admincost + self.cisp + self.interest_amount
+            )
+   
+
     
     def calculate_service_fee(self):
-        total_years = self.loan_period if self.loan_period_unit == 'years' else self.loan_period / 12
+        """Calculate the service fee based on the loan type and system settings."""
         if self.loan_type == 'Emergency':
             self.service_fee = self.loan_amount * self.system_settings.service_fee_rate_emergency
         else:
-            if total_years <= 1:
-                rate = self.system_settings.service_fee_rate_regular_1yr
-            elif total_years <= 2:
-                rate = self.system_settings.service_fee_rate_regular_2yr
-            elif total_years <= 3:
-                rate = self.system_settings.service_fee_rate_regular_3yr
+            if self.loan_period <= 12:
+                self.service_fee = self.loan_amount * self.system_settings.service_fee_rate_regular_1yr
+            elif self.loan_period <= 24:
+                self.service_fee = self.loan_amount * self.system_settings.service_fee_rate_regular_2yr
+            elif self.loan_period <= 36:
+                self.service_fee = self.loan_amount * self.system_settings.service_fee_rate_regular_3yr
             else:
-                rate = self.system_settings.service_fee_rate_regular_4yr
-            self.service_fee = self.loan_amount * rate
-        self.service_fee = self.service_fee.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                self.service_fee = self.loan_amount * self.system_settings.service_fee_rate_regular_4yr
+
+        print(f"Service fee calculated: {self.service_fee}")
 
 
-
+    def calculate_takehomePay(self):
+        self.takehomePay = self.loan_amount - (
+            self.service_fee + self.notarial + self.cisp + self.admincost
+        )
+        return self.takehomePay
         
     def calculate_due_date(self):
-        """
-        Calculates the due date based on the loan period and start date.
-        """
+        """Calculate the loan due date based on the loan period."""
+        if not self.loan_date:
+            raise ValueError("Loan date is not set. Cannot calculate due date.")
+
         if self.loan_period_unit == 'months':
-            return self.loan_date + timedelta(days=self.loan_period * 30)
-        else:
-            return self.loan_date + timedelta(days=self.loan_period * 365)
+            return self.loan_date + timezone.timedelta(days=self.loan_period * 30)
+        elif self.loan_period_unit == 'years':
+            return self.loan_date + timezone.timedelta(days=self.loan_period * 365)
         return None
+
 
     def check_loan_eligibility_for_reloan(self):
         """Check if at least 50% of the loan is paid off."""
@@ -470,7 +572,7 @@ class Loan(models.Model):
         total_periods = total_months * 2  # Bi-monthly (payments every 15 days)
         
 
-        loan_principal = self.loan_amount
+        loan_principal = self.outstanding_balance
 
         
         remaining_balance = loan_principal  # Start with the full loan amount
@@ -489,14 +591,9 @@ class Loan(models.Model):
                 balance=remaining_balance.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
                 loan_type=self.loan_type  # Keep loan type consistent across schedules
             )
-
-
-
-            
-
     def __str__(self):
         return f"Loan {self.control_number} for {self.account} ({self.status})"
-
+       
 class PaymentSchedule(models.Model):
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)
     principal_amount = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
@@ -510,8 +607,7 @@ class PaymentSchedule(models.Model):
     is_paid = models.BooleanField(default=False)
     loan_type = models.CharField(max_length=20, choices=[('Regular', 'Regular'), ('Emergency', 'Emergency')], default='Regular')  
     
-    def __str__(self):
-        return f"Payment for Loan {self.loan.control_number} on {self.due_date}"
+
 
 
     def mark_as_paid(self):
@@ -519,14 +615,46 @@ class PaymentSchedule(models.Model):
             self.is_paid = True
             self.save()
 
+    def process_payment(self, received_amount):
+        """Handles payments and updates advance/underpayment."""
+        received_amount = Decimal(received_amount)
+        print(f"Received Amount: {received_amount}")
+        
+        # Case 1: Overpayment (Advance Pay)
+        if received_amount > self.payment_amount:
+            self.advance_pay = (received_amount - self.payment_amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            self.under_pay = Decimal('0.00')
+            print(f"Advance Pay: {self.advance_pay}")
+        # Case 2: Underpayment (Under Pay)
+        elif received_amount < self.payment_amount:
+            self.under_pay = (self.payment_amount - received_amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            self.advance_pay = Decimal('0.00')
+            self.penalty += (self.under_pay * Decimal('0.02')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            print(f"Under Pay: {self.under_pay}, Penalty: {self.penalty}")
+        # Case 3: Exact Payment
+        else:
+            self.advance_pay = Decimal('0.00')
+            self.under_pay = Decimal('0.00')
+            print(f"Exact Payment, Advance Pay: {self.advance_pay}, Under Pay: {self.under_pay}")
 
+        # Update received amount and balance
+        self.received_amnt = received_amount
+        self.balance = (self.balance - received_amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        print(f"New Balance: {self.balance}")
+        # Mark as paid if balance is zero or less
+        if self.balance <= Decimal('0.00'):
+            self.is_paid = True
+            print("Marked as Paid")
+
+        self.save()
     def calculate_payment_amount(self):
-        self.payment_amount = self.principal_amount + self.loan.interest_amount + self.loan.service_fee
+        self.payment_amount = self.principal_amount 
 
     def save(self, *args, **kwargs):
         self.calculate_payment_amount()
         super().save(*args, **kwargs)
-
+    def __str__(self):
+        return f"Payment for Loan {self.loan.control_number} on {self.due_date}"
     def __str__(self):
         return f"Payment Schedule for {self.loan.account_number} "
 

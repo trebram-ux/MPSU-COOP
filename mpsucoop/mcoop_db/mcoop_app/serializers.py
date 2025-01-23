@@ -144,9 +144,9 @@ class LoanSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Loan
-        fields = ['control_number', 'account', 'loan_amount', 'loan_type', 'interest_amount','system_settings',
+        fields = ['control_number', 'account', 'loan_amount', 'loan_type', 'interest_amount','system_settings','service_fee',
                   'loan_period', 'loan_period_unit', 'loan_date', 'due_date', 'status', 'takehomePay', 'cisp', 'admincost', 'notarial', 'outstanding_balance', 
-                   'purpose',  'payment_schedule','account_holder','co_make','relationships']
+                   'purpose',  'payment_schedule','account_holder']
         read_only_fields = ['control_number', 'loan_date', 'due_date', 'interest_amount',  ]
         
     def get_account_holder(self, obj):
@@ -164,23 +164,8 @@ class LoanSerializer(serializers.ModelSerializer):
         except ValueError:
             raise serializers.ValidationError("Invalid UUID format.")
         return value
-    # def get_bi_monthly_installment(self, obj):
-    #     total_periods = (obj.loan_period * 2) if obj.loan_period_unit == 'years' else obj.loan_period * 2
-    #     print(f"Total periods: {total_periods}")
-        
-    #     bi_monthly_rate = (obj.interest_rate / Decimal('100')) / 24  
-    #     print(f"Bi-monthly interest rate: {bi_monthly_rate}")
-        
-    #     total_interest = (obj.loan_amount * bi_monthly_rate * total_periods)
-    #     print(f"Total interest: {total_interest}")
-        
-    #     total_amount_due = obj.loan_amount + total_interest
-    #     print(f"Total amount due: {total_amount_due}")
-        
-    #     bi_monthly_payment = total_amount_due / Decimal(total_periods)
-        
-        
-    #     return bi_monthly_payment.quantize(Decimal('0.01'))
+
+
 
 
 
@@ -190,6 +175,19 @@ class LoanSerializer(serializers.ModelSerializer):
             loan.generate_payment_schedule()
         return loan
 
+
+
+        return instance
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.calculate_service_fee()
+        instance.calculate_takehomePay()
+        instance.calculate_outstanding_balance()
+        instance.calculate_interest()
+        instance.calculate_cisp()
+        instance.save()
+        return instance
 
 
 class PaymentSerializer(serializers.ModelSerializer):

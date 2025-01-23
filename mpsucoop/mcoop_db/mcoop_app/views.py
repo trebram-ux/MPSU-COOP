@@ -384,6 +384,12 @@ class LoanViewSet(viewsets.ModelViewSet):
     serializer_class = LoanSerializer
     permission_classes = [AllowAny]
     
+    def get(self, request):
+        loans = Loan.objects.all()  # Fetch all loans from the database
+        serializer = LoanSerializer(loans, many=True)  # Serialize the data
+        loan_data = serializer.data  # Get the serialized data
+        print("Serialized Loan Data:", loan_data)  # Print to the terminal
+        return Response(loan_data) 
 
     @action(detail=True, methods=['post'])
     def mark_as_paid(self, request, pk=None):
@@ -426,7 +432,7 @@ class LoanViewSet(viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 new_loan = Loan.objects.create(**loan_data)
-                new_loan.takehomePay = (new_loan.loan_amount - (new_loan.service_fee + new_loan.admincost + new_loan.notarial + new_loan.cisp))
+                new_loan.takehomePay = (new_loan.loan_amount - (new_loan.service_fee + new_loan.interest_amount + new_loan.admincost + new_loan.notarial + new_loan.cisp))
                 new_loan.save()
 
                 self.create_payment_schedule(new_loan)
@@ -461,19 +467,23 @@ class LoanViewSet(viewsets.ModelViewSet):
         payment_schedule = PaymentSchedule.objects.filter(loan=loan)
         return Response(PaymentScheduleSerializer(payment_schedule, many=True).data)
 
-    def create(self, request, *args, **kwargs):
-        """
-        Override create to handle loan creation without service fee calculation.
-        """
-        loan_data = request.data
-        loan_amount = float(loan_data.get('loan_amount', 0))
-        loan_data['takehomePay'] = loan_amount  # No service fee deduction
+    # def create(self, request, *args, **kwargs):
+    #     """
+    #     Override create to handle loan creation without service fee calculation.
+    #     """
+    #     loan_data = request.data
+    #     loan_amount = float(loan_data.get('loan_amount', 0))
+    #     # loan_data['takehomePay'] = loan_amount  # No service fee deduction
 
-        serializer = self.get_serializer(data=loan_data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     serializer = self.get_serializer(data=loan_data)
+    #     serializer.is_valid(raise_exception=True)
+
+    #     loan = serializer.save()
+    #     loan.calculate_service_fee()
+    #     loan.calculate_takehome_pay()
+    #     loan.save()
+        
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'])
     def by_account(self, request):
@@ -546,41 +556,29 @@ class PaymentScheduleViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def mark_as_paid(self, request, pk=None):
         schedule = self.get_object()
-
-        schedule.is_paid = True
-        schedule.status = 'Paid' 
-        schedule.save()
-
-        update_loan_status(schedule.loan)
-
-        return Response({'status': 'Payment marked as paid.'}, status=status.HTTP_200_OK)
+        schedule.process_payment(schedule.balance)
+        return Response({'status': 'Payment processed and marked as paid.'}, status=status.HTTP_200_OK)
 
 def mark_as_paid(request, id):
-            try:
-                schedule = PaymentSchedule.objects.get(id=id)
+    try:
+        schedule = PaymentSchedule.objects.get(id=id)
+        schedule.process_payment(schedule.balance)
+        return JsonResponse({'status': 'Payment processed and marked as paid.'}, status=status.HTTP_200_OK)
+    except PaymentSchedule.DoesNotExist:
+        return JsonResponse({'error': 'Payment schedule not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-                schedule.is_paid = True
-                schedule.status = 'Paid'
-                schedule.save()
-
-                return JsonResponse({'status': 'Payment marked as paid.'}, status=status.HTTP_200_OK)
-            except PaymentSchedule.DoesNotExist:
-                return JsonResponse({'error': 'Payment schedule not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 def update_loan_status(loan):
-    all_paid = loan.paymentschedule_set.filter(is_paid=False).count() == 0
+    unpaid_count = loan.paymentschedule_set.filter(is_paid=False).count()
 
-    if all_paid:
-        loan.status = 'Completed'  
-        loan.save()
-
-       
-        loan.archived = True  
-        loan.save()
-
+    if unpaid_count == 0:
+        loan.status = 'Completed'
+        loan.archived = True
     else:
         loan.status = 'Pending'
-        loan.save()
+
+    loan.save()
+
 
     
 class PaymentViewSet(viewsets.ModelViewSet):

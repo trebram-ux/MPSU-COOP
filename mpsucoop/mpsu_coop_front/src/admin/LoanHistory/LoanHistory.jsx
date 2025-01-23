@@ -105,8 +105,8 @@ const LoanManager = () => {
         }
     
 
-        if (!loan_period || loan_period <= 0) {
-            errors.loan_period = 'Loan period must be greater than 0.';
+        if (!loan_period || loan_period < 1 || loan_period > 4) {
+            errors.loan_period = 'Loan period must be from 1 upto 4 years only.';
         } else if (loan_type === 'Emergency' && loan_period > 6) {
             errors.loan_period = 'Emergency loans cannot exceed 6 months.';
         }
@@ -203,7 +203,7 @@ const LoanManager = () => {
             
                 setTimeout(() => {
                     setShowPopup(false);
-                }, 2000);
+                }, 1000);
             }            
             fetchLoans();
         } catch (err) {
@@ -980,7 +980,7 @@ return (
             </li>
         ))}
         </ul>
-            <button onClick={closePopup} className="close-btn">Close</button>
+            <button onClick={closePopup} className="close-btn">OK</button>
             </div>
         </div>
         )}
@@ -1021,7 +1021,7 @@ return (
                                 <td>{formatNumber(loan.admincost)}</td>
                                 <td>{formatNumber(loan.notarial)}</td>
                                 <td>{formatNumber(loan.cisp)}</td>
-                                <td>{formatNumber(loan.takehomPay)}</td>
+                                <td>{formatNumber(loan.takehomePay)}</td>
                                 <td>{formatNumber(loan.outstanding_balance)}</td>
                                 <td>{loan.purpose}</td>
                                 <td>{loan.status}</td>
@@ -1070,7 +1070,7 @@ return (
                         fontSize: "16px",
                         cursor: "pointer",
                         borderRadius: "5px",
-                        marginLeft: '100px',
+                        marginLeft: '5px',
                         marginTop: '5px'
 
                     }}
