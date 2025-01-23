@@ -634,17 +634,11 @@ return (
                       <td>₱ {formatNumber((parseFloat(schedule.under_pay) || 0).toFixed(2))}</td>
                       <td>₱ {formatNumber((parseFloat(schedule.penalty) || 0).toFixed(2))}</td>
                       <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
-<<<<<<< HEAD
-                      {/* <td>₱ {formatNumber((parseFloat(schedule.receied_amnt) || 0).toFixed(2))}</td> */}
-                      <td>₱ {formatNumber((parseFloat(schedule.received_amnt) || 0).toFixed(2))}</td>
-=======
                       <td>₱ {formatNumber((parseFloat(schedule.receied_amnt) || 0).toFixed(2))}</td>
->>>>>>> fe3fb0c9bbd32b43830302ba6881d8778137a739
                       <td>₱ {formatNumber((parseFloat(schedule.balance) || 0).toFixed(2))}</td>
                       <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
                         {schedule.is_paid ? 'Paid!' : 'Ongoing'}
                       </td>
-                      
                       <td>
                         <div
                           style={{
