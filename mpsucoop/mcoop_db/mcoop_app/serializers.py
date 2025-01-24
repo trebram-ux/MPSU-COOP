@@ -129,7 +129,8 @@ class PaymentScheduleSerializer(serializers.ModelSerializer):
     loan_type = serializers.CharField(source='loan.loan_type', read_only=True)
     loan_amount = serializers.DecimalField(source='loan.loan_amount', max_digits=10, decimal_places=2,default=Decimal('0.00'))
     loan_date = serializers.DateField(source='loan.loan_date', read_only=True)
-
+    payment_amount = serializers.FloatField()
+    received_amnt = serializers.FloatField()
     class Meta:
         model = PaymentSchedule
         fields = ['id', 'loan', 'principal_amount', 'payment_amount','advance_pay','under_pay','received_amnt','penalty',
@@ -165,18 +166,11 @@ class LoanSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Invalid UUID format.")
         return value
 
-
-
-
-
     def create(self, validated_data):
         loan = Loan.objects.create(**validated_data)
         if loan.status == 'Ongoing':
             loan.generate_payment_schedule()
         return loan
-
-
-
         return instance
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():

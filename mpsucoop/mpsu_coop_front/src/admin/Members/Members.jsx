@@ -74,8 +74,19 @@ function Members() {
   );
 
   const handleInputChange = (e, setter) => {
-    setter(prevState => ({ ...prevState, [e.target.name]: e.target.value }));
-  };  
+    const { name, value } = e.target;
+  
+    // Validate the input
+    const error = validateInput(name, value);
+  
+    // Update state with the new value and any validation errors
+    setter((prevState) => ({
+      ...prevState,
+      [name]: value, // Update the value
+      [`${name}_error`]: error, // Update the error dynamically
+    }));
+  };
+    
 
   const handleAddMember = async () => {
     if (!newMember.first_name || !newMember.last_name) {
@@ -543,11 +554,11 @@ const confirmDeleteMember = async () => {
                   onChange={(e) => handleInputChange(e, editingMember ? setEditingMember : setNewMember)}
                 />
                 {/* Display error message if validation fails */}
-                {newMember?.in_dep_error && (
+                {(editingMember?.in_dep_error || newMember?.in_dep_error) && (
                   <div style={{ color: 'red', fontSize: '12px' }}>
-                    {newMember.in_dep_error}
+                    {editingMember?.in_dep_error || newMember?.in_dep_error}
                   </div>
-                )}
+                            )}
               </div>
             </div>
               

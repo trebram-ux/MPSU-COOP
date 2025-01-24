@@ -21,6 +21,7 @@ const PaymentSchedule = () => {
   const [advancePayment, setAdvancePayment] = useState('');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [receiptPrinted, setReceiptPrinted] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [isPaymentInProgress, setIsPaymentInProgress] = useState(false);
   const [receivedAmount, setReceivedAmount] = useState(null); // Add the state here
@@ -155,20 +156,19 @@ const PaymentSchedule = () => {
     }
   };
   
+  
   const handlePaymentSubmit = () => {
     console.log('Submit payment clicked');
-    if (selectedSchedule && selectedSchedule.is_paid) {
+    if (selectedSchedule && selectedSchedule.is_paid) { 
       alert('This schedule is already paid. You cannot submit another payment.');
       console.log('This schedule is already paid');
       return;
     }
   
-    const payment = parseFloat(paymentAmount) || 0;  
-    const received = parseFloat(receivedAmount) || 0;  
-    const totalPayment = payment + received;
-  
+    const totalPayment = parseFloat(paymentAmount  || 0) + parseFloat(receivedAmount || 0);
+
     console.log(`Total payment calculated: ₱${totalPayment.toFixed(2)}`);
-  
+
     if (isNaN(totalPayment) || totalPayment <= 0) {
       alert('Please enter a valid payment amount.');
       console.log('Invalid payment amount entered');
@@ -177,19 +177,21 @@ const PaymentSchedule = () => {
   
     console.log(`Schedule ID: ${selectedSchedule.id}, Total Payment: ₱${totalPayment.toFixed(2)}`);
     console.log('Payment submitted');
-    markAsPaid(selectedSchedule.id, totalPayment);
+    markAsPaid(selectedSchedule.id, totalPayment); 
     setIsPaymentModalOpen(false);
     setIsPaymentInProgress(false);
   };
+  
 
   // Mark payment as paid
-  const markAsPaid = async (id, totalPayment) => {
+  const markAsPaid = async (id) => {
+    const totalPayment = parseFloat(paymentAmount) + parseFloat(receivedAmount);
     setPaying(true);
     console.log(`Marking schedule ID ${id} as paid with total payment: ₱${totalPayment.toFixed(2)}`);
     try {
       const response = await axios.post(
         `http://127.0.0.1:8000/payment-schedules/${id}/mark-paid/`,
-        { received_amount: totalPayment },  // Ensure you're passing the correct total payment
+        {received_amount: totalPayment },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -211,7 +213,7 @@ const PaymentSchedule = () => {
       setPaying(false);
     }
   };
-
+  
   // New helper function to check if previous payments are paid
   const arePreviousPaymentsPaid = (scheduleId) => {
     const index = schedules.findIndex((schedule) => schedule.id === scheduleId);
@@ -219,7 +221,7 @@ const PaymentSchedule = () => {
       // Check if the previous schedule is marked as paid
       return schedules[index - 1].is_paid;
     }
-    return true; // kung yung 1st schedule, no previous payment exists
+    return true; // If it's the first schedule, no previous payment exists
   };
   
   // Calculate remaining balance
@@ -256,6 +258,127 @@ const PaymentSchedule = () => {
       setDropdownVisible(!dropdownVisible); // Toggle dropdown visibility
     }
   };
+
+    const handlePrintReceipt = (PaymentSchedule) => {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank', 'width=800,height=600', 'position=center');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Print Official Receipt</title>
+        </head>
+        <body>
+          <div id="print-content"></div>
+          <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js"></script>
+          <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"></script>
+        </body>
+      </html>
+    `);
+
+    ReactDOM.render(
+      <Receipt prefilledData={PaymentSchedule} />,
+      printWindow.document.getElementById('print-content')
+    );
+
+    // Trigger print after rendering
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  };
+
+// Function to handle when receipt is printed
+const handleReceiptPrinted = () => {
+  setReceiptPrinted(true);
+};
+
+const generateReceipt = (schedule) => {
+  // Ensure accountDetails and schedule are available
+  if (!accountDetails || !schedule) {
+    console.error("Missing data for generating receipt");
+    return;
+  }
+
+  console.log("Generating receipt...");
+
+  // Open a new window for the receipt
+  const receiptWindow = window.open("", "Receipt", "width=600,height=400");
+
+  if (!receiptWindow) {
+    console.error("Failed to open window.");
+    return;
+  }
+
+  console.log("Window opened, preparing to write content...");
+
+  // Wait for the window to load and then write the content
+  setTimeout(() => {
+    console.log("Writing content to the window...");
+
+    const receiptContent = ` 
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Receipt Test</title>
+          <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h1 { text-align: center; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid black; padding: 10px; text-align: left; }
+              .footer { margin-top: 20px; text-align: center; font-size: 12px; }
+          </style>
+      </head>
+      <body>
+          <h1>Acknowledgement Receipt</h1>
+          <table>
+              <tr>
+                <th>Loan Type</th>
+                <td>${loanType}</td>
+              </tr>
+              <tr>
+                  <th>Account Number</th>
+                  <td>${selectedAccount}</td>
+              </tr>
+              <tr>
+                <th>Account Holder</th>
+                <td>${accountDetails ? `${accountDetails.first_name} ${accountDetails.middle_name} ${accountDetails.last_name}` : 'N/A'}</td>
+              </tr>
+              <tr>
+                <th>Payment Amount</th>
+                <td>₱ ${(isNaN(schedule.payment_amount) ? 0 : parseFloat(schedule.payment_amount)).toFixed(2)}</td>
+              </tr>
+              <tr>
+                  <th>Due Date</th>
+                  <td>${new Date(schedule.due_date).toLocaleDateString()}</td>
+              </tr>
+              <tr>
+                  <th>Status</th>
+                  <td>${schedule.is_paid ? "Paid" : "Ongoing"}</td>
+              </tr>
+          </table>
+          <div class="footer">
+              <p>Thank you for your payment!</p>
+          </div>
+      </body>
+      </html>
+    `;
+
+    receiptWindow.document.write(receiptContent);
+    receiptWindow.document.close();
+
+    console.log("Content written. Attempting to print...");
+
+    // Wait a moment before printing
+    setTimeout(() => {
+      console.log("Attempting to print...");
+      receiptWindow.print();
+      handleReceiptPrinted(); // Mark as printed after the print
+    }, 500); // Delay before printing
+  }, 100); // Delay before writing to the window
+};
   
   // Initial fetch of account summaries when the component mounts
   useEffect(() => {
@@ -282,6 +405,30 @@ return (
           >
             Ongoing Payment Schedules
           </h2>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault(); // Prevent default link behavior
+              handlePrintReceipt();
+            }}
+            style={{
+              padding: '5px',
+              cursor: 'pointer',
+              color: 'black',
+              textDecoration: 'none',
+              display: 'inline-block',
+              textAlign: 'center',
+              fontSize: '14px',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.color = 'goldenrod';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.color = 'black';
+            }}
+          >
+            <SiFormspree /><strong>Official Receipt</strong>
+          </a>
 
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
             <div style={{ position: 'relative', display: 'inline-block', width: '30%' }}>
@@ -496,7 +643,7 @@ return (
                       <td>₱ {formatNumber((parseFloat(schedule.under_pay) || 0).toFixed(2))}</td>
                       <td>₱ {formatNumber((parseFloat(schedule.penalty) || 0).toFixed(2))}</td>
                       <td>{new Date(schedule.due_date).toLocaleDateString()}</td>
-                      <td>₱ {formatNumber((parseFloat(schedule.received_amnt) || 0).toFixed(2))}</td>
+                      <td>₱ {formatNumber((parseFloat(schedule.receied_amnt) || 0).toFixed(2))}</td>
                       <td>₱ {formatNumber((parseFloat(schedule.balance) || 0).toFixed(2))}</td>
                       <td style={{ color: schedule.is_paid ? 'green' : 'red' }}>
                         {schedule.is_paid ? 'Paid!' : 'Ongoing'}

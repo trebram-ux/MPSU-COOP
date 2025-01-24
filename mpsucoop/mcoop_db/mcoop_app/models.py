@@ -561,7 +561,7 @@ class Loan(models.Model):
         ).aggregate(
             total_paid=Sum('payment_amount')
         )['total_paid'] or 0
-
+        return total_paid >= (self.loan_amount / 2)
 
 
     def generate_payment_schedule(self):
@@ -611,52 +611,61 @@ class PaymentSchedule(models.Model):
 
 
     def mark_as_paid(self):
-        if self.balance <= Decimal('0.00'):       
+        if self.balance <= Decimal('0.00'):
             self.is_paid = True
-            self.save()
+            self.save() 
+    def process_payment(self, received_amnt):
+        received_amnt = Decimal(received_amnt)
+        if received_amnt <= 0:
+            raise ValueError("Received amount must be greater than zero.")
+        # Proceed with logic
 
-    def process_payment(self, received_amount):
-        """Handles payments and updates advance/underpayment."""
-        received_amount = Decimal(received_amount)
-        print(f"Received Amount: {received_amount}")
         
-        # Case 1: Overpayment (Advance Pay)
-        if received_amount > self.payment_amount:
-            self.advance_pay = (received_amount - self.payment_amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        if received_amnt > self.payment_amount:
+            overpayment = received_amnt - self.payment_amount
+            self.advance_pay += overpayment
             self.under_pay = Decimal('0.00')
-            print(f"Advance Pay: {self.advance_pay}")
-        # Case 2: Underpayment (Under Pay)
-        elif received_amount < self.payment_amount:
-            self.under_pay = (self.payment_amount - received_amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        elif received_amnt < self.payment_amount:
+            underpayment = self.payment_amount - received_amnt
+            self.under_pay += underpayment
             self.advance_pay = Decimal('0.00')
-            self.penalty += (self.under_pay * Decimal('0.02')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-            print(f"Under Pay: {self.under_pay}, Penalty: {self.penalty}")
-        # Case 3: Exact Payment
+            self.penalty += (underpayment * Decimal('0.02')).quantize(Decimal('0.01'))
         else:
             self.advance_pay = Decimal('0.00')
             self.under_pay = Decimal('0.00')
-            print(f"Exact Payment, Advance Pay: {self.advance_pay}, Under Pay: {self.under_pay}")
 
-        # Update received amount and balance
-        self.received_amnt = received_amount
-        self.balance = (self.balance - received_amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        print(f"New Balance: {self.balance}")
-        # Mark as paid if balance is zero or less
+        self.balance -= received_amnt  # Correct deduction from balance
         if self.balance <= Decimal('0.00'):
             self.is_paid = True
-            print("Marked as Paid")
 
         self.save()
+
+
+    class Meta:
+        ordering = ['due_date']
+
+
+    def apply_advance_pay(self):
+        """Apply any advance payments to the remaining balance."""
+        if self.advance_pay > Decimal('0.00'):
+            self.balance = max(Decimal('0.00'), self.balance - self.advance_pay)
+            self.advance_pay = Decimal('0.00')  # Reset advance after applying
+            self.save()
+            
     def calculate_payment_amount(self):
-        self.payment_amount = self.principal_amount 
+        base_payment = self.principal_amount
+        total_payment = base_payment + self.under_pay
+        
+        self.payment_amount = total_payment
+        print(f"Calculated Payment Amount: {self.payment_amount}")
 
     def save(self, *args, **kwargs):
+        print(f"Saving Payment Schedule for Loan {self.loan.control_number}")
         self.calculate_payment_amount()
         super().save(*args, **kwargs)
     def __str__(self):
         return f"Payment for Loan {self.loan.control_number} on {self.due_date}"
-    def __str__(self):
-        return f"Payment Schedule for {self.loan.account_number} "
+  
 
 
 

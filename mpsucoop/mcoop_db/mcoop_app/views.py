@@ -61,7 +61,9 @@ from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from django.db.models import Q
 import logging
-
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import PaymentSchedule
 logger = logging.getLogger(__name__)
 class ArchiveViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
@@ -553,11 +555,44 @@ class PaymentScheduleViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-    @action(detail=True, methods=['post'])
     def mark_as_paid(self, request, pk=None):
         schedule = self.get_object()
-        schedule.process_payment(schedule.balance)
+        received_amnt = request.data.get('received_amnt', schedule.balance)  
+        schedule.process_payment(received_amnt)
         return Response({'status': 'Payment processed and marked as paid.'}, status=status.HTTP_200_OK)
+
+
+
+import json
+
+def process_payment_view(request, pk):
+    if request.method == "POST":
+        # Parse JSON body
+        try:
+            body = json.loads(request.body)
+            received_amnt = body.get('received_amnt')
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON payload"}, status=400)
+        
+        if not received_amnt:
+            return JsonResponse({"error": "received_amnt is required"}, status=400)
+        
+        # Process the payment
+        try:
+            payment_schedule = get_object_or_404(PaymentSchedule, pk=pk)
+            payment_schedule.process_payment(received_amnt)
+            return JsonResponse({
+                "message": "Payment processed successfully",
+                "advance_pay": str(payment_schedule.advance_pay),
+                "under_pay": str(payment_schedule.under_pay),
+                "penalty": str(payment_schedule.penalty),
+                "balance": str(payment_schedule.balance),
+                "is_paid": payment_schedule.is_paid
+            })
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
 
 def mark_as_paid(request, id):
     try:

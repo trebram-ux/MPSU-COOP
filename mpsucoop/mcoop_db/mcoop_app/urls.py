@@ -9,7 +9,7 @@ from .views import (
     PaymentViewSet,
     UserListView, ResetPasswordView,
     ActiveLoansByAccountView,RegisterMemberView, AccountTransactionView, MemberLoginView,LogoutView, MemberProfileView, MemberLoanListView, TokenObtainPairView, SystemSettingsView,
-    payment_schedules_by_loan, AccountDetailView, get_payments, MemberPaymentsView,PaymentListByScheduleView, PaymentsByAccountView, ArchiveViewSet,loan_summary, LogActionAPIView, GetAuditLogsAPIView
+    payment_schedules_by_loan, AccountDetailView, get_payments, MemberPaymentsView,PaymentListByScheduleView, PaymentsByAccountView, ArchiveViewSet,loan_summary, LogActionAPIView, GetAuditLogsAPIView,process_payment_view
 )
 from rest_framework_simplejwt import views as jwt_views
 import logging
@@ -63,7 +63,7 @@ urlpatterns = [
     path('delete-account/<str:account_number>/', views.delete_account, name='delete_account'),
     # path('api/audit-trail/', AuditTrailView.as_view(), name='audit-trail'),
 
-
+    path('payment-schedule/<int:pk>/process-payment/', process_payment_view, name='process-payment'),
     
 ]   
 def log_request(request):

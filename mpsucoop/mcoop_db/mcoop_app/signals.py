@@ -81,3 +81,19 @@ def update_payment_and_loan_status(sender, instance, created, **kwargs):
             from_email='noreply@yourdomain.com',
             recipient_list=[loan.account.account_holder.email],
         )
+from django.db.models.signals import post_delete, pre_save
+
+@receiver(post_delete, sender=Payment)
+def handle_payment_delete(sender, instance, **kwargs):
+    loan = instance.loan
+    loan.balance += instance.amount_paid
+    loan.save()
+
+@receiver(pre_save, sender=Payment)
+def handle_payment_update(sender, instance, **kwargs):
+    if instance.pk:  # Check if this is an update
+        old_payment = Payment.objects.get(pk=instance.pk)
+        difference = instance.amount_paid - old_payment.amount_paid
+        loan = instance.loan
+        loan.balance -= difference
+        loan.save()
