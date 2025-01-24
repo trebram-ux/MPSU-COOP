@@ -1,0 +1,133 @@
+/* Container for archived records */
+.archived-records {
+  padding: 20px;
+  color: black;
+}
+
+/* Title Styling */
+.title {
+  font-size: 2rem;
+  margin-bottom: 50px;
+  text-align: center;
+  margin-top: -50px;
+}
+
+/* Dropdown styling */
+.dropdown {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  width: 200px;
+}
+
+.dropdown-select {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 2px solid #000000;
+  border-radius: 4px;
+  outline: none;
+  background-color: #908f8f;
+  cursor: pointer;
+}
+
+/* Box styling for each section (members and loans) */
+.records-box {
+  max-height: 470px;
+  overflow-y: auto;
+  box-shadow: 0px 0px 15px 0px rgb(154, 154, 154);
+  margin-top: 40px;
+  padding: 5px;
+  border-radius: 5px;
+  scrollbar-width: none;
+  width: 99%;
+  margin-left: -5px;
+  font-size: 20px;
+}
+
+/* Table Styling */
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 20px; 
+}
+
+/* Table header style */
+.records-table thead th {
+  background-color: #969696;
+  padding: 10px;
+  text-align: left;
+  font-weight: bold;
+  position: relative;
+  font-size: 20px;
+}
+
+.records-table tbody {
+  display: block;
+  height: 420px;
+  overflow-y: scroll; /* Ensures the scrollbar is present */
+  scrollbar-width: none; /* Hides the scrollbar in Firefox */
+  -ms-overflow-style: none; /* Hides the scrollbar in Internet Explorer and Edge */
+  -webkit-overflow-scrolling: touch; /* Enables smooth scrolling on mobile devices */
+  font-size: 18px;
+}
+
+/* For Webkit browsers (Chrome, Safari) */
+.records-table tbody::-webkit-scrollbar {
+  width: 0px; /* Hides the scrollbar */
+  margin-top: 20px;
+}
+
+
+/* Keep the table header fixed */
+.records-table thead, .records-table tbody tr {
+  display: table;
+  width: 99%;
+  table-layout: fixed;
+}
+
+/* For better accessibility and readability */
+.records-table th, .records-table td {
+  text-align: left;
+  padding: 12px 8px;
+}
+
+/* Search Bar Styling */
+.search-bar {
+  margin-bottom: 1px;
+  display: flex;
+  align-items: center;
+  width: 15%;
+  position: fixed;
+  margin-left: 67%;
+}
+
+/* Input Field */
+.search-input {
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: 2px solid #000000;
+  border-radius: 5px;
+}
+
+/* Search Icon */
+.search-icon {
+  font-size: 1.5rem;
+  color: #007bff;
+  margin-left: 100px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .search-input {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  .search-icon {
+    font-size: 1.3rem;
+  }
+}
+
